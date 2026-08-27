@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" width="600" height="340">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4e3a27"/>
+      <stop offset="100%" stop-color="#b4905f"/>
+    </linearGradient>
+    <pattern id="royal" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <path d="M40 0 L80 40 L40 80 L0 40 Z" fill="none" stroke="#debc8d" stroke-width="0.6" opacity="0.2"/>
+      <circle cx="40" cy="40" r="8" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.2"/>
+      <circle cx="40" cy="40" r="2" fill="#b4905f" opacity="0.15"/>
+    </pattern>
+    <radialGradient id="glow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#ecd9b8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#4e3a27" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="340" fill="url(#bg)"/>
+  <rect width="600" height="340" fill="url(#royal)"/>
+  <rect width="600" height="340" fill="url(#glow)"/>
+  <path d="M200 80 Q300 40 400 80 Q350 140 300 120 Q250 140 200 80Z" fill="#debc8d" opacity="0.08"/>
+</svg>

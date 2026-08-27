@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKd3vXDXbtM.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/inter/v18/UcCo3FwrK3iLTcviYwYZ90OcKw.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/notonaskharabic/v22/ieVc2YFD_47Sqv3HNSRM0q8p\_Gy0mBFfFUhG4g.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/ibmplexsansarabic/v19/Qw3CZRtWPQCuHme67tEYUIx739IZTA.woff2') format('woff2');
+}
+
+:root {
+  --color-brand-primary: #b4905f;
+  --color-brand-secondary: #4e3a27;
+  --color-brand-accent: #debc8d;
+  --color-brand-dark: #2d1f12;
+  --color-brand-muted: #a8937e;
+  --color-brand-light: #f8f4ef;
+  --color-brand-surface: #ffffff;
+  --color-brand-border: #d4c5b3;
+  --color-brand-success: #5a7247;
+  --color-brand-warning: #c48c3d;
+  --color-brand-error: #b85450;
+  --color-brand-gold-light: #ecd9b8;
+
+  --font-heading-latin: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body-latin: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading-arabic: 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+  --font-body-arabic: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+}
+
+@theme inline {
+  --color-brand-primary: var(--color-brand-primary);
+  --color-brand-secondary: var(--color-brand-secondary);
+  --color-brand-accent: var(--color-brand-accent);
+  --color-brand-dark: var(--color-brand-dark);
+  --color-brand-muted: var(--color-brand-muted);
+  --color-brand-light: var(--color-brand-light);
+  --color-brand-surface: var(--color-brand-surface);
+  --color-brand-border: var(--color-brand-border);
+  --color-brand-success: var(--color-brand-success);
+  --color-brand-warning: var(--color-brand-warning);
+  --color-brand-error: var(--color-brand-error);
+  --color-brand-gold-light: var(--color-brand-gold-light);
+
+  --font-heading: var(--font-heading-latin);
+  --font-body: var(--font-body-latin);
+
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html[dir="rtl"] {
+  --font-heading: var(--font-heading-arabic);
+  --font-body: var(--font-body-arabic);
+}
+
+body {
+  background-color: var(--color-brand-light);
+  color: var(--color-brand-dark);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-brand-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::selection {
+  background-color: var(--color-brand-primary);
+  color: white;
+}
+
+::placeholder {
+  color: var(--color-brand-muted);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+/* Animated underline for nav links */
+.nav-link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-brand-primary);
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.nav-link-animated:hover::after {
+  width: 70%;
+  left: 15%;
+}

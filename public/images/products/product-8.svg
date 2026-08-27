@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#887565"/>
+      <stop offset="50%" stop-color="#705844"/>
+      <stop offset="100%" stop-color="#887565"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#a8937e" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#705844" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="stipple" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.7" fill="#a8937e" opacity="0.3"/>
+      <circle cx="6" cy="6" r="0.5" fill="#887565" opacity="0.25"/>
+      <circle cx="4" cy="0" r="0.4" fill="#a8937e" opacity="0.15"/>
+      <circle cx="0" cy="4" r="0.6" fill="#705844" opacity="0.2"/>
+    </pattern>
+    <pattern id="stipple2" x="4" y="4" width="8" height="8" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.5" fill="#b4905f" opacity="0.1"/>
+      <circle cx="6" cy="6" r="0.4" fill="#a8937e" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#stipple)"/>
+  <rect width="400" height="540" fill="url(#stipple2)"/>
+  <g opacity="0.08">
+    <line x1="0" y1="0" x2="400" y2="540" stroke="#a8937e" stroke-width="0.3"/>
+    <line x1="0" y1="50" x2="350" y2="540" stroke="#a8937e" stroke-width="0.3"/>
+    <line x1="50" y1="0" x2="400" y2="470" stroke="#a8937e" stroke-width="0.3"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="120" y="240" width="160" height="60" rx="8" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.12"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#b4905f" opacity="0.18" letter-spacing="2">LAINE</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#b4905f" opacity="0.13" letter-spacing="4">MÉLANGÉE</text>
+</svg>

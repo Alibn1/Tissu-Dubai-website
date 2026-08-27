@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" width="600" height="340">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ecd9b8"/>
+      <stop offset="50%" stop-color="#debc8d"/>
+      <stop offset="100%" stop-color="#b4905f"/>
+    </linearGradient>
+    <pattern id="silk" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(10)">
+      <path d="M0 20 Q10 15 20 20 Q30 25 40 20" fill="none" stroke="#4e3a27" stroke-width="0.5" opacity="0.12"/>
+      <path d="M0 0 Q10 -5 20 0 Q30 5 40 0" fill="none" stroke="#b4905f" stroke-width="0.3" opacity="0.1"/>
+    </pattern>
+    <radialGradient id="glow" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#debc8d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="340" fill="url(#bg)"/>
+  <rect width="600" height="340" fill="url(#silk)"/>
+  <rect width="600" height="340" fill="url(#glow)"/>
+  <path d="M0 200 Q200 160 400 210 Q500 230 600 190" fill="none" stroke="#4e3a27" stroke-width="1.5" opacity="0.12"/>
+  <path d="M0 260 Q150 230 300 260 Q450 290 600 250" fill="none" stroke="#4e3a27" stroke-width="1" opacity="0.1"/>
+</svg>

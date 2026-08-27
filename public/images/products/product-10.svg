@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8937e"/>
+      <stop offset="50%" stop-color="#705844"/>
+      <stop offset="100%" stop-color="#a8937e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#b4905f" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#705844" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="raw_stipple" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.8" fill="#b4905f" opacity="0.15"/>
+      <circle cx="4" cy="3" r="0.6" fill="#a8937e" opacity="0.2"/>
+      <circle cx="2" cy="5" r="0.5" fill="#887565" opacity="0.18"/>
+      <circle cx="5" cy="1" r="0.4" fill="#705844" opacity="0.12"/>
+      <circle cx="3" cy="4" r="0.7" fill="#b4905f" opacity="0.1"/>
+    </pattern>
+    <pattern id="fibers" x="0" y="0" width="12" height="20" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="3" y2="20" stroke="#a8937e" stroke-width="0.3" opacity="0.1"/>
+      <line x1="6" y1="0" x2="9" y2="20" stroke="#887565" stroke-width="0.3" opacity="0.08"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#raw_stipple)"/>
+  <rect width="400" height="540" fill="url(#fibers)"/>
+  <g opacity="0.06">
+    <path d="M0,50 Q100,30 200,50 Q300,70 400,50" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,150 Q100,130 200,150 Q300,170 400,150" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,250 Q100,230 200,250 Q300,270 400,250" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,350 Q100,330 200,350 Q300,370 400,350" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,450 Q100,430 200,450 Q300,470 400,450" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="100" y="240" width="200" height="60" rx="8" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.12"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#b4905f" opacity="0.18" letter-spacing="1">LAINE CARDÉE</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#b4905f" opacity="0.13" letter-spacing="5">ROYALE</text>
+</svg>

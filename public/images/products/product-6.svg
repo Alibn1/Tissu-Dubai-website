@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5E6CA"/>
+      <stop offset="50%" stop-color="#ecd9b8"/>
+      <stop offset="100%" stop-color="#F5E6CA"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ecd9b8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="2.5" fill="#b4905f" opacity="0.3"/>
+    </pattern>
+    <pattern id="dots2" x="12" y="12" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1.5" fill="#b4905f" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#dots)"/>
+  <rect width="400" height="540" fill="url(#dots2)"/>
+  <g opacity="0.06">
+    <line x1="0" y1="0" x2="0" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="40" y1="0" x2="40" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="80" y1="0" x2="80" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="120" y1="0" x2="120" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="160" y1="0" x2="160" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="200" y1="0" x2="200" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="240" y1="0" x2="240" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="280" y1="0" x2="280" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="320" y1="0" x2="320" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+    <line x1="360" y1="0" x2="360" y2="540" stroke="#b4905f" stroke-width="0.5"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="120" y="240" width="160" height="60" rx="8" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.15"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#b4905f" opacity="0.2" letter-spacing="2">TULLE BRODÉ</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#b4905f" opacity="0.15" letter-spacing="5">DORÉ</text>
+</svg>

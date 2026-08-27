@@ -1,0 +1,170 @@
+import {useTranslations} from 'next-intl';
+import {Link} from '@/i18n/navigation';
+import {Logo} from '@/components/ui/Logo';
+import {Phone} from 'lucide-react';
+
+function InstagramIcon({className}: {className?: string}) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function TiktokIcon({className}: {className?: string}) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </svg>
+  );
+}
+
+function FacebookIcon({className}: {className?: string}) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
+
+export function Footer() {
+  const t = useTranslations();
+  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || '';
+  const mapsUrl = process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL || '';
+  const instagram = process.env.NEXT_PUBLIC_INSTAGRAM_URL || '';
+  const facebook = process.env.NEXT_PUBLIC_FACEBOOK_URL || '';
+  const tiktok = process.env.NEXT_PUBLIC_TIKTOK_URL || '';
+
+  const collections = [
+    {label: t('nav.fabrics.caftanShort'), href: '/collections/caftan'},
+    {label: t('nav.fabrics.jellabaShort'), href: '/collections/jellaba'},
+    {label: t('nav.fabrics.tekchitaShort'), href: '/collections/tekchita'}
+  ];
+
+  return (
+    <footer className="bg-[#C4B5A0] text-[#3A2A1A]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Main Footer */}
+        <div className="grid grid-cols-1 gap-8 py-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
+
+          {/* Column 1: Brand */}
+          <div className="space-y-4 pt-[80px]">
+            <div className="flex items-center gap-4">
+              <Logo variant="mark" size="md" />
+              <h2 className="font-heading text-3xl font-bold text-[#2B1F14]">
+                Tissu Dubai
+              </h2>
+            </div>
+            <p className="text-lg leading-relaxed text-[#3A2A1A]/70">
+              {t('common.tagline')}
+            </p>
+          </div>
+
+          {/* Column 2: Collections */}
+          <div className="space-y-4">
+            <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-[#2B1F14]">
+              {t('common.collections')}
+            </h3>
+            <ul className="space-y-2">
+              {collections.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="text-base text-[#3A2A1A]/80 underline-offset-4 hover:underline hover:decoration-[#B8860B] hover:decoration-1 transition-all duration-200"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="pt-2">
+              <h4 className="font-heading pt-6 text-lg font-bold uppercase tracking-wider text-[#2B1F14]">
+                {t('common.followUs')}
+              </h4>
+              <div className="mt-3 flex items-center gap-4">
+                {instagram && (
+                  <a
+                    href={instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="text-[#3A2A1A]/50 hover:text-[#B8860B] transition-colors duration-200"
+                  >
+                    <InstagramIcon className="h-6 w-6" />
+                  </a>
+                )}
+                {tiktok && (
+                  <a
+                    href={tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="TikTok"
+                    className="text-[#3A2A1A]/50 hover:text-[#B8860B] transition-colors duration-200"
+                  >
+                    <TiktokIcon className="h-6 w-6" />
+                  </a>
+                )}
+                {facebook && (
+                  <a
+                    href={facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                    className="text-[#3A2A1A]/50 hover:text-[#B8860B] transition-colors duration-200"
+                  >
+                    <FacebookIcon className="h-6 w-6" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Column 3: Our Store */}
+          <div className="space-y-3">
+            <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-[#2B1F14]">
+              {t('common.location')}
+            </h3>
+            {mapsUrl ? (
+              <div className="overflow-hidden rounded-md">
+                <iframe
+                  src={mapsUrl}
+                  width="100%"
+                  height="220"
+                  style={{border: 0}}
+                  allowFullScreen={false}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full"
+                />
+              </div>
+            ) : (
+              <div className="flex h-[220px] items-center justify-center rounded-md border border-[#2B1F14]/10 bg-[#2B1F14]/5 text-sm text-[#2B1F14]/30">
+                Map
+              </div>
+            )}
+            <div className="space-y-2">
+              {phone && (
+                <a
+                  href={`tel:${phone}`}
+                  className="flex items-center gap-2 text-base text-[#3A2A1A]/80 hover:text-[#B8860B] transition-colors duration-200"
+                >
+                  <Phone className="h-4 w-4 flex-shrink-0 text-[#3A2A1A]/50" />
+                  {phone}
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="py-5">
+          <p className="text-center text-sm text-[#3A2A1A]/40">
+            &copy; 2026 Tissu Dubai. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}

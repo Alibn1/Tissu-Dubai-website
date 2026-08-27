@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="600" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#722F37"/>
+      <stop offset="50%" stop-color="#b4905f"/>
+      <stop offset="100%" stop-color="#debc8d"/>
+    </linearGradient>
+    <pattern id="rich" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+      <path d="M0 25 L25 0 L50 25 L25 50 Z" fill="none" stroke="#ecd9b8" stroke-width="0.6" opacity="0.2"/>
+      <circle cx="25" cy="25" r="3" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.25"/>
+      <circle cx="0" cy="0" r="3" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.15"/>
+      <circle cx="50" cy="50" r="3" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.15"/>
+    </pattern>
+    <radialGradient id="glow" cx="60%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#ecd9b8" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#722F37" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="450" fill="url(#bg)"/>
+  <rect width="600" height="450" fill="url(#rich)"/>
+  <rect width="600" height="450" fill="url(#glow)"/>
+  <path d="M0 300 Q150 260 300 310 Q450 360 600 290 L600 450 L0 450Z" fill="#4e3a27" opacity="0.2"/>
+</svg>

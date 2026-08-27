@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#debc8d"/>
+      <stop offset="40%" stop-color="#c9a870"/>
+      <stop offset="100%" stop-color="#b4905f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#F5E6CA" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#debc8d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <g opacity="0.25">
+    <path d="M0,20 C100,0 200,40 300,20 C350,12 400,30 400,20" fill="none" stroke="#b4905f" stroke-width="1.2"/>
+    <path d="M0,60 C80,30 180,80 280,50 C340,38 400,65 400,55" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,100 C120,70 220,110 320,90 C370,82 400,105 400,95" fill="none" stroke="#debc8d" stroke-width="1"/>
+    <path d="M0,140 C90,110 190,150 290,130 C360,120 400,145 400,135" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,180 C110,150 210,190 310,170 C370,160 400,185 400,175" fill="none" stroke="#debc8d" stroke-width="1"/>
+    <path d="M0,220 C80,190 180,230 280,210 C350,200 400,225 400,215" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,260 C120,230 220,270 320,250 C360,242 400,265 400,255" fill="none" stroke="#debc8d" stroke-width="1"/>
+    <path d="M0,300 C90,270 190,310 290,290 C350,280 400,305 400,295" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,340 C110,310 210,350 310,330 C370,320 400,345 400,335" fill="none" stroke="#debc8d" stroke-width="1"/>
+    <path d="M0,380 C80,350 180,390 280,370 C360,360 400,385 400,375" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,420 C120,390 220,430 320,410 C350,402 400,425 400,415" fill="none" stroke="#debc8d" stroke-width="1"/>
+    <path d="M0,460 C90,430 190,470 290,450 C350,440 400,465 400,455" fill="none" stroke="#b4905f" stroke-width="1.5"/>
+    <path d="M0,500 C110,470 210,510 310,490 C370,480 400,505 400,495" fill="none" stroke="#debc8d" stroke-width="1"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="120" y="240" width="160" height="60" rx="8" fill="none" stroke="#4e3a27" stroke-width="0.5" opacity="0.15"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#4e3a27" opacity="0.2" letter-spacing="2">SOIE</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#4e3a27" opacity="0.15" letter-spacing="5">ORIENTALE</text>
+</svg>

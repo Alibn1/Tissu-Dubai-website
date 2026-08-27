@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A1A1A"/>
+      <stop offset="50%" stop-color="#222222"/>
+      <stop offset="100%" stop-color="#1A1A1A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#b4905f" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#1A1A1A" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="diamonds" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M25,5 L45,25 L25,45 L5,25 Z" fill="none" stroke="#b4905f" stroke-width="0.6" opacity="0.35"/>
+      <circle cx="25" cy="25" r="1.5" fill="#b4905f" opacity="0.25"/>
+      <path d="M25,0 L50,25 L25,50 L0,25 Z" fill="none" stroke="#b4905f" stroke-width="0.3" opacity="0.15"/>
+    </pattern>
+    <pattern id="gold_dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="0.8" fill="#b4905f" opacity="0.2"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#diamonds)"/>
+  <rect width="400" height="540" fill="url(#gold_dots)"/>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="120" y="240" width="160" height="60" rx="8" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.15"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#b4905f" opacity="0.2" letter-spacing="2">BROCARD ROYAL</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#b4905f" opacity="0.15" letter-spacing="5">NOIR</text>
+</svg>

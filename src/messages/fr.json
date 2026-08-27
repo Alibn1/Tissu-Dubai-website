@@ -1,0 +1,334 @@
+{
+  "common": {
+    "brand": "Tissu Dubai",
+    "tagline": "L'art du tissu premium",
+    "home": "Accueil",
+    "fabrics": "Nos Tissus",
+    "collections": "Collections",
+    "followUs": "Suivez-nous",
+    "about": "À Propos",
+    "contact": "Contact",
+    "location": "Notre Magasin",
+    "faq": "Questions Fréquentes",
+    "readMore": "En savoir plus",
+    "viewAll": "Voir tout",
+    "viewDetails": "Voir les détails",
+    "loading": "Chargement...",
+    "notFound": "Page non trouvée",
+    "backToHome": "Retour à l'accueil",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "all": "Tous",
+    "close": "Fermer",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "menu": "Menu",
+    "phone": "Téléphone",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "share": "Partager",
+    "and": "et",
+    "currency": "DH",
+    "perMeter": "/ mètre",
+    "surDevis": "Sur devis",
+    "meters": "mètres",
+    "meter": "mètre"
+  },
+  "nav": {
+    "fabrics": {
+      "label": "Tissus",
+      "caftan": "Tissus Caftan",
+      "jellaba": "Tissus Djellaba",
+      "tekchita": "Tissus Takchita",
+      "caftanShort": "Caftan",
+      "jellabaShort": "Djellaba",
+      "tekchitaShort": "Takchita"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "L'Excellence du Tissu au Maroc",
+      "description": "Découvrez notre collection exclusive de tissus premium, soigneusement sélectionnés pour les créations les plus prestigieuses.",
+      "discover": "Découvrir nos tissus",
+      "whatsapp": "Commander via WhatsApp"
+    },
+    "categories": {
+      "title": "Nos Univers",
+      "subtitle": "Des tissus d'exception pour chaque création",
+      "caftan": {
+        "name": "Caftan",
+        "description": "Soies, brocades et velours pour un caftan d'exception"
+      },
+      "jellaba": {
+        "name": "Djellaba",
+        "description": "Laines, cachemires et tissus légers pour une jellaba élégante"
+      },
+      "tekchita": {
+        "name": "Takchita",
+        "description": "Tissus riches et soyeux pour une tekchita rayonnante"
+      }
+    },
+    "featured": {
+      "title": "Tissus Sélectionnés",
+      "subtitle": "Notre sélection exclusive du moment"
+    },
+    "newArrivals": {
+      "title": "Nouveautés",
+      "subtitle": "Découvrez les dernières arrivées"
+    },
+    "collection": {
+      "title": "Collection du Moment",
+      "subtitle": "Une sélection exclusive pensée pour vous",
+      "discover": "Découvrir la collection"
+    },
+    "brandStory": {
+      "title": "Notre Histoire",
+      "description": "Fondée au cœur de Casablanca, Tissu Dubai s'est imposée comme la référence des tissus premium au Maroc. Notre passion pour l'excellence nous pue à rechercher les plus beaux tissus à travers le monde, pour sublimer les créations les plus prestigieuses de la mode marocaine.",
+      "values": [
+        {
+          "title": "Qualité Premium",
+          "description": "Chaque tissu est minutieusement sélectionné pour garantir une qualité exceptionnelle."
+        },
+        {
+          "title": "Savoir-faire",
+          "description": "Nous travaillons avec les meilleurs fournisseurs pour offrir des tissus uniques."
+        },
+        {
+          "title": "Service Personnalisé",
+          "description": "Notre équipe vous accompagne dans le choix du tissu idéal pour votre projet."
+        }
+      ]
+    },
+    "whyUs": {
+      "title": "Pourquoi Tissu Dubai",
+      "reasons": [
+        {
+          "title": "Qualité Garantie",
+          "description": "Un contrôle rigoureux de chaque bolt de tissu."
+        },
+        {
+          "title": "Large Choix",
+          "description": "Des centaines de références en stock permanent."
+        },
+        {
+          "title": "Prix Compétitifs",
+          "description": "Le meilleur rapport qualité-prix du marché."
+        },
+        {
+          "title": "Conseil Expert",
+          "description": "Une équipe à votre écoute pour vous guider."
+        },
+        {
+          "title": "Rapidité",
+          "description": "Service rapide et livraison disponible."
+        },
+        {
+          "title": "Proximité",
+          "description": "Un magasin au cœur de Casablanca."
+        }
+      ]
+    },
+    "whatsappCta": {
+      "title": "Besoin d'un conseil ?",
+      "description": "Notre équipe est disponible pour vous accompagner dans le choix de vos tissus.",
+      "button": "Contactez-nous sur WhatsApp"
+    },
+    "storeLocation": {
+      "title": "Notre Magasin",
+      "address": "Adresse",
+      "hours": "Horaires d'ouverture",
+      "directions": "Itinéraire",
+      "callUs": "Appelez-nous"
+    }
+  },
+  "catalog": {
+    "title": "Nos Tissus",
+    "subtitle": "Explorez notre collection de tissus premium",
+    "resultsCount": "{count} tissu trouvé | {count} tissus trouvés",
+    "noResults": "Aucun tissu ne correspond à votre recherche.",
+    "clearFilters": "Effacer les filtres",
+    "filters": {
+      "categories": "Catégories",
+      "materials": "Matières",
+      "colors": "Couleurs",
+      "availability": "Disponibilité",
+      "inStock": "En stock",
+      "outOfStock": "Rupture de stock",
+      "price": "Prix",
+      "priceLowToHigh": "Prix croissant",
+      "priceHighToLow": "Prix décroissant",
+      "newest": "Plus récent",
+      "featured": "En vedette",
+      "name": "Nom A-Z"
+    },
+    "mobileFilters": "Filtres"
+  },
+  "product": {
+    "reference": "Référence",
+    "material": "Matière",
+    "width": "Largeur",
+    "price": "Prix",
+    "availability": "Disponibilité",
+    "color": "Couleur",
+    "colors": "Couleurs",
+    "quantity": "Quantité",
+    "inStock": "En stock",
+    "outOfStock": "Rupture de stock",
+    "new": "Nouveau",
+    "featured": "En vedette",
+    "description": "Description",
+    "characteristics": "Caractéristiques",
+    "relatedProducts": "Tissus similaires",
+    "orderWhatsApp": "Commander via WhatsApp",
+    "askWhatsApp": "Demander via WhatsApp",
+    "selectColor": "Sélectionnez la couleur",
+    "selectQuantity": "Quantité en mètres",
+    "share": "Partager ce tissu",
+    "addToInquiry": "Ajouter à ma demande"
+  },
+  "about": {
+    "title": "À Propos",
+    "hero": {
+      "title": "Notre Histoire",
+      "subtitle": "La passion du tissu depuis Casablanca"
+    },
+    "story": {
+      "title": "Notre Parcours",
+      "content": "Tissu Dubai est née d'une passion profonde pour les beaux tissus et l'artisanat marocain. Depuis notre création à Casablanca, nous nous efforçons de proposer une sélection exclusive de tissus premium qui subliment les créations les plus prestigieuses."
+    },
+    "philosophy": {
+      "title": "Notre Philosophie",
+      "content": "Nous croyons que chaque création mérite le meilleur tissu. C'est pourquoi nous parcourons le monde pour sélectionner les matières les plus raffinées, les plus nobles et les plus belles, afin d'offrir à notre clientèle marocaine et internationale une expérience unique."
+    },
+    "quality": {
+      "title": "Exigence de Qualité",
+      "content": "Chaque tissu que nous proposons passe par un rigoureux processus de sélection. Nous travaillons uniquement avec des fournisseurs de confiance et des producteurs reconnus pour leur excellence."
+    },
+    "craftsmanship": {
+      "title": "Savoir-Faire Marocain",
+      "content": "Le Maroc possède une tradition textile riche et ancienne. Nous contribuons à perpétuer ce savoir-faire en proposant des tissus qui honorent les traditions tout en intégrant les tendances contemporaines."
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "hero": {
+      "title": "Contactez-Nous",
+      "subtitle": "Nous sommes à votre écoute"
+    },
+    "form": {
+      "name": "Nom complet",
+      "namePlaceholder": "Votre nom",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+212 6XX XXX XXX",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "subject": "Sujet",
+      "subjectPlaceholder": "Objet de votre message",
+      "message": "Message",
+      "messagePlaceholder": "Décrivez votre demande...",
+      "send": "Envoyer",
+      "sending": "Envoi en cours...",
+      "success": "Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.",
+      "error": "Une erreur est survenue lors de l'envoi. Veuillez réessayer."
+    },
+    "info": {
+      "title": "Nos Coordonnées",
+      "address": "Adresse",
+      "phone": "Téléphone",
+      "email": "Email",
+      "whatsapp": "WhatsApp"
+    }
+  },
+  "location": {
+    "title": "Notre Magasin",
+    "hero": {
+      "title": "Nous Trouver",
+      "subtitle": "Rendez-nous visite à Casablanca"
+    },
+    "address": {
+      "title": "Adresse",
+      "placeholder": "PLACEHOLDER_ADDRESS"
+    },
+    "hours": {
+      "title": "Horaires d'Ouverture",
+      "weekdays": "Lundi - Samedi",
+      "weekdaysHours": "09h00 - 19h00",
+      "sunday": "Dimanche",
+      "sundayHours": "Fermé"
+    },
+    "contact": {
+      "title": "Contact Direct",
+      "phone": "Appelez-nous",
+      "whatsapp": "WhatsApp",
+      "directions": "Itinéraire Google Maps"
+    }
+  },
+  "faq": {
+    "title": "Questions Fréquentes",
+    "hero": {
+      "title": "Questions Fréquentes",
+      "subtitle": "Trouvez rapidement les réponses à vos questions"
+    },
+    "questions": [
+      {
+        "question": "Quels types de tissus proposez-vous ?",
+        "answer": "Nous proposons une large gamme de tissus premium destinés à la confection de vêtements traditionnels marocains : caftans, djellabas, takchitas, ainsi que des tissus pour créations sur mesure. Nos collections incluent des soies, des brocades, des velours, des cotonnades de luxe et bien plus."
+      },
+      {
+        "question": "Vendez-vous au mètre ?",
+        "answer": "Oui, tous nos tissus sont vendus au mètre. La plupart de nos tissus sont disponibles en largeurs standard de 1,40 m à 3 mètres, selon les références."
+      },
+      {
+        "question": "Comment vérifier la disponibilité d'un tissu ?",
+        "answer": "Vous pouvez vérifier la disponibilité directement sur notre site web, ou nous contacter par téléphone ou WhatsApp pour une confirmation immédiate. Notre équipe se tient à votre disposition pour toute information."
+      },
+      {
+        "question": "Comment passer une commande ?",
+        "answer": "Pour commander, il vous suffit de nous contacter via WhatsApp en nous indiquant la référence du tissu, la couleur souhaitée et la quantité. Nous vous confirmerons la disponibilité et le prix, puis organiserons la suite."
+      },
+      {
+        "question": "Où êtes-vous situés ?",
+        "answer": "Notre magasin est situé au cœur de Casablanca. Vous pouvez retrouver notre adresse exacte et nos horaires d'ouverture sur la page 'Notre Magasin'."
+      },
+      {
+        "question": "Proposez-vous des échantillons ?",
+        "answer": "Oui, nous pouvons vous envoyer des échantillons pour vous permettre de voir et toucher les tissus avant de commander. Contactez-nous via WhatsApp pour en savoir plus."
+      },
+      {
+        "question": "Livrez-vous à l'intérieur du Maroc ?",
+        "answer": "Oui, nous assurons la livraison dans tout le Maroc. Contactez-nous pour plus de détails sur les modalités de livraison et les tarifs."
+      }
+    ]
+  },
+  "seo": {
+    "home": {
+      "title": "Tissu Dubai - Tissus Premium à Casablanca | Caftan, Djellaba, Takchita",
+      "description": "Tissu Dubai, votre spécialiste en tissus premium à Casablanca, Maroc. Découvrez notre sélection de tissus pour caftan, jellaba, tekchita et créations traditionnelles marocaines."
+    },
+    "fabrics": {
+      "title": "Nos Tissus | Tissu Dubai",
+      "description": "Explorez notre catalogue de tissus premium : soies, brocades, velours et cotonnades de luxe pour vos créations traditionnelles marocaines."
+    },
+    "about": {
+      "title": "À Propos | Tissu Dubai",
+      "description": "Découvrez l'histoire et les valeurs de Tissu Dubai, votre spécialiste en tissus premium à Casablanca."
+    },
+    "contact": {
+      "title": "Contact | Tissu Dubai",
+      "description": "Contactez Tissu Dubai pour toute demande de tissus premium. Équipe disponible par téléphone, email ou WhatsApp."
+    },
+    "location": {
+      "title": "Notre Magasin | Tissu Dubai",
+      "description": "Rendez-nous visite dans notre magasin à Casablanca. Trouvez notre adresse, nos horaires et un itinéraire."
+    },
+    "faq": {
+      "title": "Questions Fréquentes | Tissu Dubai",
+      "description": "Retrouvez les réponses aux questions les plus fréquentes sur nos tissus, nos services et notre magasin."
+    }
+  },
+  "collections": {
+    "title": "Nos Collections",
+    "subtitle": "Découvrez notre sélection de tissus premium"
+  }
+}

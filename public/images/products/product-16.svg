@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DC143C"/>
+      <stop offset="40%" stop-color="#c41230"/>
+      <stop offset="70%" stop-color="#722F37"/>
+      <stop offset="100%" stop-color="#DC143C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#FF4D6D" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#DC143C" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="40%" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#sheen)"/>
+  <g opacity="0.18">
+    <path d="M0,25 Q100,5 200,25 Q300,45 400,25" fill="none" stroke="#722F37" stroke-width="1.2"/>
+    <path d="M0,65 Q100,45 200,65 Q300,85 400,65" fill="none" stroke="#9a3a44" stroke-width="0.8"/>
+    <path d="M0,105 Q100,85 200,105 Q300,125 400,105" fill="none" stroke="#722F37" stroke-width="1.2"/>
+    <path d="M0,145 Q100,125 200,145 Q300,165 400,145" fill="none" stroke="#9a3a44" stroke-width="0.8"/>
+    <path d="M0,185 Q100,165 200,185 Q300,205 400,185" fill="none" stroke="#722F37" stroke-width="1.2"/>
+    <path d="M0,225 Q100,205 200,225 Q300,245 400,225" fill="none" stroke="#9a3a44" stroke-width="0.8"/>
+    <path d="M0,265 Q100,245 200,265 Q300,285 400,265" fill="none" stroke="#722F37" stroke-width="1.2"/>
+    <path d="M0,305 Q100,285 200,305 Q300,325 400,305" fill="none" stroke="#9a3a44" stroke-width="0.8"/>
+    <path d="M0,345 Q100,325 200,345 Q300,365 400,345" fill="none" stroke="#722F37" stroke-width="1.2"/>
+    <path d="M0,385 Q100,365 200,385 Q300,405 400,385" fill="none" stroke="#9a3a44" stroke-width="0.8"/>
+    <path d="M0,425 Q100,405 200,425 Q300,445 400,425" fill="none" stroke="#722F37" stroke-width="1.2"/>
+    <path d="M0,465 Q100,445 200,465 Q300,485 400,465" fill="none" stroke="#9a3a44" stroke-width="0.8"/>
+    <path d="M0,505 Q100,485 200,505 Q300,525 400,505" fill="none" stroke="#722F37" stroke-width="1.2"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="100" y="240" width="200" height="60" rx="8" fill="none" stroke="#9a3a44" stroke-width="0.5" opacity="0.12"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#9a3a44" opacity="0.18" letter-spacing="1">SOIE PRESTIGE</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#9a3a44" opacity="0.13" letter-spacing="4">ÉCARLATE</text>
+</svg>

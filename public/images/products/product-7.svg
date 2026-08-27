@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ecd9b8"/>
+      <stop offset="30%" stop-color="#D4838F"/>
+      <stop offset="70%" stop-color="#c97080"/>
+      <stop offset="100%" stop-color="#ecd9b8"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#F5E6CA" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#D4838F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#sheen)"/>
+  <g opacity="0.1">
+    <path d="M0,40 Q200,20 400,40" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M0,80 Q200,60 400,80" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,120 Q200,100 400,120" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M0,160 Q200,140 400,160" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,200 Q200,180 400,200" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M0,240 Q200,220 400,240" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,280 Q200,260 400,280" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M0,320 Q200,300 400,320" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,360 Q200,340 400,360" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M0,400 Q200,380 400,400" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,440 Q200,420 400,440" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M0,480 Q200,460 400,480" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,520 Q200,500 400,520" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="120" y="240" width="160" height="60" rx="8" fill="none" stroke="#4e3a27" stroke-width="0.5" opacity="0.12"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#4e3a27" opacity="0.18" letter-spacing="2">SATIN DE</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#4e3a27" opacity="0.13" letter-spacing="5">LUXE</text>
+</svg>

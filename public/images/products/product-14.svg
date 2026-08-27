@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DC143C"/>
+      <stop offset="50%" stop-color="#c41230"/>
+      <stop offset="100%" stop-color="#DC143C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#b4905f" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#DC143C" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="festive_diamond" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M24,4 L44,24 L24,44 L4,24 Z" fill="none" stroke="#b4905f" stroke-width="0.8" opacity="0.3"/>
+      <path d="M24,12 L36,24 L24,36 L12,24 Z" fill="none" stroke="#b4905f" stroke-width="0.4" opacity="0.2"/>
+      <circle cx="24" cy="24" r="1.5" fill="#b4905f" opacity="0.25"/>
+      <circle cx="24" cy="4" r="1" fill="#b4905f" opacity="0.15"/>
+      <circle cx="24" cy="44" r="1" fill="#b4905f" opacity="0.15"/>
+      <circle cx="4" cy="24" r="1" fill="#b4905f" opacity="0.15"/>
+      <circle cx="44" cy="24" r="1" fill="#b4905f" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#festive_diamond)"/>
+  <g opacity="0.1">
+    <path d="M0,100 L400,100" stroke="#b4905f" stroke-width="0.5"/>
+    <path d="M0,200 L400,200" stroke="#b4905f" stroke-width="0.5"/>
+    <path d="M0,300 L400,300" stroke="#b4905f" stroke-width="0.5"/>
+    <path d="M0,400 L400,400" stroke="#b4905f" stroke-width="0.5"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="120" y="240" width="160" height="60" rx="8" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.15"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#b4905f" opacity="0.2" letter-spacing="2">BROCARD</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#b4905f" opacity="0.15" letter-spacing="5">DE FÊTE</text>
+</svg>

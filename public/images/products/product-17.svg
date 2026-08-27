@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF9F6"/>
+      <stop offset="50%" stop-color="#F5F3EE"/>
+      <stop offset="100%" stop-color="#FAF9F6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#F5F3EE" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="embroidery" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="15" cy="15" r="2" fill="none" stroke="#b4905f" stroke-width="0.4" opacity="0.25"/>
+      <circle cx="15" cy="15" r="5" fill="none" stroke="#b4905f" stroke-width="0.3" opacity="0.15"/>
+      <circle cx="0" cy="0" r="1.5" fill="none" stroke="#b4905f" stroke-width="0.3" opacity="0.15"/>
+      <circle cx="30" cy="30" r="1.5" fill="none" stroke="#b4905f" stroke-width="0.3" opacity="0.15"/>
+      <circle cx="30" cy="0" r="1.5" fill="none" stroke="#b4905f" stroke-width="0.3" opacity="0.15"/>
+      <circle cx="0" cy="30" r="1.5" fill="none" stroke="#b4905f" stroke-width="0.3" opacity="0.15"/>
+    </pattern>
+    <pattern id="cross_stitch" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+      <line x1="4" y1="4" x2="12" y2="12" stroke="#b4905f" stroke-width="0.3" opacity="0.12"/>
+      <line x1="12" y1="4" x2="4" y2="12" stroke="#b4905f" stroke-width="0.3" opacity="0.12"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#embroidery)"/>
+  <rect width="400" height="540" fill="url(#cross_stitch)"/>
+  <g opacity="0.06">
+    <path d="M0,60 Q200,40 400,60" fill="none" stroke="#b4905f" stroke-width="1"/>
+    <path d="M0,120 Q200,100 400,120" fill="none" stroke="#b4905f" stroke-width="1"/>
+    <path d="M0,180 Q200,160 400,180" fill="none" stroke="#b4905f" stroke-width="1"/>
+    <path d="M0,240 Q200,220 400,240" fill="none" stroke="#b4905f" stroke-width="1"/>
+    <path d="M0,300 Q200,280 400,300" fill="none" stroke="#b4905f" stroke-width="1"/>
+    <path d="M0,360 Q200,340 400,360" fill="none" stroke="#b4905f" stroke-width="1"/>
+    <path d="M0,420 Q200,400 400,420" fill="none" stroke="#b4905f" stroke-width="1"/>
+    <path d="M0,480 Q200,460 400,480" fill="none" stroke="#b4905f" stroke-width="1"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="100" y="240" width="200" height="60" rx="8" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.1"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#b4905f" opacity="0.18" letter-spacing="1">COTON BRODÉ</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#b4905f" opacity="0.13" letter-spacing="4">ARTISANAL</text>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5F3EE"/>
+      <stop offset="30%" stop-color="#ecd9b8"/>
+      <stop offset="70%" stop-color="#debc8d"/>
+      <stop offset="100%" stop-color="#F5F3EE"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ecd9b8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="transparency" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#transparency)"/>
+  <g opacity="0.15">
+    <path d="M0,30 Q80,15 160,30 Q240,45 320,30 Q360,22 400,30" fill="none" stroke="#debc8d" stroke-width="0.8"/>
+    <path d="M0,65 Q80,50 160,65 Q240,80 320,65 Q360,57 400,65" fill="none" stroke="#ecd9b8" stroke-width="0.6"/>
+    <path d="M0,100 Q80,85 160,100 Q240,115 320,100 Q360,92 400,100" fill="none" stroke="#debc8d" stroke-width="0.8"/>
+    <path d="M0,135 Q80,120 160,135 Q240,150 320,135 Q360,127 400,135" fill="none" stroke="#ecd9b8" stroke-width="0.6"/>
+    <path d="M0,170 Q80,155 160,170 Q240,185 320,170 Q360,162 400,170" fill="none" stroke="#debc8d" stroke-width="0.8"/>
+    <path d="M0,205 Q80,190 160,205 Q240,220 320,205 Q360,197 400,205" fill="none" stroke="#ecd9b8" stroke-width="0.6"/>
+    <path d="M0,240 Q80,225 160,240 Q240,255 320,240 Q360,232 400,240" fill="none" stroke="#debc8d" stroke-width="0.8"/>
+    <path d="M0,275 Q80,260 160,275 Q240,290 320,275 Q360,267 400,275" fill="none" stroke="#ecd9b8" stroke-width="0.6"/>
+    <path d="M0,310 Q80,295 160,310 Q240,325 320,310 Q360,302 400,310" fill="none" stroke="#debc8d" stroke-width="0.8"/>
+    <path d="M0,345 Q80,330 160,345 Q240,360 320,345 Q360,337 400,345" fill="none" stroke="#ecd9b8" stroke-width="0.6"/>
+    <path d="M0,380 Q80,365 160,380 Q240,395 320,380 Q360,372 400,380" fill="none" stroke="#debc8d" stroke-width="0.8"/>
+    <path d="M0,415 Q80,400 160,415 Q240,430 320,415 Q360,407 400,415" fill="none" stroke="#ecd9b8" stroke-width="0.6"/>
+    <path d="M0,450 Q80,435 160,450 Q240,465 320,450 Q360,442 400,450" fill="none" stroke="#debc8d" stroke-width="0.8"/>
+    <path d="M0,485 Q80,470 160,485 Q240,500 320,485 Q360,477 400,485" fill="none" stroke="#ecd9b8" stroke-width="0.6"/>
+    <path d="M0,520 Q80,505 160,520 Q240,535 320,520 Q360,512 400,520" fill="none" stroke="#debc8d" stroke-width="0.8"/>
+  </g>
+  <g opacity="0.05">
+    <path d="M0,20 Q100,10 200,20 Q300,30 400,20" fill="none" stroke="#b4905f" stroke-width="2"/>
+    <path d="M0,100 Q100,90 200,100 Q300,110 400,100" fill="none" stroke="#b4905f" stroke-width="2"/>
+    <path d="M0,180 Q100,170 200,180 Q300,190 400,180" fill="none" stroke="#b4905f" stroke-width="2"/>
+    <path d="M0,260 Q100,250 200,260 Q300,270 400,260" fill="none" stroke="#b4905f" stroke-width="2"/>
+    <path d="M0,340 Q100,330 200,340 Q300,350 400,340" fill="none" stroke="#b4905f" stroke-width="2"/>
+    <path d="M0,420 Q100,410 200,420 Q300,430 400,420" fill="none" stroke="#b4905f" stroke-width="2"/>
+    <path d="M0,500 Q100,490 200,500 Q300,510 400,500" fill="none" stroke="#b4905f" stroke-width="2"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="100" y="240" width="200" height="60" rx="8" fill="none" stroke="#b4905f" stroke-width="0.5" opacity="0.1"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#b4905f" opacity="0.15" letter-spacing="1">VOILE DE SOIE</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#b4905f" opacity="0.1" letter-spacing="4">NATURELLE</text>
+</svg>

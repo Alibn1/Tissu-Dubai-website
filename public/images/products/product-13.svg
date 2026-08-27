@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 540" width="400" height="540">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ecd9b8"/>
+      <stop offset="30%" stop-color="#D4838F"/>
+      <stop offset="60%" stop-color="#c97080"/>
+      <stop offset="100%" stop-color="#debc8d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#D4838F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pearl" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#FFFFFF" stop-opacity="0.1"/>
+      <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="540" fill="url(#bg)"/>
+  <rect width="400" height="540" fill="url(#pearl)"/>
+  <g opacity="0.2">
+    <path d="M0,30 Q100,10 200,30 Q300,50 400,30" fill="none" stroke="#debc8d" stroke-width="1.2"/>
+    <path d="M0,70 Q100,50 200,70 Q300,90 400,70" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,110 Q100,90 200,110 Q300,130 400,110" fill="none" stroke="#debc8d" stroke-width="1.2"/>
+    <path d="M0,150 Q100,130 200,150 Q300,170 400,150" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,190 Q100,170 200,190 Q300,210 400,190" fill="none" stroke="#debc8d" stroke-width="1.2"/>
+    <path d="M0,230 Q100,210 200,230 Q300,250 400,230" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,270 Q100,250 200,270 Q300,290 400,270" fill="none" stroke="#debc8d" stroke-width="1.2"/>
+    <path d="M0,310 Q100,290 200,310 Q300,330 400,310" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,350 Q100,330 200,350 Q300,370 400,350" fill="none" stroke="#debc8d" stroke-width="1.2"/>
+    <path d="M0,390 Q100,370 200,390 Q300,410 400,390" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,430 Q100,410 200,430 Q300,450 400,430" fill="none" stroke="#debc8d" stroke-width="1.2"/>
+    <path d="M0,470 Q100,450 200,470 Q300,490 400,470" fill="none" stroke="#FFFFFF" stroke-width="0.8"/>
+    <path d="M0,510 Q100,490 200,510 Q300,530 400,510" fill="none" stroke="#debc8d" stroke-width="1.2"/>
+  </g>
+  <rect width="400" height="540" fill="url(#glow)"/>
+  <rect x="100" y="240" width="200" height="60" rx="8" fill="none" stroke="#4e3a27" stroke-width="0.5" opacity="0.1"/>
+  <text x="200" y="265" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#4e3a27" opacity="0.15" letter-spacing="1">SOIE NACRÉ</text>
+  <text x="200" y="285" text-anchor="middle" font-family="Georgia, serif" font-size="8" fill="#4e3a27" opacity="0.1" letter-spacing="5">ROSE</text>
+</svg>

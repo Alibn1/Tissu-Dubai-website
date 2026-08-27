@@ -1,0 +1,334 @@
+{
+  "common": {
+    "brand": "Tissu Dubai",
+    "tagline": "The Art of Premium Fabric",
+    "home": "Home",
+    "fabrics": "Our Fabrics",
+    "collections": "Collections",
+    "followUs": "Follow Us",
+    "about": "About",
+    "contact": "Contact",
+    "location": "Our Store",
+    "faq": "FAQ",
+    "readMore": "Read more",
+    "viewAll": "View all",
+    "viewDetails": "View details",
+    "loading": "Loading...",
+    "notFound": "Page not found",
+    "backToHome": "Back to home",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "all": "All",
+    "close": "Close",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu",
+    "phone": "Phone",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "share": "Share",
+    "and": "and",
+    "currency": "MAD",
+    "perMeter": "/ meter",
+    "surDevis": "On request",
+    "meters": "meters",
+    "meter": "meter"
+  },
+  "nav": {
+    "fabrics": {
+      "label": "Fabrics",
+      "caftan": "Caftan Fabrics",
+      "jellaba": "Djellaba Fabrics",
+      "tekchita": "Takchita Fabrics",
+      "caftanShort": "Caftan",
+      "jellabaShort": "Djellaba",
+      "tekchitaShort": "Takchita"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "The Excellence of Moroccan Fabric",
+      "description": "Discover our exclusive collection of premium fabrics, carefully selected to form the foundation of the most prestigious creations.",
+      "discover": "Explore our fabrics",
+      "whatsapp": "Order via WhatsApp"
+    },
+    "categories": {
+      "title": "Our Collections",
+      "subtitle": "Exceptional fabrics for every creation",
+      "caftan": {
+        "name": "Caftan",
+        "description": "Silks, brocades, and velvets for an exceptional caftan"
+      },
+      "jellaba": {
+        "name": "Djellaba",
+        "description": "Wools, cashmeres, and lightweight fabrics for an elegant jellaba"
+      },
+      "tekchita": {
+        "name": "Takchita",
+        "description": "Rich and silky fabrics for a radiant tekchita"
+      }
+    },
+    "featured": {
+      "title": "Curated Fabrics",
+      "subtitle": "Our exclusive selection of the moment"
+    },
+    "newArrivals": {
+      "title": "New Arrivals",
+      "subtitle": "Discover the latest additions"
+    },
+    "collection": {
+      "title": "Collection of the Season",
+      "subtitle": "An exclusive selection designed for you",
+      "discover": "Discover the collection"
+    },
+    "brandStory": {
+      "title": "Our Story",
+      "description": "Founded in the heart of Casablanca, Tissu Dubai has established itself as the reference for premium fabrics in Morocco. Our passion for excellence drives us to seek out the finest fabrics from around the world, to showcase the most prestigious Moroccan fashion creations.",
+      "values": [
+        {
+          "title": "Premium Quality",
+          "description": "Each fabric is meticulously selected to guarantee exceptional quality."
+        },
+        {
+          "title": "Expertise",
+          "description": "We work with the finest suppliers to offer unique fabrics."
+        },
+        {
+          "title": "Personalized Service",
+          "description": "Our team guides you in choosing the perfect fabric for your project."
+        }
+      ]
+    },
+    "whyUs": {
+      "title": "Why Tissu Dubai",
+      "reasons": [
+        {
+          "title": "Guaranteed Quality",
+          "description": "Rigorous quality control on every bolt of fabric."
+        },
+        {
+          "title": "Wide Selection",
+          "description": "Hundreds of references in permanent stock."
+        },
+        {
+          "title": "Competitive Prices",
+          "description": "The best value for money on the market."
+        },
+        {
+          "title": "Expert Advice",
+          "description": "A team available to guide you."
+        },
+        {
+          "title": "Fast Service",
+          "description": "Quick service and delivery available."
+        },
+        {
+          "title": "Convenient Location",
+          "description": "A store in the heart of Casablanca."
+        }
+      ]
+    },
+    "whatsappCta": {
+      "title": "Need advice?",
+      "description": "Our team is available to help you choose your fabrics.",
+      "button": "Contact us on WhatsApp"
+    },
+    "storeLocation": {
+      "title": "Our Store",
+      "address": "Address",
+      "hours": "Opening Hours",
+      "directions": "Directions",
+      "callUs": "Call Us"
+    }
+  },
+  "catalog": {
+    "title": "Our Fabrics",
+    "subtitle": "Explore our collection of premium fabrics",
+    "resultsCount": "{count} fabric found | {count} fabrics found",
+    "noResults": "No fabric matches your search.",
+    "clearFilters": "Clear filters",
+    "filters": {
+      "categories": "Categories",
+      "materials": "Materials",
+      "colors": "Colors",
+      "availability": "Availability",
+      "inStock": "In stock",
+      "outOfStock": "Out of stock",
+      "price": "Price",
+      "priceLowToHigh": "Price: low to high",
+      "priceHighToLow": "Price: high to low",
+      "newest": "Newest",
+      "featured": "Featured",
+      "name": "Name A-Z"
+    },
+    "mobileFilters": "Filters"
+  },
+  "product": {
+    "reference": "Reference",
+    "material": "Material",
+    "width": "Width",
+    "price": "Price",
+    "availability": "Availability",
+    "color": "Color",
+    "colors": "Colors",
+    "quantity": "Quantity",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "new": "New",
+    "featured": "Featured",
+    "description": "Description",
+    "characteristics": "Characteristics",
+    "relatedProducts": "Similar Fabrics",
+    "orderWhatsApp": "Order via WhatsApp",
+    "askWhatsApp": "Inquire via WhatsApp",
+    "selectColor": "Select color",
+    "selectQuantity": "Quantity in meters",
+    "share": "Share this fabric",
+    "addToInquiry": "Add to my inquiry"
+  },
+  "about": {
+    "title": "About",
+    "hero": {
+      "title": "Our Story",
+      "subtitle": "A passion for fabric from Casablanca"
+    },
+    "story": {
+      "title": "Our Journey",
+      "content": "Tissu Dubai was born from a deep passion for beautiful fabrics and Moroccan craftsmanship. Since our founding in Casablanca, we have strived to offer an exclusive selection of premium fabrics that elevate the most prestigious creations."
+    },
+    "philosophy": {
+      "title": "Our Philosophy",
+      "content": "We believe that every creation deserves the finest fabric. That is why we travel the world to select the most refined, noble, and beautiful materials, to offer our Moroccan and international clientele a unique experience."
+    },
+    "quality": {
+      "title": "Commitment to Quality",
+      "content": "Every fabric we offer undergoes a rigorous selection process. We work exclusively with trusted suppliers and manufacturers renowned for their excellence."
+    },
+    "craftsmanship": {
+      "title": "Moroccan Craftsmanship",
+      "content": "Morocco possesses a rich and ancient textile heritage. We contribute to preserving this legacy by offering fabrics that honor traditions while embracing contemporary trends."
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "hero": {
+      "title": "Get in Touch",
+      "subtitle": "We're here to help"
+    },
+    "form": {
+      "name": "Full name",
+      "namePlaceholder": "Your name",
+      "phone": "Phone",
+      "phonePlaceholder": "+212 6XX XXX XXX",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "subject": "Subject",
+      "subjectPlaceholder": "Subject of your message",
+      "message": "Message",
+      "messagePlaceholder": "Describe your request...",
+      "send": "Send",
+      "sending": "Sending...",
+      "success": "Your message has been sent successfully. We will get back to you as soon as possible.",
+      "error": "An error occurred while sending. Please try again."
+    },
+    "info": {
+      "title": "Contact Information",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email",
+      "whatsapp": "WhatsApp"
+    }
+  },
+  "location": {
+    "title": "Our Store",
+    "hero": {
+      "title": "Find Us",
+      "subtitle": "Visit us in Casablanca"
+    },
+    "address": {
+      "title": "Address",
+      "placeholder": "PLACEHOLDER_ADDRESS"
+    },
+    "hours": {
+      "title": "Opening Hours",
+      "weekdays": "Monday - Saturday",
+      "weekdaysHours": "09:00 AM - 07:00 PM",
+      "sunday": "Sunday",
+      "sundayHours": "Closed"
+    },
+    "contact": {
+      "title": "Direct Contact",
+      "phone": "Call us",
+      "whatsapp": "WhatsApp",
+      "directions": "Google Maps directions"
+    }
+  },
+  "faq": {
+    "title": "FAQ",
+    "hero": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Find quick answers to your questions"
+    },
+    "questions": [
+      {
+        "question": "What types of fabrics do you offer?",
+        "answer": "We offer a wide range of premium fabrics for traditional Moroccan clothing: caftans, djellabas, takchitas, as well as fabrics for bespoke creations. Our collections include silks, brocades, velvets, luxury cotton, and more."
+      },
+      {
+        "question": "Do you sell by the meter?",
+        "answer": "Yes, all our fabrics are sold by the meter. Most of our fabrics are available in standard widths from 1.40m to 3 meters, depending on the reference."
+      },
+      {
+        "question": "How can I check fabric availability?",
+        "answer": "You can check availability directly on our website, or contact us by phone or WhatsApp for immediate confirmation. Our team is available to provide any information."
+      },
+      {
+        "question": "How do I place an order?",
+        "answer": "To place an order, simply contact us via WhatsApp with the fabric reference, desired color, and quantity. We will confirm availability and pricing, and arrange the next steps."
+      },
+      {
+        "question": "Where are you located?",
+        "answer": "Our store is located in the heart of Casablanca. You can find our exact address and opening hours on the 'Our Store' page."
+      },
+      {
+        "question": "Do you offer samples?",
+        "answer": "Yes, we can send samples so you can see and feel the fabrics before ordering. Contact us via WhatsApp to learn more."
+      },
+      {
+        "question": "Do you deliver within Morocco?",
+        "answer": "Yes, we offer delivery throughout Morocco. Contact us for more details on delivery options and rates."
+      }
+    ]
+  },
+  "seo": {
+    "home": {
+      "title": "Tissu Dubai - Premium Fabrics in Casablanca | Caftan, Djellaba, Takchita",
+      "description": "Tissu Dubai, your specialist in premium fabrics in Casablanca, Morocco. Discover our selection of fabrics for caftan, jellaba, tekchita, and traditional Moroccan creations."
+    },
+    "fabrics": {
+      "title": "Our Fabrics | Tissu Dubai",
+      "description": "Explore our catalog of premium fabrics: silks, brocades, velvets, and luxury cotton for your traditional Moroccan creations."
+    },
+    "about": {
+      "title": "About | Tissu Dubai",
+      "description": "Discover the story and values of Tissu Dubai, your premium fabric specialist in Casablanca."
+    },
+    "contact": {
+      "title": "Contact | Tissu Dubai",
+      "description": "Contact Tissu Dubai for any premium fabric inquiry. Team available by phone, email, or WhatsApp."
+    },
+    "location": {
+      "title": "Our Store | Tissu Dubai",
+      "description": "Visit us at our store in Casablanca. Find our address, opening hours, and directions."
+    },
+    "faq": {
+      "title": "FAQ | Tissu Dubai",
+      "description": "Find answers to the most frequently asked questions about our fabrics, services, and store."
+    }
+  },
+  "collections": {
+    "title": "Our Collections",
+    "subtitle": "Discover our selection of premium fabrics"
+  }
+}
