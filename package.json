@@ -9,9 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "pages:build": "npx @opennextjs/cloudflare build",
-    "pages:deploy": "wrangler pages deploy .vercel/output/static --project-name=tissudubai",
-    "pages:dev": "npx @opennextjs/cloudflare dev"
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

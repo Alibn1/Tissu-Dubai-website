@@ -1,6 +1,7 @@
 'use client';
 
 import {useTranslations} from 'next-intl';
+import Image from 'next/image';
 import {Link} from '@/i18n/navigation';
 import {MessageCircle, ArrowRight} from 'lucide-react';
 import {cn} from '@/lib/utils';
@@ -12,21 +13,26 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto max-w-8xl px-6 sm:px-8 lg:px-12 pt-4 sm:pt-6 pb-12 sm:pb-16 lg:pb-20">
-        <div className="relative overflow-hidden rounded-md border border-brand-border bg-white">
-          {/* White image placeholder fill */}
-          <div className="absolute inset-0 flex items-center justify-center p-4">
-            <span className="font-heading text-lg font-bold text-brand-muted uppercase tracking-wide sm:text-2xl md:text-3xl text-center">
-              Insert your store image here
-            </span>
-          </div>
+        <div className="relative overflow-hidden rounded-md border border-brand-border">
+          {/* Hero background image */}
+          <Image
+            src="/images/Herobackground.jpg"
+            alt="Tissu Dubai"
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 100vw"
+            className="object-cover"
+          />
+          {/* Readable overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
 
           {/* Content overlaid on the image */}
           <div className="relative max-w-2xl py-16 px-6 sm:py-24 sm:px-10 lg:py-28">
-            <h1 className="font-heading text-3xl font-bold text-brand-light drop-shadow-[0_1px_0_rgba(255,255,255,0.7)] sm:text-4xl md:text-5xl leading-tight">
+            <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl md:text-5xl leading-tight">
               {t('title')}
             </h1>
 
-            <p className="mt-4 text-base text-brand-light/70 drop-shadow-[0_1px_0_rgba(255,255,255,0.6)] sm:text-lg md:mt-6 md:text-xl max-w-xl leading-relaxed">
+            <p className="mt-4 text-base text-white/80 sm:text-lg md:mt-6 md:text-xl max-w-xl leading-relaxed">
               {t('description')}
             </p>
 

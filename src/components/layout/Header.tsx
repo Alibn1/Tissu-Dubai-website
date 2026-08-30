@@ -6,7 +6,7 @@ import {Logo} from '@/components/ui/Logo';
 import {LanguageSwitcher} from '@/components/ui/LanguageSwitcher';
 import {cn} from '@/lib/utils';
 import {useState, useEffect, useCallback} from 'react';
-import {Menu, X, Phone} from 'lucide-react';
+import {Menu, X, Phone, Truck} from 'lucide-react';
 
 const navLinks = [
   {key: 'common.home', href: '/'},
@@ -69,6 +69,19 @@ export function Header() {
             : 'bg-brand-surface/60 backdrop-blur-md border-b border-transparent'
         )}
       >
+        {/* Top bar (scrolls away under fixed navbar) */}
+        <div
+          className={cn(
+            'flex h-9 items-center justify-center overflow-hidden bg-brand-light/95 px-4 text-center transition-all duration-300',
+            scrolled ? 'max-h-0 py-0' : 'max-h-9'
+          )}
+        >
+          <span className="flex items-center gap-2 text-xs font-medium tracking-wide text-brand-gold-light sm:text-sm whitespace-nowrap">
+            <Truck className="h-4 w-4 shrink-0" />
+            {t('common.deliveryBanner')}
+          </span>
+        </div>
+
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo + Brand Name */}
           <Link

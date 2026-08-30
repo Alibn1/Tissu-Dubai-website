@@ -81,7 +81,7 @@ export default async function LocaleLayout({children, params}: LocaleLayoutProps
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header />
-          <main className="flex-1 pt-16">{children}</main>
+          <main className="flex-1 pt-[100px]">{children}</main>
           <Footer />
           <WhatsAppButton />
         </NextIntlClientProvider>
