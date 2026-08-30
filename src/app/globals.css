@@ -33,18 +33,18 @@
 }
 
 :root {
-  --color-brand-primary: #b4905f;
-  --color-brand-secondary: #4e3a27;
-  --color-brand-accent: #debc8d;
-  --color-brand-dark: #2d1f12;
-  --color-brand-muted: #a8937e;
-  --color-brand-light: #f8f4ef;
-  --color-brand-surface: #ffffff;
-  --color-brand-border: #d4c5b3;
-  --color-brand-success: #5a7247;
-  --color-brand-warning: #c48c3d;
-  --color-brand-error: #b85450;
-  --color-brand-gold-light: #ecd9b8;
+  --color-brand-primary: #C9A227;
+  --color-brand-secondary: #EDE3D3;
+  --color-brand-accent: #D8B25C;
+  --color-brand-dark: #EAE0CE;
+  --color-brand-muted: #C4B5A0;
+  --color-brand-light: #2B1F14;
+  --color-brand-surface: #3A2A1A;
+  --color-brand-border: #4E3A27;
+  --color-brand-success: #8CA96E;
+  --color-brand-warning: #D8A95A;
+  --color-brand-error: #D96C6C;
+  --color-brand-gold-light: #E5C58A;
 
   --font-heading-latin: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-body-latin: 'Inter', system-ui, -apple-system, sans-serif;
@@ -88,6 +88,13 @@ html[dir="rtl"] {
 
 body {
   background-color: var(--color-brand-light);
+  background-image: linear-gradient(
+    180deg,
+    #4A3421 0%,
+    #332417 45%,
+    #1F140B 100%
+  );
+  background-attachment: fixed;
   color: var(--color-brand-dark);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;

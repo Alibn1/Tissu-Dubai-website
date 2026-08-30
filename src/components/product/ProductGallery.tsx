@@ -1,29 +1,33 @@
 'use client';
 
-import {useState} from 'react';
 import Image from 'next/image';
 import {cn} from '@/lib/utils';
-import {type Product, type Locale} from '@/types';
+import {type Product, type Locale, type ProductVariant} from '@/types';
 import {Expand} from 'lucide-react';
 
 type ProductGalleryProps = {
   product: Product;
   locale: Locale;
+  selectedVariant: number;
+  onVariantChange: (index: number) => void;
 };
 
-export function ProductGallery({product, locale}: ProductGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedVariant, setSelectedVariant] = useState(0);
-
-  const variant = product.variants[selectedVariant];
-  const images = variant?.images?.length ? variant.images : product.images;
+export function ProductGallery({
+  product,
+  locale,
+  selectedVariant,
+  onVariantChange
+}: ProductGalleryProps) {
+  const variants = product.variants;
+  const selected = variants[selectedVariant];
+  const mainImage = selected?.images?.[0] || product.images?.[0] || '/images/products/product-1.svg';
 
   return (
     <div className="space-y-3">
       {/* Main Image */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-md border border-brand-border bg-brand-light">
         <Image
-          src={images[selectedImage] || '/images/products/product-1.svg'}
+          src={mainImage}
           alt={product.name[locale] || product.name.fr}
           fill
           priority
@@ -38,29 +42,37 @@ export function ProductGallery({product, locale}: ProductGalleryProps) {
         </button>
       </div>
 
-      {/* Thumbnail strip */}
-      {images.length > 1 && (
+      {/* Color picture menu */}
+      {variants.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {images.map((img, idx) => (
-            <button
-              key={idx}
-              onClick={() => setSelectedImage(idx)}
-              className={cn(
-                'relative h-16 w-16 flex-shrink-0 overflow-hidden rounded border-2 transition-all',
-                selectedImage === idx
-                  ? 'border-brand-primary'
-                  : 'border-brand-border hover:border-brand-muted'
-              )}
-            >
-              <Image
-                src={img}
-                alt={`${product.name[locale] || product.name.fr} - ${idx + 1}`}
-                fill
-                sizes="64px"
-                className="object-cover"
-              />
-            </button>
-          ))}
+          {variants.map((v: ProductVariant, idx: number) => {
+            const img = v.images?.[0] || mainImage;
+            const selectedImg = selected?.images?.[0];
+            return (
+              <button
+                key={v.id}
+                onClick={() => onVariantChange(idx)}
+                title={v.color}
+                className={cn(
+                  'relative h-20 w-16 flex-shrink-0 overflow-hidden rounded border-2 transition-all',
+                  selectedVariant === idx
+                    ? 'border-brand-primary'
+                    : 'border-brand-border hover:border-brand-muted'
+                )}
+              >
+                <Image
+                  src={img}
+                  alt={`${product.name[locale] || product.name.fr} - ${v.color}`}
+                  fill
+                  sizes="64px"
+                  className="object-cover"
+                />
+                {img === selectedImg && (
+                  <span className="sr-only">{v.color}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

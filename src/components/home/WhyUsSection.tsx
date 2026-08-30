@@ -15,7 +15,7 @@ export async function WhyUsSection() {
   }));
 
   return (
-    <section className="py-16 sm:py-20 bg-brand-secondary">
+    <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="font-heading text-2xl font-bold text-white sm:text-3xl md:text-4xl">

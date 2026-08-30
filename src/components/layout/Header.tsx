@@ -77,8 +77,8 @@ export function Header() {
             className="flex items-center gap-2.5 flex-shrink-0 group"
             aria-label={t('common.brand')}
           >
-            <Logo size="md" />
-            <span className="hidden sm:block font-heading text-lg font-bold text-brand-secondary group-hover:text-brand-primary transition-colors duration-200">
+            <Logo size="lg" />
+            <span className="hidden sm:block font-heading text-xl font-bold text-brand-secondary group-hover:text-brand-primary transition-colors duration-200">
               Tissu Dubai
             </span>
           </Link>
@@ -110,7 +110,7 @@ export function Header() {
               className={cn(
                 'hidden md:flex items-center gap-2 px-3 py-2 text-sm',
                 'text-brand-secondary hover:text-brand-primary',
-                'transition-colors duration-200 rounded-lg hover:bg-white/60'
+                'transition-colors duration-200 rounded-lg hover:bg-brand-light'
               )}
               aria-label={t('common.phone')}
             >
@@ -123,7 +123,7 @@ export function Header() {
               className={cn(
                 'lg:hidden flex items-center justify-center',
                 'h-10 w-10 rounded-lg',
-                'text-brand-secondary hover:bg-white/60',
+                'text-brand-secondary hover:bg-brand-light',
                 'transition-colors duration-200'
               )}
               aria-label={t('common.openMenu')}
@@ -137,7 +137,7 @@ export function Header() {
       {/* Mobile Sidebar Overlay */}
       <div
         className={cn(
-          'fixed inset-0 z-[60] bg-brand-dark/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden',
+          'fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden',
           sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
         onClick={() => setSidebarOpen(false)}
@@ -146,7 +146,7 @@ export function Header() {
       {/* Mobile Sidebar */}
       <div
         className={cn(
-          'fixed top-0 right-0 z-[70] h-full w-[280px] bg-white shadow-2xl',
+          'fixed top-0 right-0 z-[70] h-full w-[280px] bg-brand-surface shadow-2xl',
           'transition-transform duration-300 ease-out lg:hidden',
           'flex flex-col',
           sidebarOpen ? 'translate-x-0' : 'translate-x-full'

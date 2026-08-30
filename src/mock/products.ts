@@ -178,24 +178,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% soie naturelle",
-        "Entretien : Nettoyage à sec recommandé",
         "Largeur : 140 cm",
         "Origine : Dubaï, Émirats arabes unis",
-        "Grammage : 120 g/m²",
       ],
       ar: [
         "التركيب: 100% حرير طبيعي",
-        "العناية: يُنصح بالتنظيف الجاف",
         "العرض: 140 سم",
         "الم origin: دبي، الإمارات العربية المتحدة",
-        "الوزن: 120 جم/م²",
       ],
       en: [
         "Composition: 100% natural silk",
-        "Care: Dry clean recommended",
         "Width: 140 cm",
         "Origin: Dubai, United Arab Emirates",
-        "Weight: 120 g/m²",
       ],
     },
   },
@@ -265,24 +259,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : Brocard enrichi de fils métalliques",
-        "Entretien : Lavage délicat à 30°C",
         "Largeur : 130 cm",
         "Origine : Fès, Maroc",
-        "Grammage : 210 g/m²",
       ],
       ar: [
         "التركيب: بروكار غني بخيوط معدنية",
-        "العناية: غسل رقيق عند 30 درجة مئوية",
         "العرض: 130 سم",
         "الم origin: فاس، المغرب",
-        "الوزن: 210 جم/م²",
       ],
       en: [
         "Composition: Brocade enriched with metallic threads",
-        "Care: Gentle wash at 30°C",
         "Width: 130 cm",
         "Origin: Fez, Morocco",
-        "Weight: 210 g/m²",
       ],
     },
   },
@@ -362,24 +350,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 80% coton, 20% soie",
-        "Entretien : Nettoyage à sec uniquement",
         "Largeur : 150 cm",
         "Origine : Marrakech, Maroc",
-        "Grammage : 320 g/m²",
       ],
       ar: [
         "التركيب: 80% قطن، 20% حرير",
-        "العناية: التنظيف الجاف فقط",
         "العرض: 150 سم",
         "الم origin: مراكش، المغرب",
-        "الوزن: 320 جم/م²",
       ],
       en: [
         "Composition: 80% cotton, 20% silk",
-        "Care: Dry clean only",
         "Width: 150 cm",
         "Origin: Marrakech, Morocco",
-        "Weight: 320 g/m²",
       ],
     },
   },
@@ -439,24 +421,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% soie naturelle",
-        "Entretien : Lavage délicat à mains",
         "Largeur : 140 cm",
         "Origine : Bursa, Turquie",
-        "Grammage : 85 g/m²",
       ],
       ar: [
         "التركيب: 100% حرير طبيعي",
-        "العناية: غسل يدوي رقيق",
         "العرض: 140 سم",
         "الم origin: بورصة، تركيا",
-        "الوزن: 85 جم/م²",
       ],
       en: [
         "Composition: 100% natural silk",
-        "Care: Gentle hand wash",
         "Width: 140 cm",
         "Origin: Bursa, Turkey",
-        "Weight: 85 g/m²",
       ],
     },
   },
@@ -526,24 +502,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : Brocard enrichi, fils métalliques dorés",
-        "Entretien : Nettoyage à sec recommandé",
         "Largeur : 130 cm",
         "Origine : Fès, Maroc",
-        "Grammage : 250 g/m²",
       ],
       ar: [
         "التركيب: بروكار غني، خيوط معدنية ذهبية",
-        "العناية: يُنصح بالتنظيف الجاف",
         "العرض: 130 سم",
         "الم origin: فاس، المغرب",
-        "الوزن: 250 جم/م²",
       ],
       en: [
         "Composition: Enriched brocade, golden metallic threads",
-        "Care: Dry clean recommended",
         "Width: 130 cm",
         "Origin: Fez, Morocco",
-        "Weight: 250 g/m²",
       ],
     },
   },
@@ -613,24 +583,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% nylon, broderie polyester",
-        "Entretien : Lavage délicat à 30°C",
         "Largeur : 160 cm",
         "Origine : Casablanca, Maroc",
-        "Grammage : 45 g/m²",
       ],
       ar: [
         "التركيب: 100% نايلون، تطريز بوليستر",
-        "العناية: غسل رقيق عند 30 درجة مئوية",
         "العرض: 160 سم",
         "الم origin: الدار البيضاء، المغرب",
-        "الوزن: 45 جم/م²",
       ],
       en: [
         "Composition: 100% nylon, polyester embroidery",
-        "Care: Gentle wash at 30°C",
         "Width: 160 cm",
         "Origin: Casablanca, Morocco",
-        "Weight: 45 g/m²",
       ],
     },
   },
@@ -700,24 +664,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% soie",
-        "Entretien : Lavage délicat à mains",
         "Largeur : 140 cm",
         "Origine : Suzhou, Chine",
-        "Grammage : 95 g/m²",
       ],
       ar: [
         "التركيب: 100% حرير",
-        "العناية: غسل يدوي رقيق",
         "العرض: 140 سم",
         "الم origin: سوجو، الصين",
-        "الوزن: 95 جم/م²",
       ],
       en: [
         "Composition: 100% silk",
-        "Care: Gentle hand wash",
         "Width: 140 cm",
         "Origin: Suzhou, China",
-        "Weight: 95 g/m²",
       ],
     },
   },
@@ -787,24 +745,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 60% laine, 40% acrylique",
-        "Entretien : Lavage délicat à 30°C",
         "Largeur : 150 cm",
         "Origine : Meknès, Maroc",
-        "Grammage : 280 g/m²",
       ],
       ar: [
         "التركيب: 60% صوف، 40% أكريليك",
-        "العناية: غسل رقيق عند 30 درجة مئوية",
         "العرض: 150 سم",
         "الم origin:مكناس، المغرب",
-        "الوزن: 280 جم/م²",
       ],
       en: [
         "Composition: 60% wool, 40% acrylic",
-        "Care: Gentle wash at 30°C",
         "Width: 150 cm",
         "Origin: Meknes, Morocco",
-        "Weight: 280 g/m²",
       ],
     },
   },
@@ -864,24 +816,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% cachemire de Mongolie",
-        "Entretien : Lavage à mains à eau froide",
         "Largeur : 145 cm",
         "Origine : Oulan-Bator, Mongolie",
-        "Grammage : 180 g/m²",
       ],
       ar: [
         "التركيب: 100% كشمير من منغوليا",
-        "العناية: غسل يدوي بمياه باردة",
         "العرض: 145 سم",
         "الم origin: أولان باتور، منغوليا",
-        "الوزن: 180 جم/م²",
       ],
       en: [
         "Composition: 100% Mongolian cashmere",
-        "Care: Hand wash in cold water",
         "Width: 145 cm",
         "Origin: Ulaanbaatar, Mongolia",
-        "Weight: 180 g/m²",
       ],
     },
   },
@@ -951,24 +897,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% laine cardée de Berbère",
-        "Entretien : Lavage délicat à froid",
         "Largeur : 150 cm",
         "Origine : Atlas, Maroc",
-        "Grammage : 350 g/m²",
       ],
       ar: [
         "التركيب: 100% صوف مشط من الأمازيغ",
-        "العناية: غسل رقيق بارد",
         "العرض: 150 سم",
         "الم origin: الأطلس، المغرب",
-        "الوزن: 350 جم/م²",
       ],
       en: [
         "Composition: 100% Berber carded wool",
-        "Care: Gentle cold wash",
         "Width: 150 cm",
         "Origin: Atlas Mountains, Morocco",
-        "Weight: 350 g/m²",
       ],
     },
   },
@@ -1038,24 +978,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 70% cachemire, 30% laine",
-        "Entretien : Lavage délicat à mains",
         "Largeur : 145 cm",
         "Origine : Écosse, Royaume-Uni",
-        "Grammage : 200 g/m²",
       ],
       ar: [
         "التركيب: 70% كشمير، 30% صوف",
-        "العناية: غسل يدوي رقيق",
         "العرض: 145 سم",
         "الم origin: اسكتلندا، المملكة المتحدة",
-        "الوزن: 200 جم/م²",
       ],
       en: [
         "Composition: 70% cashmere, 30% wool",
-        "Care: Gentle hand wash",
         "Width: 145 cm",
         "Origin: Scotland, United Kingdom",
-        "Weight: 200 g/m²",
       ],
     },
   },
@@ -1115,24 +1049,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% laine de mouton locale",
-        "Entretien : Lavage délicat à 30°C",
         "Largeur : 145 cm",
         "Origine : Haut Atlas, Maroc",
-        "Grammage : 190 g/m²",
       ],
       ar: [
         "التركيب: 100% صوف خروف محلي",
-        "العناية: غسل رقيق عند 30 درجة مئوية",
         "العرض: 145 سم",
         "الم origin: الأطلس المتوسط، المغرب",
-        "الوزن: 190 جم/م²",
       ],
       en: [
         "Composition: 100% local sheep wool",
-        "Care: Gentle wash at 30°C",
         "Width: 145 cm",
         "Origin: Middle Atlas, Morocco",
-        "Weight: 190 g/m²",
       ],
     },
   },
@@ -1202,24 +1130,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% soie nacrée",
-        "Entretien : Nettoyage à sec recommandé",
         "Largeur : 140 cm",
         "Origine : Lyon, France",
-        "Grammage : 110 g/m²",
       ],
       ar: [
         "التركيب: 100% حرير لؤلؤي",
-        "العناية: يُنصح بالتنظيف الجاف",
         "العرض: 140 سم",
         "الم origin: ليون، فرنسا",
-        "الوزن: 110 جم/م²",
       ],
       en: [
         "Composition: 100% pearlescent silk",
-        "Care: Dry clean recommended",
         "Width: 140 cm",
         "Origin: Lyon, France",
-        "Weight: 110 g/m²",
       ],
     },
   },
@@ -1289,24 +1211,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : Brocard enrichi, fils colorés",
-        "Entretien : Lavage délicat à mains",
         "Largeur : 135 cm",
         "Origine : Salé, Maroc",
-        "Grammage : 230 g/m²",
       ],
       ar: [
         "التركيب: بروكار غني، خيوط ملونة",
-        "العناية: غسل يدوي رقيق",
         "العرض: 135 سم",
         "الم origin: سلا، المغرب",
-        "الوزن: 230 جم/م²",
       ],
       en: [
         "Composition: Enriched brocade, colorful threads",
-        "Care: Gentle hand wash",
         "Width: 135 cm",
         "Origin: Sale, Morocco",
-        "Weight: 230 g/m²",
       ],
     },
   },
@@ -1366,24 +1282,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 90% coton, 10% élasthanne",
-        "Entretien : Nettoyage à sec recommandé",
         "Largeur : 150 cm",
         "Origine : Tanger, Maroc",
-        "Grammage : 300 g/m²",
       ],
       ar: [
         "التركيب: 90% قطن، 10% إيلاستين",
-        "العناية: يُنصح بالتنظيف الجاف",
         "العرض: 150 سم",
         "الم origin: طنجة، المغرب",
-        "الوزن: 300 جم/م²",
       ],
       en: [
         "Composition: 90% cotton, 10% elastane",
-        "Care: Dry clean recommended",
         "Width: 150 cm",
         "Origin: Tangier, Morocco",
-        "Weight: 300 g/m²",
       ],
     },
   },
@@ -1453,24 +1363,18 @@ export const products: Product[] = [
     characteristics: {
       fr: [
         "Composition : 100% soie twill",
-        "Entretien : Nettoyage à sec exclusivement",
         "Largeur : 140 cm",
         "Origine : Varanasi, Inde",
-        "Grammage : 130 g/m²",
       ],
       ar: [
         "التركيب: 100% حرير تويل",
-        "العناية: التنظيف الجاف حصرياً",
         "العرض: 140 سم",
         "الم origin: فاراناسي، الهند",
-        "الوزن: 130 جم/م²",
       ],
       en: [
         "Composition: 100% twill silk",
-        "Care: Dry clean exclusively",
         "Width: 140 cm",
         "Origin: Varanasi, India",
-        "Weight: 130 g/m²",
       ],
     },
   },

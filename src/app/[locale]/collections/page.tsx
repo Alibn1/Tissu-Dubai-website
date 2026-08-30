@@ -61,7 +61,7 @@ export default async function CollectionsPage({params}: Props) {
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/70 via-brand-dark/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 start-0 end-0 p-5 sm:p-6">
                     <h2 className="font-heading text-xl font-bold text-white sm:text-2xl">
                       {tCat(`${category.slug}.name`)}

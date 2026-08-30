@@ -33,19 +33,6 @@ const MATERIAL_OPTIONS = [
   {value: 'tulle', label: {fr: 'Tulle', ar: 'تور', en: 'Tulle'}}
 ];
 
-const COLOR_OPTIONS = [
-  {value: 'Bordeaux', hex: '#722F37'},
-  {value: 'Doré', hex: '#C9A961'},
-  {value: 'Noir', hex: '#1A1A1A'},
-  {value: 'Écarlate', hex: '#DC143C'},
-  {value: 'Rose', hex: '#D4838F'},
-  {value: 'Blanc', hex: '#FAF9F6'},
-  {value: 'Vert', hex: '#2E6B4F'},
-  {value: 'Bleu', hex: '#2C3E7B'},
-  {value: 'Crème', hex: '#F5E6CA'},
-  {value: 'Mauve', hex: '#8B6F9E'}
-];
-
 export function CatalogContent({
   initialProducts,
   categories,
@@ -58,7 +45,6 @@ export function CatalogContent({
   const [filters, setFilters] = useState<FilterState>({
     categories: activeCategory ? [activeCategory] : [],
     materials: [],
-    colors: [],
     collections: [],
     inStockOnly: false,
     search: '',
@@ -76,11 +62,6 @@ export function CatalogContent({
     }
     if (filters.materials.length > 0) {
       result = result.filter((p) => filters.materials.includes(p.materialSlug));
-    }
-    if (filters.colors.length > 0) {
-      result = result.filter((p) =>
-        p.variants.some((v) => filters.colors.includes(v.color))
-      );
     }
     if (filters.inStockOnly) {
       result = result.filter((p) => p.inStock);
@@ -128,14 +109,12 @@ export function CatalogContent({
   const activeFilterCount =
     filters.categories.length +
     filters.materials.length +
-    filters.colors.length +
     (filters.inStockOnly ? 1 : 0);
 
   const clearAllFilters = () => {
     setFilters({
       categories: activeCategory ? [activeCategory] : [],
       materials: [],
-      colors: [],
       collections: [],
       inStockOnly: false,
       search: '',
@@ -257,7 +236,7 @@ export function CatalogContent({
       {mobileFiltersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-brand-dark/50"
+            className="absolute inset-0 bg-black/50"
             onClick={() => setMobileFiltersOpen(false)}
           />
           <div
@@ -342,7 +321,6 @@ function FilterSidebar({
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     categories: true,
     materials: true,
-    colors: true,
     availability: true
   });
 
@@ -393,26 +371,6 @@ function FilterSidebar({
             </span>
           </label>
         ))}
-      </FilterSection>
-
-      {/* Colors */}
-      <FilterSection title={t('colors')} expanded={expandedSections.colors} onToggle={() => toggleSection('colors')}>
-        <div className="flex flex-wrap gap-2 py-1">
-          {COLOR_OPTIONS.map((color) => (
-            <button
-              key={color.value}
-              onClick={() => toggleFilter('colors', color.value)}
-              className={cn(
-                'h-7 w-7 rounded-full border-2 transition-all',
-                filters.colors.includes(color.value)
-                  ? 'border-brand-primary scale-110'
-                  : 'border-brand-border hover:border-brand-muted'
-              )}
-              style={{backgroundColor: color.hex}}
-              title={color.value}
-            />
-          ))}
-        </div>
       </FilterSection>
 
       {/* Availability */}
@@ -489,7 +447,6 @@ function FilterContent({
   const tabs = [
     {id: 'categories', label: t('categories')},
     {id: 'materials', label: t('materials')},
-    {id: 'colors', label: t('colors')},
     {id: 'availability', label: t('availability')}
   ];
 
@@ -547,29 +504,6 @@ function FilterContent({
                   {mat.label[locale] || mat.label.fr}
                 </span>
               </label>
-            ))}
-          </div>
-        )}
-
-        {activeTab === 'colors' && (
-          <div className="flex flex-wrap gap-3 py-2">
-            {COLOR_OPTIONS.map((color) => (
-              <button
-                key={color.value}
-                onClick={() => toggleFilter('colors', color.value)}
-                className={cn(
-                  'flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-all',
-                  filters.colors.includes(color.value)
-                    ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
-                    : 'border-brand-border text-brand-secondary hover:border-brand-muted'
-                )}
-              >
-                <span
-                  className="h-4 w-4 rounded-full border border-brand-border"
-                  style={{backgroundColor: color.hex}}
-                />
-                {color.value}
-              </button>
             ))}
           </div>
         )}

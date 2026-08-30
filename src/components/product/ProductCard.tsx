@@ -48,7 +48,7 @@ export function ProductCard({product, className}: ProductCardProps) {
 
           {/* Availability */}
           {!product.inStock && (
-            <div className="absolute inset-0 bg-brand-dark/40 flex items-center justify-center">
+            <div className="absolute inset-0 bg-[#1A110A]/50 flex items-center justify-center">
               <Badge variant="error">{t('product.outOfStock')}</Badge>
             </div>
           )}

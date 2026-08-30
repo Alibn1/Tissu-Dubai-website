@@ -44,7 +44,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-[#C4B5A0] text-[#3A2A1A]">
+    <footer className="bg-brand-light text-brand-muted">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main Footer */}
         <div className="grid grid-cols-1 gap-8 py-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
@@ -53,18 +53,18 @@ export function Footer() {
           <div className="space-y-4 pt-[80px]">
             <div className="flex items-center gap-4">
               <Logo variant="mark" size="md" />
-              <h2 className="font-heading text-3xl font-bold text-[#2B1F14]">
+              <h2 className="font-heading text-3xl font-bold text-brand-secondary">
                 Tissu Dubai
               </h2>
             </div>
-            <p className="text-lg leading-relaxed text-[#3A2A1A]/70">
+            <p className="text-lg leading-relaxed text-brand-muted/80">
               {t('common.tagline')}
             </p>
           </div>
 
           {/* Column 2: Collections */}
           <div className="space-y-4">
-            <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-[#2B1F14]">
+            <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-brand-secondary">
               {t('common.collections')}
             </h3>
             <ul className="space-y-2">
@@ -72,7 +72,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-base text-[#3A2A1A]/80 underline-offset-4 hover:underline hover:decoration-[#B8860B] hover:decoration-1 transition-all duration-200"
+                    className="text-base text-brand-muted underline-offset-4 hover:underline hover:decoration-brand-accent hover:decoration-1 transition-all duration-200"
                   >
                     {item.label}
                   </Link>
@@ -80,7 +80,7 @@ export function Footer() {
               ))}
             </ul>
             <div className="pt-2">
-              <h4 className="font-heading pt-6 text-lg font-bold uppercase tracking-wider text-[#2B1F14]">
+              <h4 className="font-heading pt-6 text-lg font-bold uppercase tracking-wider text-brand-secondary">
                 {t('common.followUs')}
               </h4>
               <div className="mt-3 flex items-center gap-4">
@@ -90,7 +90,7 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram"
-                    className="text-[#3A2A1A]/50 hover:text-[#B8860B] transition-colors duration-200"
+                    className="text-brand-muted/60 hover:text-brand-accent transition-colors duration-200"
                   >
                     <InstagramIcon className="h-6 w-6" />
                   </a>
@@ -101,7 +101,7 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="TikTok"
-                    className="text-[#3A2A1A]/50 hover:text-[#B8860B] transition-colors duration-200"
+                    className="text-brand-muted/60 hover:text-brand-accent transition-colors duration-200"
                   >
                     <TiktokIcon className="h-6 w-6" />
                   </a>
@@ -112,7 +112,7 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Facebook"
-                    className="text-[#3A2A1A]/50 hover:text-[#B8860B] transition-colors duration-200"
+                    className="text-brand-muted/60 hover:text-brand-accent transition-colors duration-200"
                   >
                     <FacebookIcon className="h-6 w-6" />
                   </a>
@@ -123,7 +123,7 @@ export function Footer() {
 
           {/* Column 3: Our Store */}
           <div className="space-y-3">
-            <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-[#2B1F14]">
+            <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-brand-secondary">
               {t('common.location')}
             </h3>
             {mapsUrl ? (
@@ -140,7 +140,7 @@ export function Footer() {
                 />
               </div>
             ) : (
-              <div className="flex h-[220px] items-center justify-center rounded-md border border-[#2B1F14]/10 bg-[#2B1F14]/5 text-sm text-[#2B1F14]/30">
+              <div className="flex h-[220px] items-center justify-center rounded-md border border-brand-border bg-brand-surface text-sm text-brand-muted">
                 Map
               </div>
             )}
@@ -148,9 +148,9 @@ export function Footer() {
               {phone && (
                 <a
                   href={`tel:${phone}`}
-                  className="flex items-center gap-2 text-base text-[#3A2A1A]/80 hover:text-[#B8860B] transition-colors duration-200"
+                  className="flex items-center gap-2 text-base text-brand-muted hover:text-brand-accent transition-colors duration-200"
                 >
-                  <Phone className="h-4 w-4 flex-shrink-0 text-[#3A2A1A]/50" />
+                  <Phone className="h-4 w-4 flex-shrink-0 text-brand-muted/60" />
                   {phone}
                 </a>
               )}
@@ -160,7 +160,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="py-5">
-          <p className="text-center text-sm text-[#3A2A1A]/40">
+          <p className="text-center text-sm text-brand-muted/50">
             &copy; 2026 Tissu Dubai. All rights reserved.
           </p>
         </div>

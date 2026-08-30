@@ -10,7 +10,7 @@ type BadgeProps = {
 
 const variantClasses: Record<BadgeVariant, string> = {
   primary: 'bg-brand-primary text-white',
-  secondary: 'bg-brand-secondary text-white',
+  secondary: 'bg-brand-muted text-brand-light',
   accent: 'bg-brand-accent/20 text-brand-secondary',
   success: 'bg-brand-success/15 text-brand-success',
   warning: 'bg-brand-warning/15 text-brand-warning',

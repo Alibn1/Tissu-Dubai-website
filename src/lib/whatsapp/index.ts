@@ -14,21 +14,21 @@ const messages: Record<Locale, (params: WhatsAppMessageParams) => string> = {
     `Tissu : ${productName}\n` +
     `Référence : ${reference}\n` +
     `Couleur : ${color}\n` +
-    `Quantité : ${quantity} mètre${quantity > 1 ? 's' : ''}\n\n` +
+    `Quantité : ${quantity}\n\n` +
     `Merci de me confirmer la disponibilité.`,
   ar: ({productName, reference, color, quantity}) =>
     `مرحباً، أريد الطلب ما يلي :\n\n` +
     `القماش : ${productName}\n` +
     `المرجع : ${reference}\n` +
     `اللون : ${color}\n` +
-    `الكمية : ${quantity} متر\n\n` +
+    `الكمية : ${quantity}\n\n` +
     `شكراً لتأكيد التوفر.`,
   en: ({productName, reference, color, quantity}) =>
     `Hello, I would like to order:\n\n` +
     `Fabric: ${productName}\n` +
     `Reference: ${reference}\n` +
     `Color: ${color}\n` +
-    `Quantity: ${quantity} meter${quantity > 1 ? 's' : ''}\n\n` +
+    `Quantity: ${quantity}\n\n` +
     `Please confirm availability.`
 };
 

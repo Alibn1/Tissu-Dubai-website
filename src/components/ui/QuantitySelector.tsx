@@ -33,13 +33,13 @@ export function QuantitySelector({
   };
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('flex items-center gap-3', className)}>
       {label && (
-        <label className="text-sm font-medium text-brand-secondary">
+        <label className="text-sm font-medium text-brand-secondary whitespace-nowrap">
           {label}
         </label>
       )}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1">
         <button
           type="button"
           onClick={handleDecrease}
@@ -55,12 +55,9 @@ export function QuantitySelector({
           <Minus className="h-4 w-4" />
         </button>
 
-        <div className="flex min-w-[80px] items-center justify-center">
+        <div className="flex min-w-[40px] items-center justify-center">
           <span className="text-lg font-semibold text-brand-secondary">
             {value}
-          </span>
-          <span className="ms-1 text-sm text-brand-muted">
-            m
           </span>
         </div>
 

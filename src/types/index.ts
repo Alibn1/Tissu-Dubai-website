@@ -63,7 +63,6 @@ export type SortOption = {
 export type FilterState = {
   categories: string[];
   materials: string[];
-  colors: string[];
   collections: string[];
   inStockOnly: boolean;
   search: string;

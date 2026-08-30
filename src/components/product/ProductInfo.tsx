@@ -3,7 +3,6 @@
 import {useState} from 'react';
 import {useTranslations} from 'next-intl';
 import {cn} from '@/lib/utils';
-import {ColorSelector} from '@/components/ui/ColorSelector';
 import {QuantitySelector} from '@/components/ui/QuantitySelector';
 import {Badge} from '@/components/ui/Badge';
 import {buildWhatsAppUrl, getWhatsAppNumber} from '@/lib/whatsapp';
@@ -14,12 +13,12 @@ import {type Product, type Locale} from '@/types';
 type ProductInfoProps = {
   product: Product;
   locale: Locale;
+  selectedVariant: number;
 };
 
-export function ProductInfo({product, locale}: ProductInfoProps) {
+export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps) {
   const t = useTranslations();
 
-  const [selectedVariant, setSelectedVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
   const variant = product.variants[selectedVariant];
@@ -27,10 +26,7 @@ export function ProductInfo({product, locale}: ProductInfoProps) {
   const material = product.material[locale] || product.material.fr;
   const description = product.description[locale] || product.description.fr;
 
-  const colors = product.variants.map((v) => ({
-    name: v.color,
-    hex: v.colorHex
-  }));
+  const displayPrice = variant?.price ?? product.price;
 
   const handleWhatsApp = () => {
     const number = getWhatsAppNumber();
@@ -65,9 +61,9 @@ export function ProductInfo({product, locale}: ProductInfoProps) {
 
       {/* Price */}
       <div>
-        {product.price !== null ? (
+        {displayPrice !== null ? (
           <span className="text-2xl font-bold text-brand-primary">
-            {product.price} {t('common.currency')}
+            {displayPrice} {t('common.currency')}
           </span>
         ) : (
           <span className="text-lg font-medium text-brand-muted italic">
@@ -86,18 +82,13 @@ export function ProductInfo({product, locale}: ProductInfoProps) {
           <span className="text-brand-muted">{t('product.width')}: </span>
           <span className="font-medium text-brand-secondary">{product.width}</span>
         </div>
+        {variant && (
+          <div>
+            <span className="text-brand-muted">{t('product.selectColor')}: </span>
+            <span className="font-medium text-brand-secondary">{variant.color}</span>
+          </div>
+        )}
       </div>
-
-      {/* Color Selector */}
-      <ColorSelector
-        colors={colors}
-        selectedColor={variant?.color || ''}
-        onChange={(color) => {
-          const idx = product.variants.findIndex((v) => v.color === color.name);
-          if (idx !== -1) setSelectedVariant(idx);
-        }}
-        label={t('product.selectColor')}
-      />
 
       {/* Availability */}
       <div className="flex items-center gap-2">

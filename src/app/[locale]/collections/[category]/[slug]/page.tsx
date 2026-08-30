@@ -6,6 +6,7 @@ import {getProductBySlug, getRelatedProducts} from '@/lib/api';
 import {JsonLd} from '@/lib/seo/JsonLd';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 import {ProductGallery} from '@/components/product/ProductGallery';
+import {ProductView} from '@/components/product/ProductView';
 import {ProductInfo} from '@/components/product/ProductInfo';
 import {ProductDetails} from '@/components/product/ProductDetails';
 import {RelatedProducts} from '@/components/product/RelatedProducts';
@@ -103,9 +104,8 @@ export default async function ProductDetailPage({params}: Props) {
             items={breadcrumbs.map((b) => ({label: b.name, href: b.url}))}
           />
 
-          <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
-            <ProductGallery product={product} locale={loc} />
-            <ProductInfo product={product} locale={loc} />
+          <div className="mt-6">
+            <ProductView product={product} locale={loc} />
           </div>
 
           <ProductDetails product={product} locale={loc} />

@@ -16,32 +16,31 @@ describe('WhatsApp Service', () => {
       expect(message).toContain('Soie Royale Dubai');
       expect(message).toContain('TD-CAF-0001');
       expect(message).toContain('Bordeaux');
-      expect(message).toContain('4 mètres');
+      expect(message).toContain('Quantité : 4');
     });
 
     it('generates Arabic message', () => {
       const message = generateWhatsAppMessage({...baseParams, locale: 'ar'});
       expect(message).toContain('مرحباً');
       expect(message).toContain('Soie Royale Dubai');
-      expect(message).toContain('4 متر');
+      expect(message).toContain('الكمية : 4');
     });
 
     it('generates English message', () => {
       const message = generateWhatsAppMessage({...baseParams, locale: 'en'});
       expect(message).toContain('Hello, I would like to order');
       expect(message).toContain('Soie Royale Dubai');
-      expect(message).toContain('4 meters');
+      expect(message).toContain('Quantity: 4');
     });
 
-    it('uses singular for quantity 1', () => {
+    it('includes the quantity number', () => {
       const message = generateWhatsAppMessage({...baseParams, quantity: 1, locale: 'en'});
-      expect(message).toContain('1 meter');
-      expect(message).not.toContain('1 meters');
+      expect(message).toContain('Quantity: 1');
     });
 
-    it('uses plural for quantity > 1', () => {
+    it('includes the quantity number for multiple items', () => {
       const message = generateWhatsAppMessage({...baseParams, quantity: 5, locale: 'en'});
-      expect(message).toContain('5 meters');
+      expect(message).toContain('Quantity: 5');
     });
   });
 
