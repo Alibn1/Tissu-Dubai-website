@@ -1,14 +1,12 @@
 'use client';
 
 import {useState} from 'react';
-import {useRouter} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
 import {Lock} from 'lucide-react';
 
 export function AdminLoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +20,9 @@ export function AdminLoginForm() {
       });
 
       if (res.ok) {
-        router.push('/admin/dashboard');
+        // Hard navigation so the admin layout re-renders server-side
+        // with the session cookie and the sidebar becomes visible.
+        window.location.href = '/fr/admin/dashboard';
       } else {
         setError(true);
       }
@@ -37,20 +37,20 @@ export function AdminLoginForm() {
         <div className="mb-6 text-center">
           <Lock className="mx-auto h-8 w-8 text-brand-primary" />
           <h1 className="mt-3 font-heading text-xl font-bold text-brand-secondary">
-            Admin
+            Administration
           </h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <p className="rounded-md bg-brand-error/10 p-3 text-sm text-brand-error">
-              Invalid password
+              Mot de passe invalide
             </p>
           )}
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-brand-secondary mb-1">
-              Password
+              Mot de passe
             </label>
             <input
               id="password"
@@ -73,7 +73,7 @@ export function AdminLoginForm() {
               'hover:bg-brand-primary/90 transition-colors'
             )}
           >
-            Sign in
+            Se connecter
           </button>
         </form>
       </div>

@@ -6,31 +6,37 @@ describe('WhatsApp Service', () => {
     productName: 'Soie Royale Dubai',
     reference: 'TD-CAF-0001',
     color: 'Bordeaux',
-    quantity: 4
+    quantity: 4,
+    name: 'Karim',
+    phone: '0612345678'
   };
 
   describe('generateWhatsAppMessage', () => {
     it('generates French message', () => {
       const message = generateWhatsAppMessage({...baseParams, locale: 'fr'});
-      expect(message).toContain('Bonjour, je souhaite commander');
+      expect(message).toContain('Bonjour, je suis Karim');
       expect(message).toContain('Soie Royale Dubai');
       expect(message).toContain('TD-CAF-0001');
       expect(message).toContain('Bordeaux');
       expect(message).toContain('Quantité : 4');
+      expect(message).toContain('Mon téléphone : 0612345678');
     });
 
     it('generates Arabic message', () => {
       const message = generateWhatsAppMessage({...baseParams, locale: 'ar'});
       expect(message).toContain('مرحباً');
+      expect(message).toContain('Karim');
       expect(message).toContain('Soie Royale Dubai');
       expect(message).toContain('الكمية : 4');
+      expect(message).toContain('0612345678');
     });
 
     it('generates English message', () => {
       const message = generateWhatsAppMessage({...baseParams, locale: 'en'});
-      expect(message).toContain('Hello, I would like to order');
+      expect(message).toContain('Hello, I am Karim');
       expect(message).toContain('Soie Royale Dubai');
       expect(message).toContain('Quantity: 4');
+      expect(message).toContain('My phone: 0612345678');
     });
 
     it('includes the quantity number', () => {

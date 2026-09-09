@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import {useTranslations} from 'next-intl';
 import {cn} from '@/lib/utils';
 import {type Product, type Locale, type ProductVariant} from '@/types';
 import {Expand} from 'lucide-react';
@@ -18,6 +19,7 @@ export function ProductGallery({
   selectedVariant,
   onVariantChange
 }: ProductGalleryProps) {
+  const t = useTranslations();
   const variants = product.variants;
   const selected = variants[selectedVariant];
   const mainImage = selected?.images?.[0] || product.images?.[0] || '/images/products/product-1.svg';
@@ -44,7 +46,14 @@ export function ProductGallery({
 
       {/* Color picture menu */}
       {variants.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div>
+          <p className="text-base font-bold text-brand-secondary">
+            {t('product.availableColors')} :
+          </p>
+          <div
+            id="product-color-gallery"
+            className="mt-4 flex gap-2 overflow-x-auto pb-1 scroll-mt-[120px]"
+          >
           {variants.map((v: ProductVariant, idx: number) => {
             const img = v.images?.[0] || mainImage;
             const selectedImg = selected?.images?.[0];
@@ -73,6 +82,7 @@ export function ProductGallery({
               </button>
             );
           })}
+          </div>
         </div>
       )}
     </div>

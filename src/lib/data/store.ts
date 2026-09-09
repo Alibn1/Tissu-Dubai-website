@@ -1,13 +1,11 @@
-import {readFileSync, writeFileSync, existsSync} from 'fs';
+import {mkdirSync, readFileSync, writeFileSync, existsSync} from 'fs';
 import {join} from 'path';
 
 const DATA_DIR = join(process.cwd(), 'data');
 const CONTACT_FILE = join(DATA_DIR, 'contacts.json');
-const INQUIRIES_FILE = join(DATA_DIR, 'inquiries.json');
 const PRODUCTS_FILE = join(DATA_DIR, 'products.json');
 
 function ensureDataDir() {
-  const {mkdirSync} = require('fs');
   if (!existsSync(DATA_DIR)) {
     mkdirSync(DATA_DIR, {recursive: true});
   }
@@ -34,17 +32,6 @@ export type ContactEntry = {
   phone: string;
   subject: string;
   message: string;
-  locale: string;
-  createdAt: string;
-  read: boolean;
-};
-
-export type InquiryEntry = {
-  id: string;
-  productName: string;
-  reference: string;
-  color: string;
-  quantity: number;
   locale: string;
   createdAt: string;
   read: boolean;
@@ -99,25 +86,6 @@ export function markContactRead(id: string) {
 export function deleteContact(id: string) {
   const contacts = getContacts().filter((c) => c.id !== id);
   writeJSON(CONTACT_FILE, contacts);
-}
-
-// ── Inquiries (WhatsApp) ──
-
-export function getInquiries(): InquiryEntry[] {
-  return readJSON<InquiryEntry[]>(INQUIRIES_FILE, []);
-}
-
-export function addInquiry(entry: Omit<InquiryEntry, 'id' | 'createdAt' | 'read'>): InquiryEntry {
-  const inquiries = getInquiries();
-  const newEntry: InquiryEntry = {
-    ...entry,
-    id: `i-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    createdAt: new Date().toISOString(),
-    read: false
-  };
-  inquiries.push(newEntry);
-  writeJSON(INQUIRIES_FILE, inquiries);
-  return newEntry;
 }
 
 // ── Admin Products (for future CRUD) ──

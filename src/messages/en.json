@@ -31,7 +31,6 @@
     "deliveryBanner": "Delivery everywhere in Morocco",
     "and": "and",
     "currency": "MAD",
-    "perMeter": "/ meter",
     "surDevis": "On request",
     "meters": "meters",
     "meter": "meter"
@@ -168,6 +167,7 @@
   "product": {
     "reference": "Reference",
     "material": "Material",
+    "name": "Fabric",
     "width": "Width",
     "price": "Price",
     "availability": "Availability",
@@ -185,8 +185,10 @@
     "askWhatsApp": "Inquire via WhatsApp",
     "selectColor": "Select color",
     "selectQuantity": "Quantity",
-    "share": "Share this fabric",
-    "addToInquiry": "Add to my inquiry"
+    "color": "Color",
+    "availableColors": "Available colors",
+    "chooseColor": "Choose another color",
+    "share": "Share this fabric"
   },
   "about": {
     "title": "About",
@@ -229,6 +231,7 @@
       "message": "Message",
       "messagePlaceholder": "Describe your request...",
       "send": "Send",
+      "sendWhatsApp": "Send via WhatsApp",
       "sending": "Sending...",
       "success": "Your message has been sent successfully. We will get back to you as soon as possible.",
       "error": "An error occurred while sending. Please try again."
@@ -331,5 +334,18 @@
   "collections": {
     "title": "Our Collections",
     "subtitle": "Discover our selection of premium fabrics"
+  },
+  "confirmation": {
+    "title": "Confirm your information",
+    "subtitle": "Review and correct your information before continuing.",
+    "previewTitle": "Message preview",
+    "previewSubtitle": "This is exactly what will be sent on WhatsApp:",
+    "back": "Back",
+    "continue": "Continue",
+    "edit": "Edit",
+    "send": "Send on WhatsApp",
+    "fieldRequired": "This field is required",
+    "phoneRequired": "Phone is required",
+    "phoneInvalid": "Invalid phone number"
   }
 }

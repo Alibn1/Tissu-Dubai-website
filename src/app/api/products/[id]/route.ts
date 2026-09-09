@@ -23,9 +23,10 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
 
   // Update fields on the in-memory product (persisted only in mock data for now)
   const product = products[productIndex];
-  if (body.name) product.name = body.name;
-  if (body.description) product.description = body.description;
-  if (body.material) product.material = body.material;
+  if (body.name !== undefined) product.name = body.name;
+  if (body.description !== undefined) product.description = body.description;
+  if (body.material !== undefined) product.material = body.material;
+  if (body.characteristics !== undefined) product.characteristics = body.characteristics;
   if (body.price !== undefined) product.price = body.price;
   if (body.inStock !== undefined) product.inStock = body.inStock;
   if (body.featured !== undefined) product.featured = body.featured;

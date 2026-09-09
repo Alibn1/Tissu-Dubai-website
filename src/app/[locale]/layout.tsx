@@ -4,9 +4,7 @@ import {NextIntlClientProvider} from 'next-intl';
 import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
-import {Header} from '@/components/layout/Header';
-import {Footer} from '@/components/layout/Footer';
-import {WhatsAppButton} from '@/components/whatsapp/WhatsAppButton';
+import {SiteChrome} from '@/components/layout/SiteChrome';
 import '../globals.css';
 
 export function generateStaticParams() {
@@ -80,10 +78,7 @@ export default async function LocaleLayout({children, params}: LocaleLayoutProps
     <html lang={lang} dir={dir} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Header />
-          <main className="flex-1 pt-[100px]">{children}</main>
-          <Footer />
-          <WhatsAppButton />
+          <SiteChrome>{children}</SiteChrome>
         </NextIntlClientProvider>
       </body>
     </html>

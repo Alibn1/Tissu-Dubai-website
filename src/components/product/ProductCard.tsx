@@ -63,30 +63,11 @@ export function ProductCard({product, className}: ProductCardProps) {
             {material}
           </p>
 
-          {/* Colors preview */}
-          {product.variants.length > 0 && (
-            <div className="mt-2 flex items-center gap-1">
-              {product.variants.slice(0, 5).map((variant) => (
-                <span
-                  key={variant.id}
-                  className="h-3 w-3 rounded-full border border-brand-border"
-                  style={{backgroundColor: variant.colorHex}}
-                  title={variant.color}
-                />
-              ))}
-              {product.variants.length > 5 && (
-                <span className="text-[10px] text-brand-muted">
-                  +{product.variants.length - 5}
-                </span>
-              )}
-            </div>
-          )}
-
           {/* Price */}
           <div className="mt-2">
             {product.price !== null ? (
               <span className="text-sm font-semibold text-brand-primary">
-                {product.price} {t('common.currency')} <span className="text-xs font-normal text-brand-muted">{t('common.perMeter')}</span>
+                {product.price} {t('common.currency')}
               </span>
             ) : (
               <span className="text-sm font-medium text-brand-muted italic">

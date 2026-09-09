@@ -31,7 +31,6 @@
     "deliveryBanner": "التوصيل في جميع أنحاء المغرب",
     "and": "و",
     "currency": "درهم",
-    "perMeter": "/ المتر",
     "surDevis": "حسب الطلب",
     "meters": "أمتار",
     "meter": "متر"
@@ -168,6 +167,7 @@
   "product": {
     "reference": "المرجع",
     "material": "المادة",
+    "name": "القماش",
     "width": "العرض",
     "price": "السعر",
     "availability": "التوفر",
@@ -185,8 +185,10 @@
     "askWhatsApp": "استفسر عبر واتساب",
     "selectColor": "اختر اللون",
     "selectQuantity": "الكمية",
-    "share": "مشاركة هذا القماش",
-    "addToInquiry": "أضف إلى طلبي"
+    "color": "اللون",
+    "availableColors": "الألوان المتاحة",
+    "chooseColor": "اختر لونًا آخر",
+    "share": "مشاركة هذا القماش"
   },
   "about": {
     "title": "من نحن",
@@ -229,6 +231,7 @@
       "message": "الرسالة",
       "messagePlaceholder": "اكتبوا رسالتكم هنا...",
       "send": "إرسال",
+      "sendWhatsApp": "إرسال عبر واتساب",
       "sending": "جاري الإرسال...",
       "success": "تم إرسال رسالتكم بنجاح. سنجيبكم في أقرب وقت ممكن.",
       "error": "حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى."
@@ -331,5 +334,18 @@
   "collections": {
     "title": "مجموعاتنا",
     "subtitle": "اكتشفوا مجموعتنا من الأقمشة الفاخرة"
+  },
+  "confirmation": {
+    "title": "تأكيد معلوماتك",
+    "subtitle": "راجِع وصحِّح معلوماتك قبل المتابعة.",
+    "previewTitle": "معاينة الرسالة",
+    "previewSubtitle": "هذا بالضبط ما سيُرسل عبر واتساب:",
+    "back": "رجوع",
+    "continue": "متابعة",
+    "edit": "تعديل",
+    "send": "إرسال عبر واتساب",
+    "fieldRequired": "هذا الحقل مطلوب",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "phoneInvalid": "رقم الهاتف غير صالح"
   }
 }

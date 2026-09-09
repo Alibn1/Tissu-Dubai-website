@@ -1,20 +1,21 @@
 'use client';
 
+import {useMemo, useState} from 'react';
 import {useTranslations} from 'next-intl';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {z} from 'zod';
 import {cn} from '@/lib/utils';
 import {Send} from 'lucide-react';
-import {useState} from 'react';
-import {submitContactForm} from '@/actions/contact';
+import {
+  WhatsAppConfirmationFlow,
+  phoneRegex
+} from '@/components/forms/WhatsAppConfirmationFlow';
 import {type Locale} from '@/types';
 
 type ContactFormProps = {
   locale: Locale;
 };
-
-const phoneRegex = /^(\+?212|0)[5-7]\d{8}$/;
 
 const createSchema = (locale: Locale) => {
   const messages: Record<Locale, {nameRequired: string; phoneRequired: string; phoneInvalid: string; subjectRequired: string; messageRequired: string}> = {
@@ -26,7 +27,7 @@ const createSchema = (locale: Locale) => {
   return z.object({
     name: z.string().min(1, messages[locale].nameRequired),
     phone: z.string().min(1, messages[locale].phoneRequired).regex(phoneRegex, messages[locale].phoneInvalid),
-    subject: z.string().min(1, messages[locale].subjectRequired),
+    subject: z.string().optional(),
     message: z.string().min(1, messages[locale].messageRequired)
   });
 };
@@ -34,59 +35,69 @@ const createSchema = (locale: Locale) => {
 type FormData = {
   name: string;
   phone: string;
-  subject: string;
+  subject?: string;
   message: string;
 };
 
 export function ContactForm({locale}: ContactFormProps) {
   const t = useTranslations('contact.form');
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState(false);
 
   const schema = createSchema(locale);
+  const [flowData, setFlowData] = useState<FormData | null>(null);
 
   const {
     register,
     handleSubmit,
-    formState: {errors, isSubmitting},
+    formState: {errors},
     reset
   } = useForm<FormData>({
     resolver: zodResolver(schema)
   });
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      const result = await submitContactForm({
-        ...data,
-        locale
-      });
-      if (result.success) {
-        setSubmitted(true);
-        reset();
-      } else {
-        setError(true);
-      }
-    } catch {
-      setError(true);
-    }
+  const onSubmit = (data: FormData) => {
+    setFlowData(data);
   };
 
-  if (submitted) {
-    return (
-      <div className="rounded-md border border-brand-success/30 bg-brand-success/5 p-6 text-center">
-        <p className="text-sm font-medium text-brand-success">{t('success')}</p>
-      </div>
-    );
-  }
+  const buildMessage = (values: Record<string, string>) => {
+    const phrases =
+      locale === 'ar'
+        ? {greeting: 'مرحباً تيسو دبي', intro: 'أتصل بكم من موقعكم الإلكتروني.', name: 'الاسم', phone: 'الهاتف', subject: 'الموضوع', message: 'الرسالة'}
+        : locale === 'fr'
+          ? {greeting: 'Bonjour Tissu Dubai', intro: 'Je vous contacte depuis votre site.', name: 'Nom', phone: 'Téléphone', subject: 'Sujet', message: 'Message'}
+          : {greeting: 'Hello Tissu Dubai', intro: 'I am contacting you from your website.', name: 'Name', phone: 'Phone', subject: 'Subject', message: 'Message'};
+
+    const messageLines = [
+      `*${phrases.greeting}*`,
+      '',
+      phrases.intro,
+      '',
+      `*${phrases.name} :* ${values.name}`,
+      `*${phrases.phone} :* ${values.phone}`,
+      values.subject?.trim() ? `*${phrases.subject} :* ${values.subject}` : null,
+      '',
+      `*${phrases.message} :*`,
+      values.message
+    ].filter(Boolean) as string[];
+
+    return messageLines.join('\n');
+  };
+
+  const fields = useMemo(
+    () =>
+      flowData
+        ? [
+            {name: 'name', label: t('name'), value: flowData.name, required: true},
+            {name: 'phone', label: t('phone'), value: flowData.phone, required: true, type: 'tel' as const},
+            {name: 'subject', label: t('subject'), value: flowData.subject ?? '', required: false},
+            {name: 'message', label: t('message'), value: flowData.message, required: true, type: 'textarea' as const}
+          ]
+        : [],
+    [flowData, t]
+  );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-      {error && (
-        <div className="rounded-md border border-brand-error/30 bg-brand-error/5 p-4">
-          <p className="text-sm text-brand-error">{t('error')}</p>
-        </div>
-      )}
-
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-brand-secondary mb-1">
@@ -175,19 +186,26 @@ export function ContactForm({locale}: ContactFormProps) {
 
       <button
         type="submit"
-        disabled={isSubmitting}
         className={cn(
           'inline-flex items-center gap-2',
-          'bg-brand-primary hover:bg-brand-primary/90 text-white',
+          'bg-[#25D366] hover:bg-[#20BD5A] text-white',
           'px-8 py-3 rounded-md',
           'text-sm font-semibold',
-          'transition-colors duration-200',
-          'disabled:opacity-50 disabled:cursor-not-allowed'
+          'transition-colors duration-200'
         )}
       >
         <Send className="h-4 w-4" />
-        {isSubmitting ? t('sending') : t('send')}
+        {t('sendWhatsApp')}
       </button>
-    </form>
+      </form>
+
+      <WhatsAppConfirmationFlow
+        open={!!flowData}
+        fields={fields}
+        buildMessage={buildMessage}
+        onClose={() => setFlowData(null)}
+        onSent={() => reset()}
+      />
+    </>
   );
 }

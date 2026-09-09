@@ -31,7 +31,6 @@
     "deliveryBanner": "Livraison partout au Maroc",
     "and": "et",
     "currency": "DH",
-    "perMeter": "/ mètre",
     "surDevis": "Sur devis",
     "meters": "mètres",
     "meter": "mètre"
@@ -168,6 +167,7 @@
   "product": {
     "reference": "Référence",
     "material": "Matière",
+    "name": "Tissu",
     "width": "Largeur",
     "price": "Prix",
     "availability": "Disponibilité",
@@ -185,8 +185,10 @@
     "askWhatsApp": "Demander via WhatsApp",
     "selectColor": "Sélectionnez la couleur",
     "selectQuantity": "Quantité",
-    "share": "Partager ce tissu",
-    "addToInquiry": "Ajouter à ma demande"
+    "color": "Couleur",
+    "availableColors": "Couleurs disponibles",
+    "chooseColor": "Choisir une autre couleur",
+    "share": "Partager ce tissu"
   },
   "about": {
     "title": "À Propos",
@@ -229,6 +231,7 @@
       "message": "Message",
       "messagePlaceholder": "Décrivez votre demande...",
       "send": "Envoyer",
+      "sendWhatsApp": "Envoyer via WhatsApp",
       "sending": "Envoi en cours...",
       "success": "Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.",
       "error": "Une erreur est survenue lors de l'envoi. Veuillez réessayer."
@@ -331,5 +334,18 @@
   "collections": {
     "title": "Nos Collections",
     "subtitle": "Découvrez notre sélection de tissus premium"
+  },
+  "confirmation": {
+    "title": "Confirmer vos informations",
+    "subtitle": "Vérifiez et corrigez vos informations avant de continuer.",
+    "previewTitle": "Aperçu du message",
+    "previewSubtitle": "Voici exactement ce qui sera envoyé sur WhatsApp :",
+    "back": "Retour",
+    "continue": "Continuer",
+    "edit": "Modifier",
+    "send": "Envoyer sur WhatsApp",
+    "fieldRequired": "Ce champ est requis",
+    "phoneRequired": "Le téléphone est requis",
+    "phoneInvalid": "Numéro de téléphone invalide"
   }
 }

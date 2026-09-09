@@ -4,7 +4,13 @@ import {useTranslations, useLocale} from 'next-intl';
 import {MessageCircle} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {type Locale} from '@/types';
-import {buildWhatsAppUrl, generateWhatsAppMessage, getWhatsAppNumber} from '@/lib/whatsapp';
+import {buildWhatsAppUrl, getWhatsAppNumber} from '@/lib/whatsapp';
+
+const greetings: Record<Locale, string> = {
+  fr: 'Bonjour, je suis intéressé(e) par vos tissus.',
+  ar: 'مرحبًا، أنا مهتم(ة) بأقمشتكم.',
+  en: 'Hello, I am interested in your fabrics.'
+};
 
 export function WhatsAppButton({className}: {className?: string}) {
   const t = useTranslations();
@@ -14,16 +20,11 @@ export function WhatsAppButton({className}: {className?: string}) {
     const number = getWhatsAppNumber();
     if (!number) return;
 
-    const message = generateWhatsAppMessage({
-      productName: '',
-      reference: '',
-      color: '',
-      quantity: 0,
-      locale
-    });
-
-    const greeting = message.split('\n')[0];
-    window.open(buildWhatsAppUrl(number, greeting), '_blank', 'noopener,noreferrer');
+    window.open(
+      buildWhatsAppUrl(number, greetings[locale] || greetings.fr),
+      '_blank',
+      'noopener,noreferrer'
+    );
   };
 
   return (

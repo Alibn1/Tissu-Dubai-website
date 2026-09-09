@@ -1,11 +1,11 @@
 'use client';
 
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 import {useTranslations} from 'next-intl';
 import {cn} from '@/lib/utils';
 import {QuantitySelector} from '@/components/ui/QuantitySelector';
 import {Badge} from '@/components/ui/Badge';
-import {buildWhatsAppUrl, getWhatsAppNumber} from '@/lib/whatsapp';
+import {WhatsAppConfirmationFlow} from '@/components/forms/WhatsAppConfirmationFlow';
 import {generateWhatsAppMessage} from '@/lib/whatsapp';
 import {MessageCircle, Share2} from 'lucide-react';
 import {type Product, type Locale} from '@/types';
@@ -18,8 +18,10 @@ type ProductInfoProps = {
 
 export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps) {
   const t = useTranslations();
+  const tForm = useTranslations('contact.form');
 
   const [quantity, setQuantity] = useState(1);
+  const [orderOpen, setOrderOpen] = useState(false);
 
   const variant = product.variants[selectedVariant];
   const name = product.name[locale] || product.name.fr;
@@ -28,17 +30,28 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
 
   const displayPrice = variant?.price ?? product.price;
 
-  const handleWhatsApp = () => {
-    const number = getWhatsAppNumber();
-    const message = generateWhatsAppMessage({
+  const buildMessage = (values: Record<string, string>) =>
+    generateWhatsAppMessage({
       productName: name,
       reference: product.reference,
       color: variant?.color || '',
       quantity,
+      name: values.name ?? '',
+      phone: values.phone ?? '',
       locale
     });
-    window.open(buildWhatsAppUrl(number, message), '_blank', 'noopener,noreferrer');
-  };
+
+  const fields = useMemo(
+    () => [
+      {name: 'name', label: tForm('name'), value: '', required: true},
+      {name: 'phone', label: tForm('phone'), value: '', required: true, type: 'tel' as const},
+      {name: 'product', label: t('product.name'), value: name, readOnly: true},
+      {name: 'reference', label: t('product.reference'), value: product.reference, readOnly: true},
+      {name: 'color', label: t('product.color'), value: variant?.color || '', readOnly: true},
+      {name: 'quantity', label: t('product.selectQuantity'), value: String(quantity), readOnly: true}
+    ],
+    [name, product, variant, quantity, t, tForm]
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,11 +97,34 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
         </div>
         {variant && (
           <div>
-            <span className="text-brand-muted">{t('product.selectColor')}: </span>
+            <span className="text-brand-muted">{t('product.color')}: </span>
             <span className="font-medium text-brand-secondary">{variant.color}</span>
           </div>
         )}
       </div>
+
+      {/* Choose color */}
+      {product.variants.length > 1 && (
+        <button
+          type="button"
+          onClick={() => {
+            document
+              .getElementById('product-color-gallery')
+              ?.scrollIntoView({behavior: 'smooth', block: 'center'});
+          }}
+          className={cn(
+            'self-start inline-flex items-center justify-center gap-2',
+            'rounded-full px-6 py-2.5',
+            'bg-transparent border border-brand-primary/60',
+            'text-sm font-semibold tracking-wide text-brand-gold-light',
+            'hover:bg-brand-primary/10 hover:border-brand-primary',
+            'shadow-[0_0_0_1px_rgba(201,162,39,0.15)]',
+            'transition-all duration-300'
+          )}
+        >
+          {t('product.chooseColor')}
+        </button>
+      )}
 
       {/* Availability */}
       <div className="flex items-center gap-2">
@@ -108,7 +144,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
       {/* Actions */}
       <div className="flex flex-col gap-3">
         <button
-          onClick={handleWhatsApp}
+          onClick={() => setOrderOpen(true)}
           disabled={!product.inStock || !variant?.inStock}
           className={cn(
             'flex items-center justify-center gap-2',
@@ -140,6 +176,13 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
           {t('product.share')}
         </button>
       </div>
+
+      <WhatsAppConfirmationFlow
+        open={orderOpen}
+        fields={fields}
+        buildMessage={buildMessage}
+        onClose={() => setOrderOpen(false)}
+      />
     </div>
   );
 }
