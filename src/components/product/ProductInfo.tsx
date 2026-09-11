@@ -7,6 +7,7 @@ import {QuantitySelector} from '@/components/ui/QuantitySelector';
 import {Badge} from '@/components/ui/Badge';
 import {WhatsAppConfirmationFlow} from '@/components/forms/WhatsAppConfirmationFlow';
 import {generateWhatsAppMessage} from '@/lib/whatsapp';
+import {trackInquiry} from '@/actions/inquiry';
 import {MessageCircle, Share2} from 'lucide-react';
 import {type Product, type Locale} from '@/types';
 
@@ -26,7 +27,6 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
   const variant = product.variants[selectedVariant];
   const name = product.name[locale] || product.name.fr;
   const material = product.material[locale] || product.material.fr;
-  const description = product.description[locale] || product.description.fr;
 
   const displayPrice = variant?.price ?? product.price;
 
@@ -40,6 +40,16 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
       phone: values.phone ?? '',
       locale
     });
+
+  const handleInquirySent = () => {
+    void trackInquiry({
+      productName: name,
+      reference: product.reference,
+      color: variant?.color || '',
+      quantity,
+      locale
+    });
+  };
 
   const fields = useMemo(
     () => [
@@ -182,6 +192,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
         fields={fields}
         buildMessage={buildMessage}
         onClose={() => setOrderOpen(false)}
+        onSent={handleInquirySent}
       />
     </div>
   );
