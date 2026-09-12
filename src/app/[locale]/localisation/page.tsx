@@ -3,6 +3,7 @@ import {getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {MapPin, Phone, Clock, ExternalLink, MessageCircle} from 'lucide-react';
 import {cn} from '@/lib/utils';
+import {GOOGLE_MAPS_EMBED_URL, GOOGLE_MAPS_LINK} from '@/lib/site';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -18,7 +19,6 @@ export default async function LocationPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations('location');
   const tHero = await getTranslations('location.hero');
   const tAddress = await getTranslations('location.address');
   const tHours = await getTranslations('location.hours');
@@ -39,15 +39,15 @@ export default async function LocationPage({params}: Props) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Map */}
           <div className="relative aspect-[4/3] overflow-hidden rounded-md border border-brand-border bg-brand-light lg:aspect-auto lg:min-h-[450px]">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="mx-auto h-16 w-16 text-brand-muted/40" />
-                <p className="mt-3 text-sm text-brand-muted">{tAddress('placeholder')}</p>
-                <p className="mt-1 text-xs text-brand-muted/60">
-                  Google Maps integration coming soon
-                </p>
-              </div>
-            </div>
+            <iframe
+              src={GOOGLE_MAPS_EMBED_URL}
+              title={tAddress('title')}
+              className="absolute inset-0 h-full w-full"
+              style={{border: 0}}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
           </div>
 
           {/* Info cards */}
@@ -122,20 +122,18 @@ export default async function LocationPage({params}: Props) {
                   <MessageCircle className="h-4 w-4" />
                   {tContact('whatsapp')}
                 </a>
-                {process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL && (
-                  <a
-                    href={process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn(
-                      'flex items-center gap-2 rounded-md border border-brand-border px-4 py-3',
-                      'text-sm font-medium text-brand-secondary hover:bg-brand-light transition-colors'
-                    )}
-                  >
-                    <ExternalLink className="h-4 w-4 text-brand-primary" />
-                    {tContact('directions')}
-                  </a>
-                )}
+                <a
+                  href={GOOGLE_MAPS_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'flex items-center gap-2 rounded-md border border-brand-border px-4 py-3',
+                    'text-sm font-medium text-brand-secondary hover:bg-brand-light transition-colors'
+                  )}
+                >
+                  <ExternalLink className="h-4 w-4 text-brand-primary" />
+                  {tContact('directions')}
+                </a>
               </div>
             </div>
           </div>

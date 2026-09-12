@@ -1,10 +1,6 @@
-import {setRequestLocale, getTranslations, getLocale} from 'next-intl/server';
+import {setRequestLocale, getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
-import {Link} from '@/i18n/navigation';
-import {getCategories} from '@/lib/api';
-import {cn} from '@/lib/utils';
-import {type Locale} from '@/types';
-import Image from 'next/image';
+import {CategoryCards} from '@/components/category/CategoryCards';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -23,10 +19,7 @@ export default async function CollectionsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const categories = await getCategories();
-  const loc = locale as Locale;
   const t = await getTranslations('collections');
-  const tCat = await getTranslations('home.categories');
 
   return (
     <section className="py-10 sm:py-16">
@@ -39,42 +32,7 @@ export default async function CollectionsPage({params}: Props) {
           <div className="mt-4 h-0.5 w-16 bg-brand-primary mx-auto" />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => {
-            const name = category.name[loc] || category.name.fr;
-            return (
-              <Link
-                key={category.id}
-                href={`/collections/${category.slug}`}
-                className={cn(
-                  'group block overflow-hidden rounded-md',
-                  'border border-brand-border bg-brand-surface',
-                  'transition-all duration-300',
-                  'hover:shadow-lg hover:-translate-y-1'
-                )}
-              >
-                <div className="relative aspect-[3/4] overflow-hidden">
-                  <Image
-                    src={category.image}
-                    alt={name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 start-0 end-0 p-5 sm:p-6">
-                    <h2 className="font-heading text-xl font-bold text-white sm:text-2xl">
-                      {tCat(`${category.slug}.name`)}
-                    </h2>
-                    <p className="mt-2 text-sm text-white/80 line-clamp-2">
-                      {tCat(`${category.slug}.description`)}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <CategoryCards gridClassName="gap-6" />
       </div>
     </section>
   );

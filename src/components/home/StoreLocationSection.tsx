@@ -2,6 +2,7 @@ import {getTranslations} from 'next-intl/server';
 import {SectionHeading} from '@/components/ui/SectionHeading';
 import {cn} from '@/lib/utils';
 import {MapPin, Phone, Clock, ExternalLink} from 'lucide-react';
+import {GOOGLE_MAPS_EMBED_URL, GOOGLE_MAPS_LINK} from '@/lib/site';
 
 export async function StoreLocationSection() {
   const t = await getTranslations('home.storeLocation');
@@ -14,16 +15,17 @@ export async function StoreLocationSection() {
         <SectionHeading title={t('title')} />
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Map placeholder */}
+          {/* Map */}
           <div className="relative aspect-[4/3] overflow-hidden rounded-md border border-brand-border bg-brand-light lg:aspect-auto lg:min-h-[400px] transition-all duration-300 hover:shadow-lg hover:border-brand-primary/30">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="mx-auto h-12 w-12 text-brand-muted/50" />
-                <p className="mt-2 text-sm text-brand-muted">
-                  {tLocation('address.title')}
-                </p>
-              </div>
-            </div>
+            <iframe
+              src={GOOGLE_MAPS_EMBED_URL}
+              title={tLocation('address.title')}
+              className="absolute inset-0 h-full w-full"
+              style={{border: 0}}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
           </div>
 
           {/* Info */}
@@ -76,21 +78,19 @@ export async function StoreLocationSection() {
               </div>
             </div>
 
-            {process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL && (
-              <a
-                href={process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  'inline-flex items-center gap-2',
-                  'text-sm font-semibold text-brand-primary hover:text-brand-secondary',
-                  'transition-colors duration-200'
-                )}
-              >
-                <ExternalLink className="h-4 w-4" />
-                {tLocation('contact.directions')}
-              </a>
-            )}
+            <a
+              href={GOOGLE_MAPS_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'inline-flex items-center gap-2',
+                'text-sm font-semibold text-brand-primary hover:text-brand-secondary',
+                'transition-colors duration-200'
+              )}
+            >
+              <ExternalLink className="h-4 w-4" />
+              {tLocation('contact.directions')}
+            </a>
           </div>
         </div>
       </div>

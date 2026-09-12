@@ -1,4 +1,5 @@
 import {type Locale} from '@/types';
+import {STORE_LOCATION} from '@/lib/site';
 
 type JsonLdProps = {
   locale: Locale;
@@ -29,8 +30,8 @@ export function JsonLd({locale, type, data = {}}: JsonLdProps) {
       },
       geo: {
         '@type': 'GeoCoordinates',
-        latitude: 33.5731,
-        longitude: -7.5898
+        latitude: STORE_LOCATION.latitude,
+        longitude: STORE_LOCATION.longitude
       },
       openingHoursSpecification: [
         {
