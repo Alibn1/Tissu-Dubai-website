@@ -2,6 +2,7 @@ import {useTranslations} from 'next-intl';
 import {Link} from '@/i18n/navigation';
 import {Logo} from '@/components/ui/Logo';
 import {Phone} from 'lucide-react';
+import {GOOGLE_MAPS_EMBED_URL} from '@/lib/site';
 
 function InstagramIcon({className}: {className?: string}) {
   return (
@@ -32,7 +33,7 @@ function FacebookIcon({className}: {className?: string}) {
 export function Footer() {
   const t = useTranslations();
   const phone = process.env.NEXT_PUBLIC_STORE_PHONE || '';
-  const mapsUrl = process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL || '';
+  const mapsUrl = GOOGLE_MAPS_EMBED_URL;
   const instagram = process.env.NEXT_PUBLIC_INSTAGRAM_URL || '';
   const facebook = process.env.NEXT_PUBLIC_FACEBOOK_URL || '';
   const tiktok = process.env.NEXT_PUBLIC_TIKTOK_URL || '';
@@ -126,22 +127,19 @@ export function Footer() {
             <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-brand-secondary">
               {t('common.location')}
             </h3>
-            {mapsUrl ? (
+            {mapsUrl && (
               <div className="overflow-hidden rounded-md">
                 <iframe
                   src={mapsUrl}
                   width="100%"
                   height="220"
                   style={{border: 0}}
-                  allowFullScreen={false}
+                  allowFullScreen
                   loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  title="Carte Tissu Dubai"
                   className="w-full"
                 />
-              </div>
-            ) : (
-              <div className="flex h-[220px] items-center justify-center rounded-md border border-brand-border bg-brand-surface text-sm text-brand-muted">
-                Map
               </div>
             )}
             <div className="space-y-2">

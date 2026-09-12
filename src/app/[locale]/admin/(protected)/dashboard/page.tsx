@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import {setRequestLocale} from 'next-intl/server';
 import {getDashboardData} from '@/mock/dashboard';
-import {Package, TrendingUp} from 'lucide-react';
+import {getInquiries} from '@/lib/data/store';
+import {Package, TrendingUp, MessageCircle} from 'lucide-react';
 import {cn} from '@/lib/utils';
 
 type Props = {
@@ -13,7 +14,17 @@ export default async function AdminDashboardPage({params}: Props) {
   setRequestLocale(locale);
 
   const {totalProducts, categoryBreakdown, topRequested} = getDashboardData();
+  const inquiries = getInquiries();
+  const recentInquiries = [...inquiries].reverse().slice(0, 10);
   const maxClicks = Math.max(...topRequested.map((p) => p.whatsappClicks), 1);
+
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
   return (
     <div className="min-h-full">
@@ -58,8 +69,10 @@ export default async function AdminDashboardPage({params}: Props) {
         ))}
       </div>
 
-      {/* Most Requested Products */}
-      <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
+      {/* Two main sections */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Most Requested Products */}
+        <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
           <div className="flex items-center gap-2 border-b border-brand-border px-5 py-3">
             <TrendingUp className="h-4 w-4 text-brand-primary" />
             <h2 className="font-heading text-base font-semibold text-brand-secondary">
@@ -112,6 +125,43 @@ export default async function AdminDashboardPage({params}: Props) {
             ))}
           </ul>
         </section>
+
+        {/* Demandes récentes */}
+        <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
+          <div className="flex items-center gap-2 border-b border-brand-border px-5 py-3">
+            <MessageCircle className="h-4 w-4 text-[#25D366]" />
+            <h2 className="font-heading text-base font-semibold text-brand-secondary">
+              Demandes récentes
+            </h2>
+          </div>
+
+          {recentInquiries.length === 0 ? (
+            <div className="p-8 text-center text-sm text-brand-muted">
+              Aucune demande pour le moment.
+            </div>
+          ) : (
+            <ul className="divide-y divide-brand-border">
+              {recentInquiries.map((inquiry) => (
+                <li key={inquiry.id} className="flex items-start gap-3 px-5 py-3.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-brand-secondary">
+                      {inquiry.productName}
+                    </p>
+                    <p className="text-xs text-brand-muted">
+                      {inquiry.reference}
+                      {inquiry.color ? ` • ${inquiry.color}` : ''}
+                      {inquiry.quantity > 0 ? ` • Qté ${inquiry.quantity}` : ''}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-xs text-brand-muted">
+                    {formatDate(inquiry.createdAt)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        </div>
     </div>
   );
 }

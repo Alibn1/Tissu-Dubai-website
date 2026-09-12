@@ -1,10 +1,32 @@
-import type {Product, Category, Collection, Locale} from '@/types';
+import type {Product, Category, Collection} from '@/types';
 import {products as mockProducts} from '@/mock/products';
 import {categories as mockCategories} from '@/mock/categories';
 import {collections as mockCollections} from '@/mock/collections';
+import {getDefaultSiteSettings, type CategoryCard, type HomepageContent} from '@/lib/siteSettings';
 
 function simulateDelay(ms = 100): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function getHomepageContent(): Promise<HomepageContent> {
+  // TODO: load from a real API / durable storage (e.g. GET /api/site-settings or a KV/D1 binding).
+  return getDefaultSiteSettings().homepage;
+}
+
+async function loadMergedCategories(): Promise<Category[]> {
+  const homepage = await getHomepageContent();
+  const cardsBySlug = new Map<string, CategoryCard>(homepage.categoryCards.map((card) => [card.id, card]));
+
+  return mockCategories.map((cat) => {
+    const card = cardsBySlug.get(cat.slug);
+    if (!card) return cat;
+    return {
+      ...cat,
+      name: card.title,
+      description: card.description,
+      image: card.image || cat.image,
+    };
+  });
 }
 
 export async function getProducts(filters?: {
@@ -93,12 +115,13 @@ export async function getNewArrivals(limit = 8): Promise<Product[]> {
 
 export async function getCategories(): Promise<Category[]> {
   await simulateDelay();
-  return mockCategories;
+  return loadMergedCategories();
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   await simulateDelay();
-  return mockCategories.find((c) => c.slug === slug) || null;
+  const merged = await loadMergedCategories();
+  return merged.find((c) => c.slug === slug) || null;
 }
 
 export async function getCollections(): Promise<Collection[]> {
