@@ -6,7 +6,8 @@ import {useState, useMemo, useCallback} from 'react';
 import {Search, SlidersHorizontal, X, ChevronDown, ArrowUpDown} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {ProductCard} from '@/components/product/ProductCard';
-import {type Product, type Category, type Locale, type FilterState} from '@/types';
+import {type Product, type Category, type Locale, type FilterState, type Model} from '@/types';
+import {getModels} from '@/lib/modelsStore';
 
 type CatalogContentProps = {
   initialProducts: Product[];
@@ -21,16 +22,6 @@ const SORT_OPTIONS = [
   {value: 'price_asc', labelKey: 'catalog.filters.priceLowToHigh'},
   {value: 'price_desc', labelKey: 'catalog.filters.priceHighToLow'},
   {value: 'name', labelKey: 'catalog.filters.name'}
-];
-
-const MATERIAL_OPTIONS = [
-  {value: 'soie', label: {fr: 'Soie', ar: 'حرير', en: 'Silk'}},
-  {value: 'brocard', label: {fr: 'Brocard', ar: 'بروكار', en: 'Brocade'}},
-  {value: 'velours', label: {fr: 'Velours', ar: 'مخمل', en: 'Velvet'}},
-  {value: 'laine', label: {fr: 'Laine', ar: 'صوف', en: 'Wool'}},
-  {value: 'cachemire', label: {fr: 'Cachemire', ar: 'كشمير', en: 'Cashmere'}},
-  {value: 'coton-luxe', label: {fr: 'Coton luxe', ar: 'قطن فاخر', en: 'Luxury cotton'}},
-  {value: 'tulle', label: {fr: 'Tulle', ar: 'تور', en: 'Tulle'}}
 ];
 
 export function CatalogContent({
@@ -51,8 +42,25 @@ export function CatalogContent({
     sort: 'featured'
   });
 
+  const [models] = useState<Model[]>(() => getModels());
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [activeFilterTab, setActiveFilterTab] = useState<string>('categories');
+
+  const modelById = useMemo(() => {
+    const map = new Map<string, Model>();
+    for (const model of models) map.set(model.id, model);
+    return map;
+  }, [models]);
+
+  // Only models that exist in the database are offered, and when a collection
+  // (category) is selected, its own models are shown.
+  const modelOptions = useMemo(
+    () =>
+      filters.categories.length > 0
+        ? models.filter((m) => filters.categories.includes(m.collectionSlug))
+        : models,
+    [models, filters.categories]
+  );
 
   const filteredProducts = useMemo(() => {
     let result = [...initialProducts];
@@ -61,7 +69,12 @@ export function CatalogContent({
       result = result.filter((p) => filters.categories.includes(p.category.slug));
     }
     if (filters.materials.length > 0) {
-      result = result.filter((p) => filters.materials.includes(p.materialSlug));
+      result = result.filter((p) =>
+        filters.materials.some((id) => {
+          const model = modelById.get(id);
+          return model && model.slug === p.materialSlug && model.collectionSlug === p.category.slug;
+        })
+      );
     }
     if (filters.inStockOnly) {
       result = result.filter((p) => p.inStock);
@@ -94,7 +107,7 @@ export function CatalogContent({
     }
 
     return result;
-  }, [initialProducts, filters, loc]);
+  }, [initialProducts, filters, loc, modelById]);
 
   const toggleFilter = useCallback((type: keyof FilterState, value: string) => {
     setFilters((prev) => {
@@ -202,6 +215,7 @@ export function CatalogContent({
             toggleFilter={toggleFilter}
             setFilters={setFilters}
             categories={categories}
+            models={modelOptions}
             locale={loc}
             onClear={clearAllFilters}
             activeFilterCount={activeFilterCount}
@@ -265,6 +279,7 @@ export function CatalogContent({
                 toggleFilter={toggleFilter}
                 setFilters={setFilters}
                 categories={categories}
+                models={modelOptions}
                 locale={loc}
                 activeTab={activeFilterTab}
                 setActiveTab={setActiveFilterTab}
@@ -305,6 +320,7 @@ function FilterSidebar({
   toggleFilter,
   setFilters,
   categories,
+  models,
   locale,
   onClear,
   activeFilterCount
@@ -313,6 +329,7 @@ function FilterSidebar({
   toggleFilter: (type: keyof FilterState, value: string) => void;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   categories: Category[];
+  models: Model[];
   locale: Locale;
   onClear: () => void;
   activeFilterCount: number;
@@ -358,16 +375,16 @@ function FilterSidebar({
 
       {/* Materials */}
       <FilterSection title={t('materials')} expanded={expandedSections.materials} onToggle={() => toggleSection('materials')}>
-        {MATERIAL_OPTIONS.map((mat) => (
-          <label key={mat.value} className="flex items-center gap-2 py-1 cursor-pointer">
+        {models.map((model) => (
+          <label key={model.id} className="flex items-center gap-2 py-1 cursor-pointer">
             <input
               type="checkbox"
-              checked={filters.materials.includes(mat.value)}
-              onChange={() => toggleFilter('materials', mat.value)}
+              checked={filters.materials.includes(model.id)}
+              onChange={() => toggleFilter('materials', model.id)}
               className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
             />
             <span className="text-sm text-brand-secondary">
-              {mat.label[locale] || mat.label.fr}
+              {model.name[locale] || model.name.fr}
             </span>
           </label>
         ))}
@@ -430,6 +447,7 @@ function FilterContent({
   toggleFilter,
   setFilters,
   categories,
+  models,
   locale,
   activeTab,
   setActiveTab
@@ -438,6 +456,7 @@ function FilterContent({
   toggleFilter: (type: keyof FilterState, value: string) => void;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   categories: Category[];
+  models: Model[];
   locale: Locale;
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -492,16 +511,16 @@ function FilterContent({
 
         {activeTab === 'materials' && (
           <div className="space-y-1">
-            {MATERIAL_OPTIONS.map((mat) => (
-              <label key={mat.value} className="flex items-center gap-2 py-2 cursor-pointer">
+            {models.map((model) => (
+              <label key={model.id} className="flex items-center gap-2 py-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={filters.materials.includes(mat.value)}
-                  onChange={() => toggleFilter('materials', mat.value)}
+                  checked={filters.materials.includes(model.id)}
+                  onChange={() => toggleFilter('materials', model.id)}
                   className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
                 />
                 <span className="text-sm text-brand-secondary">
-                  {mat.label[locale] || mat.label.fr}
+                  {model.name[locale] || model.name.fr}
                 </span>
               </label>
             ))}

@@ -26,6 +26,8 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
   if (body.name !== undefined) product.name = body.name;
   if (body.description !== undefined) product.description = body.description;
   if (body.material !== undefined) product.material = body.material;
+  if (body.materialSlug !== undefined) product.materialSlug = body.materialSlug;
+  if (body.width !== undefined) product.width = body.width;
   if (body.characteristics !== undefined) product.characteristics = body.characteristics;
   if (body.price !== undefined) product.price = body.price;
   if (body.inStock !== undefined) product.inStock = body.inStock;

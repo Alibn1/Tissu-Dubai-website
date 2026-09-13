@@ -14,13 +14,16 @@ import {
   type TranslatableFieldKey,
 } from '@/lib/translation';
 
-const FIELD_ORDER: TranslatableFieldKey[] = ['name', 'materials', 'description', 'characteristics'];
+const FIELD_ORDER: TranslatableFieldKey[] = ['name', 'materials', 'description', 'composition', 'width', 'origin'];
+
+// Composition / Largeur / Origine: rendered side by side to save vertical space.
+const INLINE_FIELDS: TranslatableFieldKey[] = ['composition', 'width', 'origin'];
 
 // Priority used to pick the source language for a field: French, then English,
 // then Arabic (first non-empty value wins).
 const SOURCE_ORDER: Locale[] = ['fr', 'en', 'ar'];
 
-const TEXTAREAS: TranslatableFieldKey[] = ['description', 'characteristics'];
+const TEXTAREAS: TranslatableFieldKey[] = ['description'];
 
 const inputClass = cn(
   'w-full rounded-md border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-secondary',
@@ -31,7 +34,7 @@ const inputClass = cn(
 type FieldErrors = Record<TranslatableFieldKey, string | null>;
 
 function createEmptyErrors(): FieldErrors {
-  return {name: null, materials: null, description: null, characteristics: null};
+  return {name: null, materials: null, description: null, composition: null, width: null, origin: null};
 }
 
 type Props = {
@@ -147,41 +150,80 @@ export function MultilingualFields({translations, onChange}: Props) {
       {/* Active language panel */}
       <div>
         <div className="space-y-6">
-          {FIELD_ORDER.map((field) => {
-            const isTextarea = TEXTAREAS.includes(field);
-            return (
+          {FIELD_ORDER.filter((field) => !INLINE_FIELDS.includes(field)).map((field) => (
+            <FieldContent
+              key={field}
+              label={FIELD_LABELS[field]}
+              placeholder={FIELD_PLACEHOLDERS[field]}
+              dir={activeLang.dir}
+              value={translations[active][field]}
+              textarea={TEXTAREAS.includes(field)}
+              error={errors[active][field]}
+              onChange={(v) => onChange(active, field, v)}
+            />
+          ))}
+
+          {/* Composition / Largeur / Origine on one line */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {INLINE_FIELDS.map((field) => (
               <div key={field}>
-                <label className="mb-1.5 block text-xs font-medium text-brand-muted">
-                  {FIELD_LABELS[field]}
-                </label>
-
-                {isTextarea ? (
-                  <textarea
-                    rows={4}
-                    dir={activeLang.dir}
-                    value={translations[active][field]}
-                    onChange={(e) => onChange(active, field, e.target.value)}
-                    placeholder={FIELD_PLACEHOLDERS[field]}
-                    className={cn(inputClass, 'resize-none')}
-                  />
-                ) : (
-                  <input
-                    dir={activeLang.dir}
-                    value={translations[active][field]}
-                    onChange={(e) => onChange(active, field, e.target.value)}
-                    placeholder={FIELD_PLACEHOLDERS[field]}
-                    className={inputClass}
-                  />
-                )}
-
-                {errors[active][field] && (
-                  <p className="mt-1 text-xs text-brand-error">{errors[active][field]}</p>
-                )}
+                <FieldContent
+                  label={FIELD_LABELS[field]}
+                  placeholder={FIELD_PLACEHOLDERS[field]}
+                  dir={activeLang.dir}
+                  value={translations[active][field]}
+                  textarea={TEXTAREAS.includes(field)}
+                  error={errors[active][field]}
+                  onChange={(v) => onChange(active, field, v)}
+                />
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function FieldContent({
+  label,
+  placeholder,
+  dir,
+  value,
+  textarea,
+  error,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  dir: 'ltr' | 'rtl';
+  value: string;
+  textarea: boolean;
+  error: string | null;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-medium text-brand-muted">{label}</label>
+      {textarea ? (
+        <textarea
+          rows={4}
+          dir={dir}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={cn(inputClass, 'resize-none')}
+        />
+      ) : (
+        <input
+          dir={dir}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={inputClass}
+        />
+      )}
+      {error && <p className="mt-1 text-xs text-brand-error">{error}</p>}
     </div>
   );
 }

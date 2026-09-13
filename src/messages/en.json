@@ -150,7 +150,7 @@
     "clearFilters": "Clear filters",
     "filters": {
       "categories": "Categories",
-      "materials": "Materials",
+      "materials": "Models",
       "colors": "Colors",
       "availability": "Availability",
       "inStock": "In stock",
@@ -166,7 +166,7 @@
   },
   "product": {
     "reference": "Reference",
-    "material": "Material",
+    "material": "Model",
     "name": "Fabric",
     "width": "Width",
     "price": "Price",

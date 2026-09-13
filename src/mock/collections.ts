@@ -7,7 +7,7 @@ export const collections: Collection[] = [
     name: {fr: 'Patrimoine Royal', ar: 'التراث الملكي', en: 'Royal Heritage'},
     description: {
       fr: 'Une collection inspirée des plus beaux caftans royaux marocains, alliant tradition et noblesse.',
-      ar: 'مجموعة مستوحاة من أجمل الكفتانات الملكية المغربية، تجمع بين التقاليد والróyalité.',
+      ar: 'مجموعة مستوحاة من أجمل الكفتانات الملكية المغربية، تجمع بين التقاليد والملكية.',
       en: 'A collection inspired by the finest Moroccan royal caftans, combining tradition and nobility.'
     },
     image: '/images/collections/royal-heritage.svg',

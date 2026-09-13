@@ -13,34 +13,56 @@ type Props = {
   locale: string;
 };
 
+const CHARACTERISTIC_LABELS: Record<Locale, string[]> = {
+  fr: ['Composition', 'Largeur', 'Origine'],
+  en: ['Composition', 'Width', 'Origin'],
+  ar: ['التركيب', 'العرض', 'المصدر'],
+};
+
+// Extracts "100% soie naturelle" out of "Composition : 100% soie naturelle".
+function stripLabel(line: string): string {
+  return line.split(':').slice(1).join(':').trim();
+}
+
+function findCharacteristic(product: Product, lang: Locale, keywords: string[]): string {
+  const lines = product.characteristics?.[lang] ?? [];
+  const line = lines.find((l) => keywords.some((k) => l.toLowerCase().includes(k)));
+  return line ? stripLabel(line) : '';
+}
+
+function parseCharacteristics(product: Product, lang: Locale): {
+  composition: string;
+  width: string;
+  origin: string;
+} {
+  return {
+    composition: findCharacteristic(product, lang, ['composition', 'التركيب']),
+    width:
+      findCharacteristic(product, lang, ['largeur', 'width', 'العرض']) ||
+      (product.width ?? ''),
+    origin: findCharacteristic(product, lang, ['origine', 'origin', 'المصدر', 'منشأ']),
+  };
+}
+
 export function ProductEditForm({product}: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const initialTranslations = useMemo<ProductTranslations>(
-    () => ({
-      en: {
-        name: product.name.en,
-        materials: product.material.en,
-        description: product.description.en,
-        characteristics: (product.characteristics?.en ?? []).join('\n'),
-      },
-      fr: {
-        name: product.name.fr,
-        materials: product.material.fr,
-        description: product.description.fr,
-        characteristics: (product.characteristics?.fr ?? []).join('\n'),
-      },
-      ar: {
-        name: product.name.ar,
-        materials: product.material.ar,
-        description: product.description.ar,
-        characteristics: (product.characteristics?.ar ?? []).join('\n'),
-      },
-    }),
-    [product]
-  );
+  const initialTranslations = useMemo<ProductTranslations>(() => {
+    const build = (lang: Locale) => {
+      const {composition, width, origin} = parseCharacteristics(product, lang);
+      return {
+        name: product.name[lang],
+        materials: product.material[lang],
+        description: product.description[lang],
+        composition,
+        width,
+        origin,
+      };
+    };
+    return {en: build('en'), fr: build('fr'), ar: build('ar')};
+  }, [product]);
 
   const [translations, setTranslations] = useState<ProductTranslations>(initialTranslations);
 
@@ -63,10 +85,13 @@ export function ProductEditForm({product}: Props) {
     ar: translations.ar[field],
   });
 
-  const splitCharacteristics = (value: string): string[] =>
-    value
-      .split('\n')
-      .map((line) => line.trim())
+  const buildCharacteristics = (lang: Locale): string[] =>
+    (['composition', 'width', 'origin'] as TranslatableFieldKey[])
+      .map((field, i) =>
+        translations[lang][field].trim()
+          ? `${CHARACTERISTIC_LABELS[lang][i]} : ${translations[lang][field].trim()}`
+          : ''
+      )
       .filter(Boolean);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,10 +107,11 @@ export function ProductEditForm({product}: Props) {
           description: pick('description'),
           material: pick('materials'),
           characteristics: {
-            en: splitCharacteristics(translations.en.characteristics),
-            fr: splitCharacteristics(translations.fr.characteristics),
-            ar: splitCharacteristics(translations.ar.characteristics),
+            en: buildCharacteristics('en'),
+            fr: buildCharacteristics('fr'),
+            ar: buildCharacteristics('ar'),
           },
+          width: translations.fr.width.trim() || undefined,
           price: formData.price === '' ? null : Number(formData.price),
           inStock: formData.inStock,
           featured: formData.featured,

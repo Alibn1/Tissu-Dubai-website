@@ -57,11 +57,12 @@ export function ProductGallery({
           {variants.map((v: ProductVariant, idx: number) => {
             const img = v.images?.[0] || mainImage;
             const selectedImg = selected?.images?.[0];
+            const colorName = v.color[locale] || v.color.fr;
             return (
               <button
                 key={v.id}
                 onClick={() => onVariantChange(idx)}
-                title={v.color}
+                title={colorName}
                 className={cn(
                   'relative h-20 w-16 flex-shrink-0 overflow-hidden rounded border-2 transition-all',
                   selectedVariant === idx
@@ -71,13 +72,13 @@ export function ProductGallery({
               >
                 <Image
                   src={img}
-                  alt={`${product.name[locale] || product.name.fr} - ${v.color}`}
+                  alt={`${product.name[locale] || product.name.fr} - ${colorName}`}
                   fill
                   sizes="64px"
                   className="object-cover"
                 />
                 {img === selectedImg && (
-                  <span className="sr-only">{v.color}</span>
+                  <span className="sr-only">{colorName}</span>
                 )}
               </button>
             );

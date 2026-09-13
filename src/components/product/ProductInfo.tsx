@@ -27,6 +27,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
   const variant = product.variants[selectedVariant];
   const name = product.name[locale] || product.name.fr;
   const material = product.material[locale] || product.material.fr;
+  const variantColor = variant ? variant.color[locale] || variant.color.fr : '';
 
   const displayPrice = variant?.price ?? product.price;
 
@@ -34,7 +35,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
     generateWhatsAppMessage({
       productName: name,
       reference: product.reference,
-      color: variant?.color || '',
+      color: variantColor,
       quantity,
       name: values.name ?? '',
       phone: values.phone ?? '',
@@ -45,7 +46,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
     void trackInquiry({
       productName: name,
       reference: product.reference,
-      color: variant?.color || '',
+      color: variantColor,
       quantity,
       locale
     });
@@ -57,10 +58,10 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
       {name: 'phone', label: tForm('phone'), value: '', required: true, type: 'tel' as const},
       {name: 'product', label: t('product.name'), value: name, readOnly: true},
       {name: 'reference', label: t('product.reference'), value: product.reference, readOnly: true},
-      {name: 'color', label: t('product.color'), value: variant?.color || '', readOnly: true},
+      {name: 'color', label: t('product.color'), value: variantColor, readOnly: true},
       {name: 'quantity', label: t('product.selectQuantity'), value: String(quantity), readOnly: true}
     ],
-    [name, product, variant, quantity, t, tForm]
+    [name, product, quantity, t, tForm, variantColor]
   );
 
   return (
@@ -108,7 +109,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
         {variant && (
           <div>
             <span className="text-brand-muted">{t('product.color')}: </span>
-            <span className="font-medium text-brand-secondary">{variant.color}</span>
+            <span className="font-medium text-brand-secondary">{variantColor}</span>
           </div>
         )}
       </div>

@@ -2,10 +2,11 @@
 
 import {Link, usePathname} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
-import {LayoutDashboard, Package, Settings, LogOut, ExternalLink} from 'lucide-react';
+import {LayoutDashboard, Package, Tags, Settings, LogOut, ExternalLink} from 'lucide-react';
 
 const navItems = [
   {href: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard},
+  {href: '/admin/models', label: 'Modèles', icon: Tags},
   {href: '/admin/products', label: 'Produits', icon: Package},
   {href: '/admin/settings', label: 'Paramètres du site', icon: Settings},
 ];
