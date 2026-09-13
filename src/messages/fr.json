@@ -150,7 +150,7 @@
     "clearFilters": "Effacer les filtres",
     "filters": {
       "categories": "Catégories",
-      "materials": "Matières",
+      "materials": "Modèles",
       "colors": "Couleurs",
       "availability": "Disponibilité",
       "inStock": "En stock",
@@ -166,7 +166,7 @@
   },
   "product": {
     "reference": "Référence",
-    "material": "Matière",
+    "material": "Modèle",
     "name": "Tissu",
     "width": "Largeur",
     "price": "Prix",

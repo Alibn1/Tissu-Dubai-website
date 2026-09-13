@@ -78,7 +78,7 @@ const collections = {
     },
     description: {
       fr: "Une collection qui capture l'esprit glamour de Casablanca avec des tons dorés et des motifs géométriques audacieux.",
-      ar: "مجموعة ت capture روح كازابلانكا الساحرة مع درجات ذهبية ونقوش هندسية جريئة.",
+      ar: "مجموعة تعكس روح كازابلانكا الساحرة مع درجات ذهبية ونقوش هندسية جريئة.",
       en: "A collection that captures the glamorous spirit of Casablanca with golden tones and bold geometric patterns.",
     },
     image: "/images/collections/casablanca-gold.svg",
@@ -132,7 +132,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-001-1",
-        color: "Bordeaux",
+        color: {fr: "Bordeaux", en: "Wine", ar: "بوردو"},
         colorHex: "#722F37",
         sku: "TD-CAF-0001-BDX",
         price: 890,
@@ -141,7 +141,7 @@ export const products: Product[] = [
       },
       {
         id: "var-001-2",
-        color: "Doré",
+        color: {fr: "Doré", en: "Gold", ar: "ذهبي"},
         colorHex: "#CFB53B",
         sku: "TD-CAF-0001-DR",
         price: 890,
@@ -150,7 +150,7 @@ export const products: Product[] = [
       },
       {
         id: "var-001-3",
-        color: "Emeraude",
+        color: {fr: "Emeraude", en: "Emerald", ar: "زمردي"},
         colorHex: "#2E8B57",
         sku: "TD-CAF-0001-EM",
         price: 890,
@@ -159,7 +159,7 @@ export const products: Product[] = [
       },
       {
         id: "var-001-4",
-        color: "Ivoire",
+        color: {fr: "Ivoire", en: "Ivory", ar: "عاجي"},
         colorHex: "#FFFFF0",
         sku: "TD-CAF-0001-IV",
         price: 890,
@@ -184,7 +184,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% حرير طبيعي",
         "العرض: 140 سم",
-        "الم origin: دبي، الإمارات العربية المتحدة",
+        "المصدر: دبي، الإمارات العربية المتحدة",
       ],
       en: [
         "Composition: 100% natural silk",
@@ -223,7 +223,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-002-1",
-        color: "Vert Sauge",
+        color: {fr: "Vert Sauge", en: "Sage Green", ar: "أخضر مريمية"},
         colorHex: "#9CAF88",
         sku: "TD-CAF-0002-VSG",
         price: 750,
@@ -232,7 +232,7 @@ export const products: Product[] = [
       },
       {
         id: "var-002-2",
-        color: "Rose Poudré",
+        color: {fr: "Rose Poudré", en: "Powder Pink", ar: "وردي بودري"},
         colorHex: "#E8B4B8",
         sku: "TD-CAF-0002-RPD",
         price: 750,
@@ -241,7 +241,7 @@ export const products: Product[] = [
       },
       {
         id: "var-002-3",
-        color: "Bleu Nuit",
+        color: {fr: "Bleu Nuit", en: "Midnight Blue", ar: "أزرق ليلي"},
         colorHex: "#1B2A4A",
         sku: "TD-CAF-0002-BNT",
         price: 750,
@@ -265,7 +265,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: بروكار غني بخيوط معدنية",
         "العرض: 130 سم",
-        "الم origin: فاس، المغرب",
+        "المصدر: فاس، المغرب",
       ],
       en: [
         "Composition: Brocade enriched with metallic threads",
@@ -304,7 +304,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-003-1",
-        color: "Pourpre",
+        color: {fr: "Pourpre", en: "Purple", ar: "أرجواني"},
         colorHex: "#6C3082",
         sku: "TD-CAF-0003-PRP",
         price: 650,
@@ -313,7 +313,7 @@ export const products: Product[] = [
       },
       {
         id: "var-003-2",
-        color: "Marine",
+        color: {fr: "Marine", en: "Navy", ar: "كحلي"},
         colorHex: "#000080",
         sku: "TD-CAF-0003-MRN",
         price: 650,
@@ -322,7 +322,7 @@ export const products: Product[] = [
       },
       {
         id: "var-003-3",
-        color: "Marron Châtaigne",
+        color: {fr: "Marron Châtaigne", en: "Chestnut Brown", ar: "بني كستنائي"},
         colorHex: "#954535",
         sku: "TD-CAF-0003-MCH",
         price: 650,
@@ -331,7 +331,7 @@ export const products: Product[] = [
       },
       {
         id: "var-003-4",
-        color: "Noir Profond",
+        color: {fr: "Noir Profond", en: "Deep Black", ar: "أسود عميق"},
         colorHex: "#0A0A0A",
         sku: "TD-CAF-0003-NPR",
         price: 650,
@@ -356,7 +356,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 80% قطن، 20% حرير",
         "العرض: 150 سم",
-        "الم origin: مراكش، المغرب",
+        "المصدر: مراكش، المغرب",
       ],
       en: [
         "Composition: 80% cotton, 20% silk",
@@ -395,7 +395,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-004-1",
-        color: "Corail",
+        color: {fr: "Corail", en: "Coral", ar: "مرجاني"},
         colorHex: "#FF7F50",
         sku: "TD-CAF-0004-CRL",
         price: 420,
@@ -404,7 +404,7 @@ export const products: Product[] = [
       },
       {
         id: "var-004-2",
-        color: "Turquoise",
+        color: {fr: "Turquoise", en: "Turquoise", ar: "فيروزي"},
         colorHex: "#30D5C8",
         sku: "TD-CAF-0004-TRQ",
         price: 420,
@@ -427,7 +427,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% حرير طبيعي",
         "العرض: 140 سم",
-        "الم origin: بورصة، تركيا",
+        "المصدر: بورصة، تركيا",
       ],
       en: [
         "Composition: 100% natural silk",
@@ -466,7 +466,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-005-1",
-        color: "Noir et Or",
+        color: {fr: "Noir et Or", en: "Black & Gold", ar: "أسود وذهبي"},
         colorHex: "#1A1A1A",
         sku: "TD-CAF-0005-NO",
         price: 950,
@@ -475,7 +475,7 @@ export const products: Product[] = [
       },
       {
         id: "var-005-2",
-        color: "Noir et Argent",
+        color: {fr: "Noir et Argent", en: "Black & Silver", ar: "أسود وفضي"},
         colorHex: "#1C1C1C",
         sku: "TD-CAF-0005-NA",
         price: 950,
@@ -484,7 +484,7 @@ export const products: Product[] = [
       },
       {
         id: "var-005-3",
-        color: "Noir et Bronze",
+        color: {fr: "Noir et Bronze", en: "Black & Bronze", ar: "أسود وبرونزي"},
         colorHex: "#1F1F1F",
         sku: "TD-CAF-0005-NBZ",
         price: 950,
@@ -508,7 +508,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: بروكار غني، خيوط معدنية ذهبية",
         "العرض: 130 سم",
-        "الم origin: فاس، المغرب",
+        "المصدر: فاس، المغرب",
       ],
       en: [
         "Composition: Enriched brocade, golden metallic threads",
@@ -547,7 +547,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-006-1",
-        color: "Champagne",
+        color: {fr: "Champagne", en: "Champagne", ar: "شمبانيا"},
         colorHex: "#F7E7CE",
         sku: "TD-CAF-0006-CHP",
         price: 380,
@@ -556,7 +556,7 @@ export const products: Product[] = [
       },
       {
         id: "var-006-2",
-        color: "Blanc Cassé",
+        color: {fr: "Blanc Cassé", en: "Off White", ar: "أبيض مكسور"},
         colorHex: "#F0EAD6",
         sku: "TD-CAF-0006-BCS",
         price: 380,
@@ -565,7 +565,7 @@ export const products: Product[] = [
       },
       {
         id: "var-006-3",
-        color: "Crème Perle",
+        color: {fr: "Crème Perle", en: "Pearl Cream", ar: "كريمي لؤلؤي"},
         colorHex: "#FDEEF4",
         sku: "TD-CAF-0006-CPR",
         price: 380,
@@ -589,7 +589,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% نايلون، تطريز بوليستر",
         "العرض: 160 سم",
-        "الم origin: الدار البيضاء، المغرب",
+        "المصدر: الدار البيضاء، المغرب",
       ],
       en: [
         "Composition: 100% nylon, polyester embroidery",
@@ -628,7 +628,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-007-1",
-        color: "Blanc Nacré",
+        color: {fr: "Blanc Nacré", en: "Pearlescent White", ar: "أبيض لؤلؤي"},
         colorHex: "#F5F5F0",
         sku: "TD-CAF-0007-BNC",
         price: 290,
@@ -637,7 +637,7 @@ export const products: Product[] = [
       },
       {
         id: "var-007-2",
-        color: "Rose Pâle",
+        color: {fr: "Rose Pâle", en: "Pale Pink", ar: "وردي فاتح"},
         colorHex: "#FADADD",
         sku: "TD-CAF-0007-RPL",
         price: 290,
@@ -646,7 +646,7 @@ export const products: Product[] = [
       },
       {
         id: "var-007-3",
-        color: "Ciel Bleu",
+        color: {fr: "Ciel Bleu", en: "Sky Blue", ar: "أزرق سماوي"},
         colorHex: "#89CFF0",
         sku: "TD-CAF-0007-CBL",
         price: 290,
@@ -670,7 +670,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% حرير",
         "العرض: 140 سم",
-        "الم origin: سوجو، الصين",
+        "المصدر: سوجو، الصين",
       ],
       en: [
         "Composition: 100% silk",
@@ -709,7 +709,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-008-1",
-        color: "Gris Anthracite",
+        color: {fr: "Gris Anthracite", en: "Anthracite Grey", ar: "رمادي أنثراسيتي"},
         colorHex: "#383838",
         sku: "TD-JEL-0001-GA",
         price: 220,
@@ -718,7 +718,7 @@ export const products: Product[] = [
       },
       {
         id: "var-008-2",
-        color: "Brun Terre",
+        color: {fr: "Brun Terre", en: "Earth Brown", ar: "بني ترابي"},
         colorHex: "#7B5B3A",
         sku: "TD-JEL-0001-BT",
         price: 220,
@@ -727,7 +727,7 @@ export const products: Product[] = [
       },
       {
         id: "var-008-3",
-        color: "Beige Sable",
+        color: {fr: "Beige Sable", en: "Sand Beige", ar: "بيج رملي"},
         colorHex: "#C2B280",
         sku: "TD-JEL-0001-BS",
         price: 220,
@@ -751,7 +751,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 60% صوف، 40% أكريليك",
         "العرض: 150 سم",
-        "الم origin:مكناس، المغرب",
+        "المصدر:مكناس، المغرب",
       ],
       en: [
         "Composition: 60% wool, 40% acrylic",
@@ -790,7 +790,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-009-1",
-        color: "Camel",
+        color: {fr: "Camel", en: "Camel", ar: "كاميل"},
         colorHex: "#C19A6B",
         sku: "TD-JEL-0002-CML",
         price: 580,
@@ -799,7 +799,7 @@ export const products: Product[] = [
       },
       {
         id: "var-009-2",
-        color: "Gris Perle",
+        color: {fr: "Gris Perle", en: "Pearl Grey", ar: "رمادي لؤلؤي"},
         colorHex: "#AAAAAA",
         sku: "TD-JEL-0002-GPR",
         price: 580,
@@ -822,7 +822,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% كشمير من منغوليا",
         "العرض: 145 سم",
-        "الم origin: أولان باتور، منغوليا",
+        "المصدر: أولان باتور، منغوليا",
       ],
       en: [
         "Composition: 100% Mongolian cashmere",
@@ -861,7 +861,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-010-1",
-        color: "Écru Naturel",
+        color: {fr: "Écru Naturel", en: "Natural Ecru", ar: "بيج إيكرو"},
         colorHex: "#C2B280",
         sku: "TD-JEL-0003-EN",
         price: 180,
@@ -870,7 +870,7 @@ export const products: Product[] = [
       },
       {
         id: "var-010-2",
-        color: "Ocre Foncé",
+        color: {fr: "Ocre Foncé", en: "Dark Ochre", ar: "مغرة داكنة"},
         colorHex: "#CC7722",
         sku: "TD-JEL-0003-OC",
         price: 180,
@@ -879,7 +879,7 @@ export const products: Product[] = [
       },
       {
         id: "var-010-3",
-        color: "Vert Forêt",
+        color: {fr: "Vert Forêt", en: "Forest Green", ar: "أخضر غابي"},
         colorHex: "#228B22",
         sku: "TD-JEL-0003-VFT",
         price: 180,
@@ -903,7 +903,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% صوف مشط من الأمازيغ",
         "العرض: 150 سم",
-        "الم origin: الأطلس، المغرب",
+        "المصدر: الأطلس، المغرب",
       ],
       en: [
         "Composition: 100% Berber carded wool",
@@ -942,7 +942,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-011-1",
-        color: "Bleu Agate",
+        color: {fr: "Bleu Agate", en: "Agate Blue", ar: "أزرق عقيق"},
         colorHex: "#6B8BA4",
         sku: "TD-JEL-0004-BAG",
         price: 490,
@@ -951,7 +951,7 @@ export const products: Product[] = [
       },
       {
         id: "var-011-2",
-        color: "Violet Mystère",
+        color: {fr: "Violet Mystère", en: "Mystery Violet", ar: "بنفسجي غامض"},
         colorHex: "#7B68AE",
         sku: "TD-JEL-0004-VMY",
         price: 490,
@@ -960,7 +960,7 @@ export const products: Product[] = [
       },
       {
         id: "var-011-3",
-        color: "Vert Sauge",
+        color: {fr: "Vert Sauge", en: "Sage Green", ar: "أخضر مريمية"},
         colorHex: "#9CAF88",
         sku: "TD-JEL-0004-VSG",
         price: 490,
@@ -984,7 +984,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 70% كشمير، 30% صوف",
         "العرض: 145 سم",
-        "الم origin: اسكتلندا، المملكة المتحدة",
+        "المصدر: اسكتلندا، المملكة المتحدة",
       ],
       en: [
         "Composition: 70% cashmere, 30% wool",
@@ -1023,7 +1023,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-012-1",
-        color: "Blanc Cassé",
+        color: {fr: "Blanc Cassé", en: "Off White", ar: "أبيض مكسور"},
         colorHex: "#F0EAD6",
         sku: "TD-JEL-0005-BCS",
         price: 150,
@@ -1032,7 +1032,7 @@ export const products: Product[] = [
       },
       {
         id: "var-012-2",
-        color: "Marron Clair",
+        color: {fr: "Marron Clair", en: "Light Brown", ar: "بني فاتح"},
         colorHex: "#A67B5B",
         sku: "TD-JEL-0005-MCL",
         price: 150,
@@ -1055,7 +1055,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% صوف خروف محلي",
         "العرض: 145 سم",
-        "الم origin: الأطلس المتوسط، المغرب",
+        "المصدر: الأطلس المتوسط، المغرب",
       ],
       en: [
         "Composition: 100% local sheep wool",
@@ -1094,7 +1094,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-013-1",
-        color: "Rose Poudré",
+        color: {fr: "Rose Poudré", en: "Powder Pink", ar: "وردي بودري"},
         colorHex: "#E8B4B8",
         sku: "TD-TEK-0001-RPD",
         price: 820,
@@ -1103,7 +1103,7 @@ export const products: Product[] = [
       },
       {
         id: "var-013-2",
-        color: "Rose Pâle",
+        color: {fr: "Rose Pâle", en: "Pale Pink", ar: "وردي فاتح"},
         colorHex: "#FADADD",
         sku: "TD-TEK-0001-RPL",
         price: 820,
@@ -1112,7 +1112,7 @@ export const products: Product[] = [
       },
       {
         id: "var-013-3",
-        color: "Corail Doux",
+        color: {fr: "Corail Doux", en: "Soft Coral", ar: "مرجاني ناعم"},
         colorHex: "#F88379",
         sku: "TD-TEK-0001-CDX",
         price: 820,
@@ -1136,7 +1136,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% حرير لؤلؤي",
         "العرض: 140 سم",
-        "الم origin: ليون، فرنسا",
+        "المصدر: ليون، فرنسا",
       ],
       en: [
         "Composition: 100% pearlescent silk",
@@ -1175,7 +1175,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-014-1",
-        color: "Doré Multicolore",
+        color: {fr: "Doré Multicolore", en: "Multicolour Gold", ar: "ذهبي متعدد الألوان"},
         colorHex: "#DAA520",
         sku: "TD-TEK-0002-DMC",
         price: 680,
@@ -1184,7 +1184,7 @@ export const products: Product[] = [
       },
       {
         id: "var-014-2",
-        color: "Rouge Festif",
+        color: {fr: "Rouge Festif", en: "Festive Red", ar: "أحمر احتفالي"},
         colorHex: "#CC0000",
         sku: "TD-TEK-0002-RFT",
         price: 680,
@@ -1193,7 +1193,7 @@ export const products: Product[] = [
       },
       {
         id: "var-014-3",
-        color: "Bleu Royal",
+        color: {fr: "Bleu Royal", en: "Royal Blue", ar: "أزرق ملكي"},
         colorHex: "#002366",
         sku: "TD-TEK-0002-BRL",
         price: 680,
@@ -1217,7 +1217,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: بروكار غني، خيوط ملونة",
         "العرض: 135 سم",
-        "الم origin: سلا، المغرب",
+        "المصدر: سلا، المغرب",
       ],
       en: [
         "Composition: Enriched brocade, colorful threads",
@@ -1256,7 +1256,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-015-1",
-        color: "Bordeaux Profond",
+        color: {fr: "Bordeaux Profond", en: "Deep Wine", ar: "بوردو عميق"},
         colorHex: "#4C0013",
         sku: "TD-TEK-0003-BPD",
         price: 550,
@@ -1265,7 +1265,7 @@ export const products: Product[] = [
       },
       {
         id: "var-015-2",
-        color: "Bleu Profond",
+        color: {fr: "Bleu Profond", en: "Deep Blue", ar: "أزرق عميق"},
         colorHex: "#003153",
         sku: "TD-TEK-0003-BPF",
         price: 550,
@@ -1288,7 +1288,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 90% قطن، 10% إيلاستين",
         "العرض: 150 سم",
-        "الم origin: طنجة، المغرب",
+        "المصدر: طنجة، المغرب",
       ],
       en: [
         "Composition: 90% cotton, 10% elastane",
@@ -1327,7 +1327,7 @@ export const products: Product[] = [
     variants: [
       {
         id: "var-016-1",
-        color: "Écarlate",
+        color: {fr: "Écarlate", en: "Scarlet", ar: "قرمزي"},
         colorHex: "#FF2400",
         sku: "TD-TEK-0004-ECL",
         price: 1100,
@@ -1336,7 +1336,7 @@ export const products: Product[] = [
       },
       {
         id: "var-016-2",
-        color: "Rouge Profond",
+        color: {fr: "Rouge Profond", en: "Deep Red", ar: "أحمر عميق"},
         colorHex: "#8B0000",
         sku: "TD-TEK-0004-RPF",
         price: 1100,
@@ -1345,7 +1345,7 @@ export const products: Product[] = [
       },
       {
         id: "var-016-3",
-        color: "Bordeaux Royal",
+        color: {fr: "Bordeaux Royal", en: "Royal Wine", ar: "بوردو ملكي"},
         colorHex: "#640024",
         sku: "TD-TEK-0004-BDR",
         price: 1100,
@@ -1369,7 +1369,7 @@ export const products: Product[] = [
       ar: [
         "التركيب: 100% حرير تويل",
         "العرض: 140 سم",
-        "الم origin: فاراناسي، الهند",
+        "المصدر: فاراناسي، الهند",
       ],
       en: [
         "Composition: 100% twill silk",

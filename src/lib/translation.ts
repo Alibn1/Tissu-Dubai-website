@@ -1,6 +1,12 @@
 import type {Locale} from '@/types';
 
-export type TranslatableFieldKey = 'name' | 'materials' | 'description' | 'characteristics';
+export type TranslatableFieldKey =
+  | 'name'
+  | 'materials'
+  | 'description'
+  | 'composition'
+  | 'width'
+  | 'origin';
 
 export type ProductTranslations = Record<Locale, Record<TranslatableFieldKey, string>>;
 
@@ -12,16 +18,20 @@ export const TRANSLATION_LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'r
 
 export const FIELD_LABELS: Record<TranslatableFieldKey, string> = {
   name: 'Nom du produit',
-  materials: 'Matières',
+  materials: 'Modèle',
   description: 'Description',
-  characteristics: 'Caractéristiques',
+  composition: 'Composition',
+  width: 'Largeur',
+  origin: 'Origine',
 };
 
 export const FIELD_PLACEHOLDERS: Record<TranslatableFieldKey, string> = {
   name: 'Ex. Soie Royale Dubai',
-  materials: 'Ex. 100% soie naturelle',
+  materials: 'Ex. Soie naturelle',
   description: 'Description du produit',
-  characteristics: 'Largeur, origine, entretien…',
+  composition: 'Ex. 100% soie naturelle',
+  width: 'Ex. 140 cm',
+  origin: 'Ex. Maroc',
 };
 
 // DeepL target-language codes. DeepL does NOT support Arabic as a target, so
@@ -44,9 +54,9 @@ export function langLabel(lang: Locale): string {
 
 export function createEmptyTranslations(): ProductTranslations {
   return {
-    en: {name: '', materials: '', description: '', characteristics: ''},
-    fr: {name: '', materials: '', description: '', characteristics: ''},
-    ar: {name: '', materials: '', description: '', characteristics: ''},
+    en: {name: '', materials: '', description: '', composition: '', width: '', origin: ''},
+    fr: {name: '', materials: '', description: '', composition: '', width: '', origin: ''},
+    ar: {name: '', materials: '', description: '', composition: '', width: '', origin: ''},
   };
 }
 

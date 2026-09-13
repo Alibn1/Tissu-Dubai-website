@@ -2,7 +2,7 @@ export type Locale = 'fr' | 'ar' | 'en';
 
 export type ProductVariant = {
   id: string;
-  color: string;
+  color: Record<Locale, string>;
   colorHex: string;
   sku: string;
   price: number | null;
@@ -46,6 +46,13 @@ export type Collection = {
   description: Record<Locale, string>;
   image: string;
   productCount: number;
+};
+
+export type Model = {
+  id: string;
+  slug: string;
+  collectionSlug: string;
+  name: Record<Locale, string>;
 };
 
 export type ContactFormData = {

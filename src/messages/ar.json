@@ -150,7 +150,7 @@
     "clearFilters": "مسح التصفية",
     "filters": {
       "categories": "الفئات",
-      "materials": "المواد",
+      "materials": "الموديلات",
       "colors": "الألوان",
       "availability": "التوفر",
       "inStock": "متوفر",
@@ -166,7 +166,7 @@
   },
   "product": {
     "reference": "المرجع",
-    "material": "المادة",
+    "material": "الموديل",
     "name": "القماش",
     "width": "العرض",
     "price": "السعر",

@@ -2,9 +2,11 @@
 
 import {useState} from 'react';
 import {cn} from '@/lib/utils';
-import type {Locale} from '@/types';
+import type {Locale, Model} from '@/types';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
 import {FileUploadButton, ImagePreview} from '@/components/admin/imageUpload';
+import {getModels} from '@/lib/modelsStore';
+import {clientTranslate, DEEPL_TARGET_CODE} from '@/lib/translation';
 import {
   createEmptyTranslations,
   type ProductTranslations,
@@ -19,14 +21,16 @@ import {
   Loader2,
   Check,
   ChevronDown,
+  Languages,
 } from 'lucide-react';
 
 // ── Types ──
 
 export interface ColorVariantForm {
   id: string;
-  colorLabel: string;
+  colorLabel: Record<Locale, string>;
   image: string;
+  inStock: boolean;
 }
 
 export interface SeoFieldsForm {
@@ -39,7 +43,8 @@ export interface SeoFieldsForm {
 export type SeoByLanguage = Record<Locale, SeoFieldsForm>;
 
 export interface ProductFormData {
-  categories: string[];
+  collection: string;
+  modelId: string;
   price: string;
   inStock: boolean;
   featured: boolean;
@@ -57,7 +62,7 @@ const LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
   {key: 'ar', label: 'العربية', dir: 'rtl'},
 ];
 
-const CATEGORIES: {value: string; label: string}[] = [
+const COLLECTIONS: {value: string; label: string}[] = [
   {value: 'caftan', label: 'Caftan'},
   {value: 'jellaba', label: 'Djellaba'},
   {value: 'tekchita', label: 'Takchita'},
@@ -86,7 +91,8 @@ function createEmptySeo(): SeoByLanguage {
 
 export function createEmptyFormData(): ProductFormData {
   return {
-    categories: [],
+    collection: '',
+    modelId: '',
     price: '',
     inStock: true,
     featured: false,
@@ -117,63 +123,109 @@ type SeoFieldKey = keyof Omit<SeoFieldsForm, 'enabled'>;
 
 // ── Sub components ──
 
-const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
-  CATEGORIES.map((c) => [c.value, c.label])
-);
-
-function MultiSelect({
-  options,
+function ModelSelect({
+  models,
   value,
   onChange,
   placeholder,
 }: {
-  options: {value: string; label: string}[];
-  value: string[];
-  onChange: (next: string[]) => void;
+  models: Model[];
+  value: string;
+  onChange: (id: string) => void;
   placeholder: string;
 }) {
-  const [open, setOpen] = useState(false);
-
-  const toggle = (v: string) =>
-    onChange(value.includes(v) ? value.filter((x) => x !== v) : [...value, v]);
-
   return (
     <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className={cn(inputClass, 'flex items-center justify-between gap-2 text-left')}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(inputClass, 'appearance-none pr-9')}
       >
-        <span className={cn('truncate', value.length === 0 && 'text-brand-muted/70')}>
-          {value.length === 0
-            ? placeholder
-            : value.map((v) => CATEGORY_LABELS[v] ?? v).join(', ')}
-        </span>
-        <ChevronDown
-          className={cn('h-4 w-4 shrink-0 text-brand-muted transition-transform', open && 'rotate-180')}
-        />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 z-20 mt-1 w-full overflow-hidden rounded-md border border-brand-border bg-brand-surface shadow-lg">
-            {options.map((opt) => {
-              const selected = value.includes(opt.value);
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => toggle(opt.value)}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-sm text-brand-secondary hover:bg-brand-light/60"
-                >
-                  <span>{opt.label}</span>
-                  {selected && <Check className="h-4 w-4 text-brand-primary" />}
-                </button>
-              );
-            })}
+        <option value="">{placeholder}</option>
+        {models.map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.name.fr}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
+    </div>
+  );
+}
+
+const COLOR_LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'; placeholder: string}[] = [
+  {key: 'fr', label: 'FR', dir: 'ltr', placeholder: 'Couleur (fr)'},
+  {key: 'en', label: 'EN', dir: 'ltr', placeholder: 'Color (en)'},
+  {key: 'ar', label: 'AR', dir: 'rtl', placeholder: 'اللون'},
+];
+
+function VariantColorFields({
+  colorLabel,
+  onChange,
+}: {
+  colorLabel: Record<Locale, string>;
+  onChange: (next: Record<Locale, string>) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const hasAnyInput = COLOR_LANGUAGES.some((lang) => colorLabel[lang.key].trim() !== '');
+
+  const translate = async () => {
+    const source = COLOR_LANGUAGES.find((lang) => colorLabel[lang.key].trim() !== '');
+    if (!source) return;
+    setBusy(true);
+    setError(null);
+    try {
+      for (const target of COLOR_LANGUAGES) {
+        if (target.key === source.key) continue;
+        const translated = await clientTranslate(
+          colorLabel[source.key].trim(),
+          DEEPL_TARGET_CODE[target.key],
+          source.key
+        );
+        onChange({...colorLabel, [target.key]: translated});
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Échec de la traduction');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-1 flex-col gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {COLOR_LANGUAGES.map((lang) => (
+          <div key={lang.key} className="flex items-center gap-2">
+            <span className="shrink-0 text-xs font-semibold uppercase text-brand-muted">
+              {lang.label}
+            </span>
+            <input
+              dir={lang.dir}
+              value={colorLabel[lang.key]}
+              onChange={(e) => onChange({...colorLabel, [lang.key]: e.target.value})}
+              className={inputClass}
+              placeholder={lang.placeholder}
+            />
           </div>
-        </>
-      )}
+        ))}
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => void translate()}
+          disabled={busy || !hasAnyInput}
+          className={cn(
+            'inline-flex items-center gap-2 rounded-md bg-brand-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors',
+            'hover:bg-brand-primary/90 disabled:cursor-not-allowed disabled:opacity-50'
+          )}
+        >
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Languages className="h-3.5 w-3.5" />}
+          {busy ? 'Traduction…' : 'Traduire'}
+        </button>
+        {error && <span className="text-[11px] leading-tight text-brand-error">{error}</span>}
+      </div>
     </div>
   );
 }
@@ -290,6 +342,7 @@ export function ProductForm({mode, productId, initialData}: Props) {
       } as SeoByLanguage,
     };
   });
+  const [models] = useState<Model[]>(() => getModels());
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -319,13 +372,16 @@ export function ProductForm({mode, productId, initialData}: Props) {
   const addColorVariant = () =>
     setFormData((f) => ({
       ...f,
-      colorVariants: [...f.colorVariants, {id: uid(), colorLabel: '', image: ''}],
+      colorVariants: [
+        ...f.colorVariants,
+        {id: uid(), colorLabel: {fr: '', en: '', ar: ''}, image: '', inStock: true},
+      ],
     }));
 
-  const updateColorVariant = (id: string, field: 'colorLabel' | 'image', value: string) =>
+  const updateColorVariant = (id: string, patch: Partial<ColorVariantForm>) =>
     setFormData((f) => ({
       ...f,
-      colorVariants: f.colorVariants.map((v) => (v.id === id ? {...v, [field]: value} : v)),
+      colorVariants: f.colorVariants.map((v) => (v.id === id ? {...v, ...patch} : v)),
     }));
 
   const removeColorVariant = (id: string) =>
@@ -333,6 +389,12 @@ export function ProductForm({mode, productId, initialData}: Props) {
       ...f,
       colorVariants: f.colorVariants.filter((v) => v.id !== id),
     }));
+
+  const selectCollection = (collection: string) =>
+    setFormData((f) => ({...f, collection, modelId: ''}));
+
+  const selectedModels = models.filter((m) => m.collectionSlug === formData.collection);
+  const selectedModel = models.find((m) => m.id === formData.modelId) ?? null;
 
   const updateBaseImage = (index: number, value: string) =>
     setField(
@@ -351,7 +413,7 @@ export function ProductForm({mode, productId, initialData}: Props) {
 
   // Build the payload to send — swap with a real API call later.
   const buildPayload = () => {
-    const {categories, price, inStock, featured, isNew, baseImages, colorVariants, seo} = formData;
+    const {collection, modelId, price, inStock, featured, isNew, baseImages, colorVariants, seo} = formData;
 
     const pick = (field: keyof ProductTranslations['en']): Record<Locale, string> => ({
       en: translations.en[field],
@@ -359,13 +421,39 @@ export function ProductForm({mode, productId, initialData}: Props) {
       ar: translations.ar[field],
     });
 
+    const buildCharacteristics = (): Record<Locale, string[]> => {
+      const labels: Record<Locale, string[]> = {
+        fr: ['Composition', 'Largeur', 'Origine'],
+        en: ['Composition', 'Width', 'Origin'],
+        ar: ['التركيب', 'العرض', 'المصدر'],
+      };
+      const fields: TranslatableFieldKey[] = ['composition', 'width', 'origin'];
+      return Object.fromEntries(
+        (['en', 'fr', 'ar'] as Locale[]).map((lang) => [
+          lang,
+          fields
+            .map((field, i) =>
+              translations[lang][field].trim()
+                ? `${labels[lang][i]} : ${translations[lang][field].trim()}`
+                : ''
+            )
+            .filter(Boolean),
+        ])
+      ) as Record<Locale, string[]>;
+    };
+
     return {
       ...(mode === 'edit' && productId ? {id: productId} : {}),
       name: pick('name'),
       description: pick('description'),
       material: pick('materials'),
-      characteristics: pick('characteristics'),
-      categories,
+      materialSlug: selectedModel?.slug ?? '',
+      collection,
+      modelId,
+      composition: pick('composition'),
+      width: pick('width'),
+      origin: pick('origin'),
+      characteristics: buildCharacteristics(),
       price: price === '' ? null : Number(price),
       inStock,
       featured,
@@ -416,15 +504,49 @@ export function ProductForm({mode, productId, initialData}: Props) {
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Catégories</label>
-            <MultiSelect
-              options={CATEGORIES}
-              value={formData.categories}
-              onChange={(next) => setField('categories', next)}
-              placeholder="Sélectionner une ou plusieurs catégories"
-            />
+            <label className={labelClass}>Collection</label>
+            <div className="flex flex-wrap gap-2">
+              {COLLECTIONS.map((col) => {
+                const active = formData.collection === col.value;
+                return (
+                  <button
+                    key={col.value}
+                    type="button"
+                    onClick={() => selectCollection(col.value)}
+                    aria-pressed={active}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all',
+                      active
+                        ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
+                        : 'border-brand-border bg-transparent text-brand-muted hover:border-brand-primary/60 hover:text-brand-secondary'
+                    )}
+                  >
+                    {active && <Check className="h-3.5 w-3.5" />}
+                    {col.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
+          <div>
+            <label className={labelClass}>Modèle</label>
+            <ModelSelect
+              models={selectedModels}
+              value={formData.modelId}
+              onChange={(id) => setFormData((f) => ({...f, modelId: id}))}
+              placeholder={
+                formData.collection
+                  ? selectedModels.length > 0
+                    ? 'Sélectionner un modèle'
+                    : 'Aucun modèle pour cette collection'
+                  : 'Choisir d’abord une collection'
+              }
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Prix (MAD)</label>
             <input
@@ -516,19 +638,26 @@ export function ProductForm({mode, productId, initialData}: Props) {
                 key={variant.id}
                 className="flex items-center gap-3 rounded-md border border-brand-border p-3"
               >
-                <ImagePreview src={variant.image} alt={variant.colorLabel} />
-                <div className="flex flex-1 flex-col gap-2 sm:flex-row">
-                  <input
-                    value={variant.colorLabel}
-                    onChange={(e) => updateColorVariant(variant.id, 'colorLabel', e.target.value)}
-                    className={inputClass}
-                    placeholder="Couleur (ex. Bordeaux)"
+                <ImagePreview src={variant.image} alt={variant.colorLabel.fr || 'Variante'} />
+                <div className="flex flex-1 flex-col gap-2">
+                  <VariantColorFields
+                    colorLabel={variant.colorLabel}
+                    onChange={(colorLabel) => updateColorVariant(variant.id, {colorLabel})}
                   />
                   <FileUploadButton
-                    onUpload={(dataUrl) => updateColorVariant(variant.id, 'image', dataUrl)}
+                    onUpload={(dataUrl) => updateColorVariant(variant.id, {image: dataUrl})}
                     label={variant.image ? 'Changer l’image' : 'Ajouter une image'}
                   />
                 </div>
+                <label className="flex shrink-0 items-center gap-2 text-sm text-brand-secondary">
+                  <input
+                    type="checkbox"
+                    checked={variant.inStock}
+                    onChange={(e) => updateColorVariant(variant.id, {inStock: e.target.checked})}
+                    className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
+                  />
+                  En stock
+                </label>
                 <button
                   type="button"
                   onClick={() => removeColorVariant(variant.id)}

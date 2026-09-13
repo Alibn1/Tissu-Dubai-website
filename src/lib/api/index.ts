@@ -50,7 +50,9 @@ export async function getProducts(filters?: {
   }
   if (filters?.color) {
     filtered = filtered.filter((p) =>
-      p.variants.some((v) => v.color.toLowerCase() === filters.color!.toLowerCase())
+      p.variants.some((v) =>
+        Object.values(v.color).some((c) => c.toLowerCase() === filters.color!.toLowerCase())
+      )
     );
   }
   if (filters?.collection) {

@@ -84,7 +84,7 @@ export type AdminProduct = {
   featured: boolean;
   isNew: boolean;
   categorySlug: string;
-  variants: {color: string; colorHex: string; sku: string; price: number | null; inStock: boolean}[];
+  variants: {color: {fr: string; ar: string; en: string}; colorHex: string; sku: string; price: number | null; inStock: boolean}[];
   characteristics: {fr: string[]; ar: string[]; en: string[]};
 };
 
