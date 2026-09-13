@@ -12,19 +12,40 @@ function ensureDataDir() {
   }
 }
 
+// On Cloudflare Workers the bundled `node:fs` polyfill does not implement
+// write operations (mkdirSync/writeFileSync). When the filesystem is
+// unavailable we transparently fall back to an in-memory store so pages,
+// routes and actions keep working (data is not persisted between isolates).
+const memoryStore = new Map<string, string>();
+let useMemoryStore = false;
+
 function readJSON<T>(filePath: string, fallback: T): T {
-  ensureDataDir();
-  try {
-    if (existsSync(filePath)) {
-      return JSON.parse(readFileSync(filePath, 'utf-8'));
+  if (!useMemoryStore) {
+    try {
+      ensureDataDir();
+      if (existsSync(filePath)) {
+        return JSON.parse(readFileSync(filePath, 'utf-8'));
+      }
+    } catch {
+      useMemoryStore = true;
     }
-  } catch {}
-  return fallback;
+  }
+  const cached = memoryStore.get(filePath);
+  return cached === undefined ? fallback : JSON.parse(cached);
 }
 
 function writeJSON(filePath: string, data: unknown) {
-  ensureDataDir();
-  writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  if (useMemoryStore) {
+    memoryStore.set(filePath, JSON.stringify(data));
+    return;
+  }
+  try {
+    ensureDataDir();
+    writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  } catch {
+    useMemoryStore = true;
+    memoryStore.set(filePath, JSON.stringify(data));
+  }
 }
 
 export type ContactEntry = {
