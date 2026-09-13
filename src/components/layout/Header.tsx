@@ -5,6 +5,7 @@ import {Link, useRouter, usePathname} from '@/i18n/navigation';
 import {Logo} from '@/components/ui/Logo';
 import {LanguageSwitcher} from '@/components/ui/LanguageSwitcher';
 import {cn} from '@/lib/utils';
+import {getDefaultSiteSettings} from '@/lib/siteSettings';
 import {useState, useEffect, useCallback} from 'react';
 import {Menu, X, Phone, Truck} from 'lucide-react';
 
@@ -24,6 +25,7 @@ export function Header() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || getDefaultSiteSettings().contact.phones[0] || '';
 
   const isHome = pathname === `/${locale}` || pathname === '/';
 
@@ -119,7 +121,7 @@ export function Header() {
             <LanguageSwitcher className="hidden sm:block" />
 
             <a
-              href={`tel:${process.env.NEXT_PUBLIC_STORE_PHONE}`}
+              href={`tel:${phone}`}
               className={cn(
                 'hidden md:flex items-center gap-2 px-3 py-2 text-sm',
                 'text-brand-secondary hover:text-brand-primary',
@@ -209,11 +211,11 @@ export function Header() {
         <div className="border-t border-brand-border/50 px-5 py-4 space-y-3">
           <LanguageSwitcher />
           <a
-            href={`tel:${process.env.NEXT_PUBLIC_STORE_PHONE}`}
+            href={`tel:${phone}`}
             className="flex items-center gap-2 text-sm text-brand-muted hover:text-brand-primary transition-colors"
           >
             <Phone className="h-4 w-4" />
-            {process.env.NEXT_PUBLIC_STORE_PHONE}
+            {phone}
           </a>
         </div>
       </div>

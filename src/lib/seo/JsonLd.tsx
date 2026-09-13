@@ -1,5 +1,6 @@
 import {type Locale} from '@/types';
 import {STORE_LOCATION} from '@/lib/site';
+import {getDefaultSiteSettings} from '@/lib/siteSettings';
 
 type JsonLdProps = {
   locale: Locale;
@@ -9,6 +10,7 @@ type JsonLdProps = {
 
 export function JsonLd({locale, type, data = {}}: JsonLdProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const defaults = getDefaultSiteSettings().contact;
 
   const schemas: Record<string, unknown> = {
     LocalBusiness: {
@@ -21,12 +23,12 @@ export function JsonLd({locale, type, data = {}}: JsonLdProps) {
         en: 'Premium fabric specialist in Casablanca, Morocco'
       }[locale],
       url: baseUrl,
-      telephone: process.env.NEXT_PUBLIC_STORE_PHONE,
+      telephone: process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || null,
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'Casablanca',
         addressCountry: 'MA',
-        streetAddress: process.env.NEXT_PUBLIC_STORE_ADDRESS || 'PLACEHOLDER_ADDRESS'
+        streetAddress: process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address
       },
       geo: {
         '@type': 'GeoCoordinates',
