@@ -4,6 +4,7 @@ import {Metadata} from 'next';
 import {MapPin, Phone, Clock, ExternalLink, MessageCircle} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {GOOGLE_MAPS_EMBED_URL, GOOGLE_MAPS_LINK} from '@/lib/site';
+import {getDefaultSiteSettings} from '@/lib/siteSettings';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -23,6 +24,11 @@ export default async function LocationPage({params}: Props) {
   const tAddress = await getTranslations('location.address');
   const tHours = await getTranslations('location.hours');
   const tContact = await getTranslations('location.contact');
+
+  const defaults = getDefaultSiteSettings().contact;
+  const address = process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address;
+  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || '';
+  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || defaults.whatsappNumber || '';
 
   return (
     <section className="py-10 sm:py-16">
@@ -63,7 +69,7 @@ export default async function LocationPage({params}: Props) {
                 </h3>
               </div>
               <p className="text-sm text-brand-muted">
-                {process.env.NEXT_PUBLIC_STORE_ADDRESS || 'PLACEHOLDER_ADDRESS'}
+                {address}
               </p>
             </div>
 
@@ -101,7 +107,7 @@ export default async function LocationPage({params}: Props) {
               </div>
               <div className="flex flex-col gap-3">
                 <a
-                  href={`tel:${process.env.NEXT_PUBLIC_STORE_PHONE}`}
+                  href={`tel:${phone}`}
                   className={cn(
                     'flex items-center gap-2 rounded-md border border-brand-border px-4 py-3',
                     'text-sm font-medium text-brand-secondary hover:bg-brand-light transition-colors'
@@ -111,7 +117,7 @@ export default async function LocationPage({params}: Props) {
                   {tContact('phone')}
                 </a>
                 <a
-                  href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '').replace(/[^0-9]/g, '')}`}
+                  href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(

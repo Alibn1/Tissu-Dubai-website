@@ -3,11 +3,16 @@ import {SectionHeading} from '@/components/ui/SectionHeading';
 import {cn} from '@/lib/utils';
 import {MapPin, Phone, Clock, ExternalLink} from 'lucide-react';
 import {GOOGLE_MAPS_EMBED_URL, GOOGLE_MAPS_LINK} from '@/lib/site';
+import {getDefaultSiteSettings} from '@/lib/siteSettings';
 
 export async function StoreLocationSection() {
   const t = await getTranslations('home.storeLocation');
   const tLocation = await getTranslations('location');
   const tHours = await getTranslations('location.hours');
+
+  const defaults = getDefaultSiteSettings().contact;
+  const address = process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address;
+  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || '';
 
   return (
     <section className="py-16 sm:py-20">
@@ -37,7 +42,7 @@ export async function StoreLocationSection() {
                   {tLocation('address.title')}
                 </h3>
                 <p className="mt-1 text-sm text-brand-muted">
-                  {process.env.NEXT_PUBLIC_STORE_ADDRESS || 'PLACEHOLDER_ADDRESS'}
+                  {address}
                 </p>
               </div>
             </div>
@@ -70,10 +75,10 @@ export async function StoreLocationSection() {
                   {t('title')}
                 </h3>
                 <a
-                  href={`tel:${process.env.NEXT_PUBLIC_STORE_PHONE}`}
+                  href={`tel:${phone}`}
                   className="mt-1 inline-flex items-center gap-1 text-sm text-brand-primary hover:text-brand-secondary transition-colors"
                 >
-                  {process.env.NEXT_PUBLIC_STORE_PHONE || 'PLACEHOLDER_PHONE'}
+                  {phone}
                 </a>
               </div>
             </div>
