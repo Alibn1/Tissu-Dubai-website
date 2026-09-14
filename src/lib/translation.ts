@@ -34,8 +34,6 @@ export const FIELD_PLACEHOLDERS: Record<TranslatableFieldKey, string> = {
   origin: 'Ex. Maroc',
 };
 
-// DeepL target-language codes. DeepL does NOT support Arabic as a target, so
-// the /api/translate route handles 'AR' via the free MyMemory API instead.
 export const DEEPL_TARGET_CODE: Record<Locale, string> = {
   fr: 'FR',
   en: 'EN',

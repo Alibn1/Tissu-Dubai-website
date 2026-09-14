@@ -7,14 +7,10 @@ const FREE_PLAN_SUFFIX = ':fx';
 
 const SUPPORTED_TARGETS = new Set(['EN', 'FR', 'AR']);
 
-// MyMemory pairs require an explicit source language ("fr|ar"), unlike DeepL
-// which auto-detects. These are the source codes our admin can produce.
+// DeepL auto-detects the source language, but we still pass the source the
+// admin produced when known; default to FR otherwise.
 const SOURCE_LANGS = new Set(['EN', 'FR', 'AR']);
 const DEFAULT_SOURCE_LANG = 'FR';
-
-// DeepL does not support Arabic as a target language, so AR requests are
-// served by the free MyMemory API (no key required) instead.
-const MYMEMORY_ENDPOINT = 'https://api.mymemory.translated.net/get';
 
 export async function POST(request: Request) {
   const apiKey = process.env.DEEPL_API_KEY;
@@ -48,10 +44,7 @@ export async function POST(request: Request) {
   const sourceCode = SOURCE_LANGS.has(rawSource.toUpperCase()) ? rawSource.toUpperCase() : DEFAULT_SOURCE_LANG;
 
   try {
-    if (code === 'AR') {
-      return await translateToArabic(text, sourceCode);
-    }
-    return await translateWithDeepL(text, code, apiKey);
+    return await translateWithDeepL(text, code, apiKey, sourceCode);
   } catch {
     return NextResponse.json(
       {error: 'Échec de la connexion au service de traduction.'},
@@ -60,11 +53,12 @@ export async function POST(request: Request) {
   }
 }
 
-async function translateWithDeepL(text: string, code: string, apiKey: string): Promise<NextResponse> {
+async function translateWithDeepL(text: string, code: string, apiKey: string, sourceCode: string): Promise<NextResponse> {
   const endpoint = apiKey.endsWith(FREE_PLAN_SUFFIX) ? FREE_ENDPOINT : PRO_ENDPOINT;
   const params = new URLSearchParams();
   params.append('text', text);
   params.append('target_lang', code);
+  params.append('source_lang', sourceCode);
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -84,22 +78,6 @@ async function translateWithDeepL(text: string, code: string, apiKey: string): P
   const translatedText = data?.translations?.[0]?.text;
   if (typeof translatedText !== 'string') {
     return NextResponse.json({error: 'Réponse invalide de DeepL.'}, {status: 500});
-  }
-
-  return NextResponse.json({translatedText});
-}
-
-async function translateToArabic(text: string, sourceCode: string): Promise<NextResponse> {
-  const url = `${MYMEMORY_ENDPOINT}?q=${encodeURIComponent(text)}&langpair=${sourceCode.toLowerCase()}|ar`;
-  const response = await fetch(url);
-  const data = await response.json().catch(() => null);
-
-  const translatedText = data?.responseData?.translatedText;
-  if (typeof translatedText !== 'string' || translatedText.trim() === '') {
-    return NextResponse.json(
-      {error: 'La traduction vers l’arabe a échoué. Saisissez le texte manuellement.'},
-      {status: 502}
-    );
   }
 
   return NextResponse.json({translatedText});
