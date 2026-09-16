@@ -5,7 +5,10 @@ import {useRouter} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
 import {Save, Loader2, Check} from 'lucide-react';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
-import type {Locale, Product} from '@/types';
+import {ModelSelect} from '@/components/admin/ModelSelect';
+import {ColorVariantsEditor, type ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
+import {getModels} from '@/lib/modelsStore';
+import type {Locale, Product, Model} from '@/types';
 import type {ProductTranslations, TranslatableFieldKey} from '@/lib/translation';
 
 type Props = {
@@ -49,6 +52,17 @@ export function ProductEditForm({product}: Props) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const [models] = useState<Model[]>(() => getModels());
+  const [modelId, setModelId] = useState<string>(() => {
+    const match = getModels().find(
+      (m) => m.collectionSlug === product.category.slug && m.slug === product.materialSlug
+    );
+    return match?.id ?? '';
+  });
+
+  const selectedModels = models.filter((m) => m.collectionSlug === product.category.slug);
+  const selectedModel = models.find((m) => m.id === modelId) ?? null;
+
   const initialTranslations = useMemo<ProductTranslations>(() => {
     const build = (lang: Locale) => {
       const {composition, width, origin} = parseCharacteristics(product, lang);
@@ -79,6 +93,46 @@ export function ProductEditForm({product}: Props) {
     isNew: product.isNew,
   });
 
+  const [colorVariants, setColorVariants] = useState<ColorVariantForm[]>(() =>
+    (product.variants ?? []).map((v, idx) => ({
+      id: v.id,
+      colorLabel: v.color,
+      image: v.images?.[0] ?? '',
+      inStock: v.inStock,
+      isDefault: idx === 0,
+    }))
+  );
+
+  const buildVariants = (): Product['variants'] => {
+    const mapped = colorVariants.map((v) => {
+      const existing = product.variants.find((pv) => pv.id === v.id);
+      return existing
+        ? {
+            ...existing,
+            color: v.colorLabel,
+            inStock: v.inStock,
+            images: v.image ? [v.image] : existing.images,
+          }
+        : {
+            id: v.id,
+            color: v.colorLabel,
+            colorHex: '#000000',
+            sku: `${product.reference}-${v.id}`,
+            price: null,
+            inStock: v.inStock,
+            images: v.image ? [v.image] : [],
+          };
+    });
+
+    // The default ("Principale") variant must stay first so the public page
+    // shows it by default when a customer orders.
+    return [...mapped].sort((a, b) => {
+      const da = colorVariants.find((v) => v.id === a.id)?.isDefault ?? false;
+      const db = colorVariants.find((v) => v.id === b.id)?.isDefault ?? false;
+      return Number(db) - Number(da);
+    });
+  };
+
   const pick = (field: keyof ProductTranslations['en']): Record<Locale, string> => ({
     en: translations.en[field],
     fr: translations.fr[field],
@@ -105,7 +159,8 @@ export function ProductEditForm({product}: Props) {
         body: JSON.stringify({
           name: pick('name'),
           description: pick('description'),
-          material: pick('materials'),
+          material: selectedModel?.name ?? product.material,
+          materialSlug: selectedModel?.slug ?? product.materialSlug,
           characteristics: {
             en: buildCharacteristics('en'),
             fr: buildCharacteristics('fr'),
@@ -116,6 +171,7 @@ export function ProductEditForm({product}: Props) {
           inStock: formData.inStock,
           featured: formData.featured,
           isNew: formData.isNew,
+          variants: buildVariants(),
         }),
       });
 
@@ -147,7 +203,33 @@ export function ProductEditForm({product}: Props) {
         <p className="mb-4 mt-1 text-sm text-brand-muted">
           Saisissez les textes dans chaque langue, ou traduisez un champ depuis une autre langue.
         </p>
-        <MultilingualFields translations={translations} onChange={setTranslationValue} />
+        <MultilingualFields
+          translations={translations}
+          onChange={setTranslationValue}
+          exclude={['materials']}
+        />
+      </section>
+
+      {/* Collection & Modèle */}
+      <section className="rounded-md border border-brand-border bg-brand-surface p-6">
+        <h2 className="font-heading text-lg font-semibold text-brand-secondary mb-4">
+          Collection et modèle
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelClass}>Collection</label>
+            <p className={cn(inputClass, 'text-brand-muted')}>{product.category.name.fr}</p>
+          </div>
+          <div>
+            <label className={labelClass}>Modèle</label>
+            <ModelSelect
+              models={selectedModels}
+              value={modelId}
+              onChange={setModelId}
+              placeholder="Sélectionner un modèle"
+            />
+          </div>
+        </div>
       </section>
 
       {/* Pricing & Status */}
@@ -193,6 +275,17 @@ export function ProductEditForm({product}: Props) {
             })}
           </div>
         </div>
+      </section>
+
+      {/* Color Variants */}
+      <section className="rounded-md border border-brand-border bg-brand-surface p-6">
+        <h2 className="font-heading text-lg font-semibold text-brand-secondary">
+          Variantes de couleur
+        </h2>
+        <p className="mb-4 mt-1 text-sm text-brand-muted">
+          Ajoutez plusieurs couleurs sous le même produit.
+        </p>
+        <ColorVariantsEditor variants={colorVariants} onChange={setColorVariants} />
       </section>
 
       {/* Save */}
