@@ -15,6 +15,7 @@ export interface CategoryBreakdown {
 
 export interface DashboardData {
   totalProducts: number;
+  totalColorVariants: number;
   categoryBreakdown: CategoryBreakdown[];
   topRequested: ProductStat[];
   products: ProductStat[];
@@ -49,6 +50,12 @@ export function getDashboardData(): DashboardData {
 
   const totalProducts = productStats.length;
 
+  // Each color variant counts as a sellable item (products without variants count as 1).
+  const totalColorVariants = productStats.reduce(
+    (sum, p) => sum + Math.max(p.variants?.length ?? 0, 1),
+    0
+  );
+
   const byCategory = productStats.reduce<Map<string, {slug: string; name: string; count: number}>>(
     (acc, product) => {
       const slug = product.category.slug;
@@ -78,6 +85,7 @@ export function getDashboardData(): DashboardData {
 
   return {
     totalProducts,
+    totalColorVariants,
     categoryBreakdown,
     topRequested,
     products: productStats,

@@ -40,9 +40,16 @@ function createEmptyErrors(): FieldErrors {
 type Props = {
   translations: ProductTranslations;
   onChange: (lang: Locale, field: TranslatableFieldKey, value: string) => void;
+  // Fields to hide (e.g. the model name now comes from the Models page).
+  exclude?: TranslatableFieldKey[];
+  // Optional content rendered on the right side of the language tabs.
+  rightSlot?: React.ReactNode;
+  // Optional slot rendered to the right of the "Nom" field (e.g. for color input).
+  // Receives the active locale so the caller can render per-language content.
+  nameRightSlot?: (activeLang: Locale) => React.ReactNode;
 };
 
-export function MultilingualFields({translations, onChange}: Props) {
+export function MultilingualFields({translations, onChange, exclude = [], rightSlot, nameRightSlot}: Props) {
   const [active, setActive] = useState<Locale>('fr');
   const [errors, setErrors] = useState<Record<Locale, FieldErrors>>({
     en: createEmptyErrors(),
@@ -50,10 +57,12 @@ export function MultilingualFields({translations, onChange}: Props) {
     ar: createEmptyErrors(),
   });
 
+  const visibleFields = FIELD_ORDER.filter((field) => !exclude.includes(field));
+
   const setFieldError = (lang: Locale, field: TranslatableFieldKey, message: string | null) =>
     setErrors((prev) => ({...prev, [lang]: {...prev[lang], [field]: message}}));
 
-  const hasAnyInput = (lang: Locale) => FIELD_ORDER.some((field) => translations[lang][field].trim() !== '');
+  const hasAnyInput = (lang: Locale) => visibleFields.some((field) => translations[lang][field].trim() !== '');
 
   // First non-empty value for a field across all languages (FR → EN → AR).
   const findSource = (field: TranslatableFieldKey): {lang: Locale; text: string} | null => {
@@ -65,7 +74,7 @@ export function MultilingualFields({translations, onChange}: Props) {
   };
 
   // True when at least one field has content in any language (so the button can act).
-  const hasAnythingToTranslate = FIELD_ORDER.some((field) => findSource(field) !== null);
+  const hasAnythingToTranslate = visibleFields.some((field) => findSource(field) !== null);
 
   // One-click translate: for every filled field, translate its source value into
   // ALL the other languages (overwriting them), so the button can be pressed
@@ -75,7 +84,7 @@ export function MultilingualFields({translations, onChange}: Props) {
     let failed = false;
     const tasks: Promise<void>[] = [];
 
-    for (const field of FIELD_ORDER) {
+    for (const field of visibleFields) {
       const source = findSource(field);
       if (!source) continue;
       for (const target of SOURCE_ORDER) {
@@ -110,64 +119,68 @@ export function MultilingualFields({translations, onChange}: Props) {
         <SectionTranslateButton onClick={translateAll} disabled={!hasAnythingToTranslate} />
       </div>
 
-      {/* Language tabs */}
-      <div
-        role="tablist"
-        aria-label="Langues du produit"
-        className="mb-6 flex items-center gap-1 rounded-md border border-brand-border bg-brand-surface p-1"
-      >
-        {TRANSLATION_LANGUAGES.map((lang) => {
-          const isActive = lang.key === active;
-          return (
-            <button
-              key={lang.key}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => setActive(lang.key)}
-              className={cn(
-                'flex flex-1 items-center justify-center gap-2 rounded px-4 py-2.5 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-brand-primary text-white shadow-sm'
-                  : 'text-brand-muted hover:bg-brand-light/60 hover:text-brand-secondary'
-              )}
-            >
-              {lang.label}
-              {hasAnyInput(lang.key) && (
-                <span
-                  className={cn(
-                    'inline-block h-1.5 w-1.5 rounded-full',
-                    isActive ? 'bg-white' : 'bg-brand-primary'
-                  )}
-                  title="Contient des données"
-                />
-              )}
-            </button>
-          );
-        })}
+      {/* Language tabs + right slot (e.g. Référence) */}
+      <div className="mb-6 flex items-center gap-1 rounded-md border border-brand-border bg-brand-surface p-1">
+        <div
+          role="tablist"
+          aria-label="Langues du produit"
+          className="flex flex-1 items-center gap-1"
+        >
+          {TRANSLATION_LANGUAGES.map((lang) => {
+            const isActive = lang.key === active;
+            return (
+              <button
+                key={lang.key}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setActive(lang.key)}
+                className={cn(
+                  'flex flex-1 items-center justify-center gap-2 rounded px-4 py-2.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-brand-primary text-white shadow-sm'
+                    : 'text-brand-muted hover:bg-brand-light/60 hover:text-brand-secondary'
+                )}
+              >
+                {lang.label}
+                {hasAnyInput(lang.key) && (
+                  <span
+                    className={cn(
+                      'inline-block h-1.5 w-1.5 rounded-full',
+                      isActive ? 'bg-white' : 'bg-brand-primary'
+                    )}
+                    title="Contient des données"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {rightSlot && <div className="ml-1 shrink-0">{rightSlot}</div>}
       </div>
 
       {/* Active language panel */}
       <div>
         <div className="space-y-6">
-          {FIELD_ORDER.filter((field) => !INLINE_FIELDS.includes(field)).map((field) => (
-            <FieldContent
-              key={field}
-              label={FIELD_LABELS[field]}
-              placeholder={FIELD_PLACEHOLDERS[field]}
-              dir={activeLang.dir}
-              value={translations[active][field]}
-              textarea={TEXTAREAS.includes(field)}
-              error={errors[active][field]}
-              onChange={(v) => onChange(active, field, v)}
-            />
-          ))}
-
-          {/* Composition / Largeur / Origine on one line */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {INLINE_FIELDS.map((field) => (
-              <div key={field}>
+          {visibleFields
+            .filter((field) => !INLINE_FIELDS.includes(field))
+            .map((field) => (
+              field === 'name' ? (
+                <div key={field} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FieldContent
+                    label={FIELD_LABELS[field]}
+                    placeholder={FIELD_PLACEHOLDERS[field]}
+                    dir={activeLang.dir}
+                    value={translations[active][field]}
+                    textarea={TEXTAREAS.includes(field)}
+                    error={errors[active][field]}
+                    onChange={(v) => onChange(active, field, v)}
+                  />
+                  {nameRightSlot?.(active)}
+                </div>
+              ) : (
                 <FieldContent
+                  key={field}
                   label={FIELD_LABELS[field]}
                   placeholder={FIELD_PLACEHOLDERS[field]}
                   dir={activeLang.dir}
@@ -176,8 +189,26 @@ export function MultilingualFields({translations, onChange}: Props) {
                   error={errors[active][field]}
                   onChange={(v) => onChange(active, field, v)}
                 />
-              </div>
+              )
             ))}
+
+          {/* Composition / Largeur / Origine on one line */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {visibleFields
+              .filter((field) => INLINE_FIELDS.includes(field))
+              .map((field) => (
+                <div key={field}>
+                  <FieldContent
+                    label={FIELD_LABELS[field]}
+                    placeholder={FIELD_PLACEHOLDERS[field]}
+                    dir={activeLang.dir}
+                    value={translations[active][field]}
+                    textarea={TEXTAREAS.includes(field)}
+                    error={errors[active][field]}
+                    onChange={(v) => onChange(active, field, v)}
+                  />
+                </div>
+              ))}
           </div>
         </div>
       </div>

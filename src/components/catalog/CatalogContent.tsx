@@ -6,6 +6,7 @@ import {useState, useMemo, useCallback} from 'react';
 import {Search, SlidersHorizontal, X, ChevronDown, ArrowUpDown} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {ProductCard} from '@/components/product/ProductCard';
+import {Checkbox} from '@/components/ui/Checkbox';
 import {type Product, type Category, type Locale, type FilterState, type Model} from '@/types';
 import {getModels} from '@/lib/modelsStore';
 
@@ -359,50 +360,37 @@ function FilterSidebar({
       {/* Categories */}
       <FilterSection title={t('categories')} expanded={expandedSections.categories} onToggle={() => toggleSection('categories')}>
         {categories.map((cat) => (
-          <label key={cat.id} className="flex items-center gap-2 py-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filters.categories.includes(cat.slug)}
-              onChange={() => toggleFilter('categories', cat.slug)}
-              className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
-            />
-            <span className="text-sm text-brand-secondary">
-              {cat.name[locale] || cat.name.fr}
-            </span>
-          </label>
+          <Checkbox
+            key={cat.id}
+            checked={filters.categories.includes(cat.slug)}
+            onChange={() => toggleFilter('categories', cat.slug)}
+          >
+            {cat.name[locale] || cat.name.fr}
+          </Checkbox>
         ))}
       </FilterSection>
 
       {/* Materials */}
       <FilterSection title={t('materials')} expanded={expandedSections.materials} onToggle={() => toggleSection('materials')}>
         {models.map((model) => (
-          <label key={model.id} className="flex items-center gap-2 py-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filters.materials.includes(model.id)}
-              onChange={() => toggleFilter('materials', model.id)}
-              className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
-            />
-            <span className="text-sm text-brand-secondary">
-              {model.name[locale] || model.name.fr}
-            </span>
-          </label>
+          <Checkbox
+            key={model.id}
+            checked={filters.materials.includes(model.id)}
+            onChange={() => toggleFilter('materials', model.id)}
+          >
+            {model.name[locale] || model.name.fr}
+          </Checkbox>
         ))}
       </FilterSection>
 
       {/* Availability */}
       <FilterSection title={t('availability')} expanded={expandedSections.availability} onToggle={() => toggleSection('availability')}>
-        <label className="flex items-center gap-2 py-1 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={filters.inStockOnly}
-            onChange={(e) => setFilters((prev) => ({...prev, inStockOnly: e.target.checked}))}
-            className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
-          />
-          <span className="text-sm text-brand-secondary">
-            {t('inStock')}
-          </span>
-        </label>
+        <Checkbox
+          checked={filters.inStockOnly}
+          onChange={(checked) => setFilters((prev) => ({...prev, inStockOnly: checked}))}
+        >
+          {t('inStock')}
+        </Checkbox>
       </FilterSection>
     </div>
   );
@@ -494,17 +482,14 @@ function FilterContent({
         {activeTab === 'categories' && (
           <div className="space-y-1">
             {categories.map((cat) => (
-              <label key={cat.id} className="flex items-center gap-2 py-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filters.categories.includes(cat.slug)}
-                  onChange={() => toggleFilter('categories', cat.slug)}
-                  className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
-                />
-                <span className="text-sm text-brand-secondary">
-                  {cat.name[locale] || cat.name.fr}
-                </span>
-              </label>
+              <Checkbox
+                key={cat.id}
+                checked={filters.categories.includes(cat.slug)}
+                onChange={() => toggleFilter('categories', cat.slug)}
+                className="py-2"
+              >
+                {cat.name[locale] || cat.name.fr}
+              </Checkbox>
             ))}
           </div>
         )}
@@ -512,34 +497,26 @@ function FilterContent({
         {activeTab === 'materials' && (
           <div className="space-y-1">
             {models.map((model) => (
-              <label key={model.id} className="flex items-center gap-2 py-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filters.materials.includes(model.id)}
-                  onChange={() => toggleFilter('materials', model.id)}
-                  className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
-                />
-                <span className="text-sm text-brand-secondary">
-                  {model.name[locale] || model.name.fr}
-                </span>
-              </label>
+              <Checkbox
+                key={model.id}
+                checked={filters.materials.includes(model.id)}
+                onChange={() => toggleFilter('materials', model.id)}
+                className="py-2"
+              >
+                {model.name[locale] || model.name.fr}
+              </Checkbox>
             ))}
           </div>
         )}
 
         {activeTab === 'availability' && (
           <div className="py-2">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={filters.inStockOnly}
-                onChange={(e) => setFilters((prev) => ({...prev, inStockOnly: e.target.checked}))}
-                className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
-              />
-              <span className="text-sm text-brand-secondary">
-                {t('inStock')}
-              </span>
-            </label>
+            <Checkbox
+              checked={filters.inStockOnly}
+              onChange={(checked) => setFilters((prev) => ({...prev, inStockOnly: checked}))}
+            >
+              {t('inStock')}
+            </Checkbox>
           </div>
         )}
       </div>

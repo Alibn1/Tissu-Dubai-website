@@ -4,34 +4,20 @@ import {useState} from 'react';
 import {cn} from '@/lib/utils';
 import type {Locale, Model} from '@/types';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
+import {ModelSelect} from '@/components/admin/ModelSelect';
 import {FileUploadButton, ImagePreview} from '@/components/admin/imageUpload';
+import {ColorVariantsEditor, type ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
 import {getModels} from '@/lib/modelsStore';
-import {clientTranslate, DEEPL_TARGET_CODE} from '@/lib/translation';
 import {
   createEmptyTranslations,
   type ProductTranslations,
   type TranslatableFieldKey,
 } from '@/lib/translation';
-import {
-  Trash2,
-  Plus,
-  Package,
-  Palette,
-  Search as SearchIcon,
-  Loader2,
-  Check,
-  ChevronDown,
-  Languages,
-} from 'lucide-react';
+import {Package, Palette, Search as SearchIcon, Check, Loader2, Trash2} from 'lucide-react';
 
 // ── Types ──
 
-export interface ColorVariantForm {
-  id: string;
-  colorLabel: Record<Locale, string>;
-  image: string;
-  inStock: boolean;
-}
+export type {ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
 
 export interface SeoFieldsForm {
   title: string;
@@ -45,6 +31,9 @@ export type SeoByLanguage = Record<Locale, SeoFieldsForm>;
 export interface ProductFormData {
   collection: string;
   modelId: string;
+  reference: string;
+  mainColor: Record<Locale, string>;
+  isMainColor: boolean;
   price: string;
   inStock: boolean;
   featured: boolean;
@@ -68,9 +57,6 @@ const COLLECTIONS: {value: string; label: string}[] = [
   {value: 'tekchita', label: 'Takchita'},
 ];
 
-let uidCounter = 0;
-const uid = () => `v-${Date.now()}-${uidCounter++}`;
-
 const inputClass = cn(
   'w-full rounded-md border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-secondary',
   'placeholder:text-brand-muted/70',
@@ -89,10 +75,15 @@ function createEmptySeo(): SeoByLanguage {
   };
 }
 
+const uidCounter = 0;
+
 export function createEmptyFormData(): ProductFormData {
   return {
     collection: '',
     modelId: '',
+    reference: `TD-${Date.now().toString(36).toUpperCase()}${uidCounter}`,
+    mainColor: {en: '', fr: '', ar: ''},
+    isMainColor: true,
     price: '',
     inStock: true,
     featured: false,
@@ -122,113 +113,6 @@ function generateSeoAltImage(_lang: Locale, name: string): string {
 type SeoFieldKey = keyof Omit<SeoFieldsForm, 'enabled'>;
 
 // ── Sub components ──
-
-function ModelSelect({
-  models,
-  value,
-  onChange,
-  placeholder,
-}: {
-  models: Model[];
-  value: string;
-  onChange: (id: string) => void;
-  placeholder: string;
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={cn(inputClass, 'appearance-none pr-9')}
-      >
-        <option value="">{placeholder}</option>
-        {models.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.name.fr}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
-    </div>
-  );
-}
-
-const COLOR_LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'; placeholder: string}[] = [
-  {key: 'fr', label: 'FR', dir: 'ltr', placeholder: 'Couleur (fr)'},
-  {key: 'en', label: 'EN', dir: 'ltr', placeholder: 'Color (en)'},
-  {key: 'ar', label: 'AR', dir: 'rtl', placeholder: 'اللون'},
-];
-
-function VariantColorFields({
-  colorLabel,
-  onChange,
-}: {
-  colorLabel: Record<Locale, string>;
-  onChange: (next: Record<Locale, string>) => void;
-}) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const hasAnyInput = COLOR_LANGUAGES.some((lang) => colorLabel[lang.key].trim() !== '');
-
-  const translate = async () => {
-    const source = COLOR_LANGUAGES.find((lang) => colorLabel[lang.key].trim() !== '');
-    if (!source) return;
-    setBusy(true);
-    setError(null);
-    try {
-      for (const target of COLOR_LANGUAGES) {
-        if (target.key === source.key) continue;
-        const translated = await clientTranslate(
-          colorLabel[source.key].trim(),
-          DEEPL_TARGET_CODE[target.key],
-          source.key
-        );
-        onChange({...colorLabel, [target.key]: translated});
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Échec de la traduction');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-1 flex-col gap-2">
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {COLOR_LANGUAGES.map((lang) => (
-          <div key={lang.key} className="flex items-center gap-2">
-            <span className="shrink-0 text-xs font-semibold uppercase text-brand-muted">
-              {lang.label}
-            </span>
-            <input
-              dir={lang.dir}
-              value={colorLabel[lang.key]}
-              onChange={(e) => onChange({...colorLabel, [lang.key]: e.target.value})}
-              className={inputClass}
-              placeholder={lang.placeholder}
-            />
-          </div>
-        ))}
-      </div>
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => void translate()}
-          disabled={busy || !hasAnyInput}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-md bg-brand-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors',
-            'hover:bg-brand-primary/90 disabled:cursor-not-allowed disabled:opacity-50'
-          )}
-        >
-          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Languages className="h-3.5 w-3.5" />}
-          {busy ? 'Traduction…' : 'Traduire'}
-        </button>
-        {error && <span className="text-[11px] leading-tight text-brand-error">{error}</span>}
-      </div>
-    </div>
-  );
-}
 
 function Section({
   icon: Icon,
@@ -342,6 +226,8 @@ export function ProductForm({mode, productId, initialData}: Props) {
       } as SeoByLanguage,
     };
   });
+  const [colorError, setColorError] = useState<string | null>(null);
+  const [referenceError, setReferenceError] = useState<string | null>(null);
   const [models] = useState<Model[]>(() => getModels());
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -369,27 +255,6 @@ export function ProductForm({mode, productId, initialData}: Props) {
       seo: {...f.seo, [lang]: {...f.seo[lang], enabled}},
     }));
 
-  const addColorVariant = () =>
-    setFormData((f) => ({
-      ...f,
-      colorVariants: [
-        ...f.colorVariants,
-        {id: uid(), colorLabel: {fr: '', en: '', ar: ''}, image: '', inStock: true},
-      ],
-    }));
-
-  const updateColorVariant = (id: string, patch: Partial<ColorVariantForm>) =>
-    setFormData((f) => ({
-      ...f,
-      colorVariants: f.colorVariants.map((v) => (v.id === id ? {...v, ...patch} : v)),
-    }));
-
-  const removeColorVariant = (id: string) =>
-    setFormData((f) => ({
-      ...f,
-      colorVariants: f.colorVariants.filter((v) => v.id !== id),
-    }));
-
   const selectCollection = (collection: string) =>
     setFormData((f) => ({...f, collection, modelId: ''}));
 
@@ -413,7 +278,20 @@ export function ProductForm({mode, productId, initialData}: Props) {
 
   // Build the payload to send — swap with a real API call later.
   const buildPayload = () => {
-    const {collection, modelId, price, inStock, featured, isNew, baseImages, colorVariants, seo} = formData;
+    const {
+      collection,
+      modelId,
+      reference,
+      mainColor,
+      isMainColor,
+      price,
+      inStock,
+      featured,
+      isNew,
+      baseImages,
+      colorVariants,
+      seo,
+    } = formData;
 
     const pick = (field: keyof ProductTranslations['en']): Record<Locale, string> => ({
       en: translations.en[field],
@@ -442,11 +320,48 @@ export function ProductForm({mode, productId, initialData}: Props) {
       ) as Record<Locale, string[]>;
     };
 
+    // The main color entered next to "Nom du produit" is ALWAYS saved as
+    // a color variant (first, "Principale" by default), so it shows up in
+    // "Variantes de couleur" on the edit page even if no extra color was added.
+    const baseVariants = [...colorVariants].sort(
+      (a, b) => Number(b.isDefault) - Number(a.isDefault)
+    );
+    const hasMainColor = (['fr', 'en', 'ar'] as Locale[]).some(
+      (lang) => mainColor[lang].trim() !== ''
+    );
+    let colorVariantsPayload: ColorVariantForm[] = baseVariants;
+    if (hasMainColor) {
+      const existingMainIndex = baseVariants.findIndex(
+        (v) =>
+          v.colorLabel.fr.trim() !== '' &&
+          v.colorLabel.fr.trim() === mainColor.fr.trim()
+      );
+      if (existingMainIndex === -1) {
+        colorVariantsPayload = [
+          {
+            id: 'v-main',
+            colorLabel: mainColor,
+            image: '',
+            inStock: true,
+            isDefault: isMainColor,
+          },
+          ...baseVariants,
+        ];
+      } else if (isMainColor) {
+        colorVariantsPayload = baseVariants.map((v, i) => ({
+          ...v,
+          isDefault: i === existingMainIndex,
+        }));
+      }
+    }
+
     return {
       ...(mode === 'edit' && productId ? {id: productId} : {}),
       name: pick('name'),
       description: pick('description'),
-      material: pick('materials'),
+      reference,
+      mainColor,
+      material: selectedModel?.name ?? {fr: '', en: '', ar: ''},
       materialSlug: selectedModel?.slug ?? '',
       collection,
       modelId,
@@ -459,7 +374,8 @@ export function ProductForm({mode, productId, initialData}: Props) {
       featured,
       isNew,
       baseImages,
-      colorVariants,
+      isMainColor,
+      colorVariants: colorVariantsPayload,
       seo,
     };
   };
@@ -480,6 +396,24 @@ export function ProductForm({mode, productId, initialData}: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const hasMainColor = (['fr', 'en', 'ar'] as Locale[]).some(
+      (lang) => formData.mainColor[lang].trim() !== ''
+    );
+    if (!hasMainColor) {
+      setColorError('Saisissez la couleur principale du produit.');
+      setReferenceError(null);
+      return;
+    }
+
+    if (!formData.reference.trim()) {
+      setColorError(null);
+      setReferenceError('Saisissez la référence du produit.');
+      return;
+    }
+    setColorError(null);
+    setReferenceError(null);
+
     setSaving(true);
     try {
       const ok = await saveProduct();
@@ -500,7 +434,38 @@ export function ProductForm({mode, productId, initialData}: Props) {
         title="Informations produit"
         subtitle="Les informations de base du produit"
       >
-        <MultilingualFields translations={translations} onChange={setTranslationValue} />
+        <MultilingualFields
+          translations={translations}
+          onChange={setTranslationValue}
+          exclude={['materials']}
+          nameRightSlot={(lang) => (
+            <div>
+              <label className={labelClass}>Couleur</label>
+              <input
+                type="text"
+                dir={lang === 'ar' ? 'rtl' : 'ltr'}
+                value={formData.mainColor[lang]}
+                onChange={(e) => {
+                  setColorError(null);
+                  setFormData((f) => ({
+                    ...f,
+                    mainColor: {...f.mainColor, [lang]: e.target.value},
+                  }));
+                }}
+                className={cn(inputClass, colorError && 'border-brand-error')}
+                placeholder={
+                  lang === 'fr' ? 'Ex. Bordeaux'
+                    : lang === 'en' ? 'Ex. Burgundy'
+                    : 'أحمر داكن'
+                }
+                aria-invalid={!!colorError}
+              />
+              {colorError && (
+                <p className="mt-1 text-xs text-brand-error">{colorError}</p>
+              )}
+            </div>
+          )}
+        />
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -548,6 +513,24 @@ export function ProductForm({mode, productId, initialData}: Props) {
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
+            <label className={labelClass}>Référence</label>
+            <input
+              type="text"
+              value={formData.reference}
+              onChange={(e) => {
+                setReferenceError(null);
+                setField('reference', e.target.value);
+              }}
+              className={cn(inputClass, referenceError && 'border-brand-error')}
+            />
+            <p className="mt-1 text-xs text-brand-muted">
+              Générée automatiquement — vous pouvez la modifier.
+            </p>
+            {referenceError && (
+              <p className="mt-1 text-xs text-brand-error">{referenceError}</p>
+            )}
+          </div>
+          <div>
             <label className={labelClass}>Prix (MAD)</label>
             <input
               type="number"
@@ -559,35 +542,56 @@ export function ProductForm({mode, productId, initialData}: Props) {
           </div>
         </div>
 
-        <div className="mt-6">
-          <label className={labelClass}>Statut</label>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            {(
-              [
-                {key: 'inStock', label: 'En stock'},
-                {key: 'featured', label: 'En vedette'},
-                {key: 'isNew', label: 'Nouveau'},
-              ] as const
-            ).map((opt) => {
-              const active = formData[opt.key];
-              return (
-                <button
-                  key={opt.key}
-                  type="button"
-                  onClick={() => setField(opt.key, !active)}
-                  aria-pressed={active}
-                  className={cn(
-                    'inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition-all',
-                    active
-                      ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
-                      : 'border-brand-border bg-transparent text-brand-muted hover:border-brand-primary/60 hover:text-brand-secondary'
-                  )}
-                >
-                  {active && <Check className="h-4 w-4 shrink-0" />}
-                  {opt.label}
-                </button>
-              );
-            })}
+        <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <label className={labelClass}>Statut</label>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              {(
+                [
+                  {key: 'inStock', label: 'En stock'},
+                  {key: 'featured', label: 'En vedette'},
+                  {key: 'isNew', label: 'Nouveau'},
+                ] as const
+              ).map((opt) => {
+                const active = formData[opt.key];
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => setField(opt.key, !active)}
+                    aria-pressed={active}
+                    className={cn(
+                      'inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition-all',
+                      active
+                        ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
+                        : 'border-brand-border bg-transparent text-brand-muted hover:border-brand-primary/60 hover:text-brand-secondary'
+                    )}
+                  >
+                    {active && <Check className="h-4 w-4 shrink-0" />}
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Statut de couleur</label>
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => setField('isMainColor', !formData.isMainColor)}
+                aria-pressed={formData.isMainColor}
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition-all',
+                  formData.isMainColor
+                    ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
+                    : 'border-brand-border bg-transparent text-brand-muted hover:border-brand-primary/60 hover:text-brand-secondary'
+                )}
+              >
+                {formData.isMainColor && <Check className="h-4 w-4 shrink-0" />}
+                Principale
+              </button>
+            </div>
           </div>
         </div>
 
@@ -627,58 +631,10 @@ export function ProductForm({mode, productId, initialData}: Props) {
         title="Variantes de couleur"
         subtitle="Ajoutez plusieurs couleurs sous le même produit"
       >
-        {formData.colorVariants.length === 0 ? (
-          <div className="mb-4 rounded-md border border-dashed border-brand-border p-6 text-center text-sm text-brand-muted">
-            Aucune variante de couleur pour le moment.
-          </div>
-        ) : (
-          <div className="mb-4 space-y-3">
-            {formData.colorVariants.map((variant) => (
-              <div
-                key={variant.id}
-                className="flex items-center gap-3 rounded-md border border-brand-border p-3"
-              >
-                <ImagePreview src={variant.image} alt={variant.colorLabel.fr || 'Variante'} />
-                <div className="flex flex-1 flex-col gap-2">
-                  <VariantColorFields
-                    colorLabel={variant.colorLabel}
-                    onChange={(colorLabel) => updateColorVariant(variant.id, {colorLabel})}
-                  />
-                  <FileUploadButton
-                    onUpload={(dataUrl) => updateColorVariant(variant.id, {image: dataUrl})}
-                    label={variant.image ? 'Changer l’image' : 'Ajouter une image'}
-                  />
-                </div>
-                <label className="flex shrink-0 items-center gap-2 text-sm text-brand-secondary">
-                  <input
-                    type="checkbox"
-                    checked={variant.inStock}
-                    onChange={(e) => updateColorVariant(variant.id, {inStock: e.target.checked})}
-                    className="h-4 w-4 rounded border-brand-border text-brand-primary focus:ring-brand-primary"
-                  />
-                  En stock
-                </label>
-                <button
-                  type="button"
-                  onClick={() => removeColorVariant(variant.id)}
-                  className="shrink-0 rounded-md p-2 text-brand-muted hover:bg-brand-light hover:text-brand-error transition-colors"
-                  aria-label="Supprimer la variante"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={addColorVariant}
-          className="inline-flex items-center gap-2 rounded-md border border-dashed border-brand-border px-3 py-2 text-sm text-brand-muted hover:border-brand-primary hover:text-brand-primary transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          Ajouter une couleur
-        </button>
+        <ColorVariantsEditor
+          variants={formData.colorVariants}
+          onChange={(next) => setField('colorVariants', next)}
+        />
       </Section>
 
       {/* ── 3. SEO Management ── */}

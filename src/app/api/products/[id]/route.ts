@@ -33,6 +33,7 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
   if (body.inStock !== undefined) product.inStock = body.inStock;
   if (body.featured !== undefined) product.featured = body.featured;
   if (body.isNew !== undefined) product.isNew = body.isNew;
+  if (body.variants !== undefined) product.variants = body.variants;
 
   return NextResponse.json({success: true, product});
 }
