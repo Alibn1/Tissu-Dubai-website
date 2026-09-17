@@ -1,23 +1,22 @@
-import type {Product, Category, Collection} from '@/types';
-import {products as mockProducts} from '@/mock/products';
-import {categories as mockCategories} from '@/mock/categories';
-import {collections as mockCollections} from '@/mock/collections';
-import {getDefaultSiteSettings, type CategoryCard, type HomepageContent} from '@/lib/siteSettings';
+import type {Product, Category} from '@/types';
+import {
+  getAllProducts,
+  getProductBySlug as getProductBySlugFromStore,
+  getCategories as getCategoriesFromStore,
+  getCategoryBySlug as getCategoryBySlugFromStore,
+  getSiteSettings,
+} from '@/lib/data/store';
+import type {CategoryCard, HomepageContent} from '@/lib/siteSettings';
 
-function simulateDelay(ms = 100): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function getHomepageContent(): HomepageContent {
+  return getSiteSettings().homepage;
 }
 
-async function getHomepageContent(): Promise<HomepageContent> {
-  // TODO: load from a real API / durable storage (e.g. GET /api/site-settings or a KV/D1 binding).
-  return getDefaultSiteSettings().homepage;
-}
-
-async function loadMergedCategories(): Promise<Category[]> {
-  const homepage = await getHomepageContent();
+function loadMergedCategories(): Category[] {
+  const homepage = getHomepageContent();
   const cardsBySlug = new Map<string, CategoryCard>(homepage.categoryCards.map((card) => [card.id, card]));
 
-  return mockCategories.map((cat) => {
+  return getCategoriesFromStore().map((cat) => {
     const card = cardsBySlug.get(cat.slug);
     if (!card) return cat;
     return {
@@ -33,14 +32,11 @@ export async function getProducts(filters?: {
   category?: string;
   material?: string;
   color?: string;
-  collection?: string;
   inStockOnly?: boolean;
   search?: string;
   sort?: string;
 }): Promise<Product[]> {
-  await simulateDelay();
-
-  let filtered = [...mockProducts];
+  let filtered = [...getAllProducts()];
 
   if (filters?.category) {
     filtered = filtered.filter((p) => p.category.slug === filters.category);
@@ -55,18 +51,16 @@ export async function getProducts(filters?: {
       )
     );
   }
-  if (filters?.collection) {
-    filtered = filtered.filter((p) => p.collection?.slug === filters.collection);
-  }
   if (filters?.inStockOnly) {
     filtered = filtered.filter((p) => p.inStock);
   }
   if (filters?.search) {
     const term = filters.search.toLowerCase();
-    filtered = filtered.filter((p) =>
-      Object.values(p.name).some((n) => n.toLowerCase().includes(term)) ||
-      Object.values(p.material).some((m) => m.toLowerCase().includes(term)) ||
-      p.reference.toLowerCase().includes(term)
+    filtered = filtered.filter(
+      (p) =>
+        Object.values(p.name).some((n) => n.toLowerCase().includes(term)) ||
+        Object.values(p.material).some((m) => m.toLowerCase().includes(term)) ||
+        p.reference.toLowerCase().includes(term)
     );
   }
 
@@ -93,60 +87,33 @@ export async function getProducts(filters?: {
   return filtered;
 }
 
-export async function getProductBySlug(
-  slug: string,
-  category?: string
-): Promise<Product | null> {
-  await simulateDelay();
-  const product = mockProducts.find(
-    (p) =>
-      p.slug === slug && (!category || p.category.slug === category)
-  );
-  return product || null;
+export async function getProductBySlug(slug: string, category?: string): Promise<Product | null> {
+  return getProductBySlugFromStore(slug, category);
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
-  await simulateDelay();
-  return mockProducts.filter((p) => p.featured).slice(0, limit);
+  return getAllProducts().filter((p) => p.featured).slice(0, limit);
 }
 
 export async function getNewArrivals(limit = 8): Promise<Product[]> {
-  await simulateDelay();
-  return mockProducts.filter((p) => p.isNew).slice(0, limit);
+  return getAllProducts().filter((p) => p.isNew).slice(0, limit);
 }
 
 export async function getCategories(): Promise<Category[]> {
-  await simulateDelay();
   return loadMergedCategories();
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  await simulateDelay();
-  const merged = await loadMergedCategories();
+  const merged = loadMergedCategories();
   return merged.find((c) => c.slug === slug) || null;
 }
 
-export async function getCollections(): Promise<Collection[]> {
-  await simulateDelay();
-  return mockCollections;
-}
-
-export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
-  await simulateDelay();
-  return mockCollections.find((c) => c.slug === slug) || null;
-}
-
-export async function getRelatedProducts(
-  product: Product,
-  limit = 4
-): Promise<Product[]> {
-  await simulateDelay();
-  return mockProducts
+export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
+  return getAllProducts()
     .filter(
       (p) =>
         p.id !== product.id &&
-        (p.category.slug === product.category.slug ||
-          p.materialSlug === product.materialSlug)
+        (p.category.slug === product.category.slug || p.materialSlug === product.materialSlug)
     )
     .slice(0, limit);
 }

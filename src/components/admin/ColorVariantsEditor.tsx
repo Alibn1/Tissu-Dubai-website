@@ -107,9 +107,18 @@ export function VariantColorFields({
 export function ColorVariantsEditor({
   variants,
   onChange,
+  // Notifies the parent when a variant is marked "Principale", so the parent
+  // can switch off its own default indicator (only one Principale overall).
+  onDefaultChange,
+  // Validation: rows listed here are highlighted and show the row message.
+  invalidIds = [],
+  rowErrorMessage = 'Image requise pour cette couleur.',
 }: {
   variants: ColorVariantForm[];
   onChange: (next: ColorVariantForm[]) => void;
+  onDefaultChange?: () => void;
+  invalidIds?: string[];
+  rowErrorMessage?: string;
 }) {
   const addVariant = () =>
     onChange([
@@ -119,15 +128,17 @@ export function ColorVariantsEditor({
         colorLabel: {fr: '', en: '', ar: ''},
         image: '',
         inStock: true,
-        isDefault: variants.length === 0,
+        isDefault: false,
       },
     ]);
 
   const updateVariant = (id: string, patch: Partial<ColorVariantForm>) =>
     onChange(variants.map((v) => (v.id === id ? {...v, ...patch} : v)));
 
-  const setDefault = (id: string) =>
+  const setDefault = (id: string) => {
     onChange(variants.map((v) => ({...v, isDefault: v.id === id})));
+    onDefaultChange?.();
+  };
 
   const removeVariant = (id: string) =>
     onChange(variants.filter((v) => v.id !== id));
@@ -143,7 +154,13 @@ export function ColorVariantsEditor({
           {variants.map((variant) => (
             <div
               key={variant.id}
-              className="flex flex-wrap items-center gap-3 rounded-md border border-brand-border p-3"
+              id={`variant-row-${variant.id}`}
+              className={cn(
+                'flex flex-wrap items-center gap-3 rounded-md border p-3',
+                invalidIds.includes(variant.id)
+                  ? 'border-brand-error bg-brand-error/5'
+                  : 'border-brand-border'
+              )}
             >
               <VariantImageControl
                 src={variant.image}
@@ -158,20 +175,20 @@ export function ColorVariantsEditor({
                 />
               </div>
               <button
-                type="button"
-                onClick={() => setDefault(variant.id)}
-                aria-pressed={variant.isDefault}
-                title="Couleur affichée sur le produit / proposée en premier lors d'une commande"
-                className={cn(
-                  'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
-                  variant.isDefault
-                    ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
-                    : 'border-brand-border bg-transparent text-brand-muted hover:border-brand-primary/60 hover:text-brand-secondary'
-                )}
-              >
-                {variant.isDefault && <Check className="h-3.5 w-3.5 shrink-0" />}
-                Principale
-              </button>
+                  type="button"
+                  onClick={() => setDefault(variant.id)}
+                  aria-pressed={variant.isDefault}
+                  title="Couleur affichée sur le produit / proposée en premier lors d'une commande"
+                  className={cn(
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
+                    variant.isDefault
+                      ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
+                      : 'border-brand-border bg-transparent text-brand-muted hover:border-brand-primary/60 hover:text-brand-secondary'
+                  )}
+                >
+                  {variant.isDefault && <Check className="h-3.5 w-3.5 shrink-0" />}
+                  Principale
+                </button>
               <button
                 type="button"
                 onClick={() => updateVariant(variant.id, {inStock: !variant.inStock})}
@@ -194,6 +211,9 @@ export function ColorVariantsEditor({
               >
                 <Trash2 className="h-4 w-4" />
               </button>
+              {invalidIds.includes(variant.id) && (
+                <p className="w-full text-xs font-medium text-brand-error">{rowErrorMessage}</p>
+              )}
             </div>
           ))}
         </div>

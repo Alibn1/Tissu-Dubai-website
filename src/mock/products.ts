@@ -51,57 +51,6 @@ const categories = {
   },
 };
 
-const collections = {
-  "royal-heritage": {
-    id: "col-royal-heritage",
-    slug: "royal-heritage",
-    name: {
-      fr: "Héritage Royal",
-      ar: "التراث الملكي",
-      en: "Royal Heritage",
-    },
-    description: {
-      fr: "Inspirée par la splendeur des palais royaux marocains, cette collection célèbre le luxe intemporel et l'élégance souveraine.",
-      ar: "مستوحاة من روعة القصور الملكية المغربية، تحتفي هذه المجموعة بالفخامة الخالدة والأناقة السيادية.",
-      en: "Inspired by the splendor of Moroccan royal palaces, this collection celebrates timeless luxury and sovereign elegance.",
-    },
-    image: "/images/collections/royal-heritage.svg",
-    productCount: 8,
-  },
-  "casablanca-gold": {
-    id: "col-casablanca-gold",
-    slug: "casablanca-gold",
-    name: {
-      fr: "Casablanca Gold",
-      ar: "كازابلانكا غولد",
-      en: "Casablanca Gold",
-    },
-    description: {
-      fr: "Une collection qui capture l'esprit glamour de Casablanca avec des tons dorés et des motifs géométriques audacieux.",
-      ar: "مجموعة تعكس روح كازابلانكا الساحرة مع درجات ذهبية ونقوش هندسية جريئة.",
-      en: "A collection that captures the glamorous spirit of Casablanca with golden tones and bold geometric patterns.",
-    },
-    image: "/images/collections/casablanca-gold.svg",
-    productCount: 5,
-  },
-  "silk-dreams": {
-    id: "col-silk-dreams",
-    slug: "silk-dreams",
-    name: {
-      fr: "Rêves de Soie",
-      ar: "أحلام الحرير",
-      en: "Silk Dreams",
-    },
-    description: {
-      fr: "Un voyage sensoriel dans le monde de la soie, où chaque tissu raconte une histoire de douceur et de raffinement.",
-      ar: "رحلة حسية في عالم الحرير، حيث يحكي كل قماش قصة نعومة ورقي.",
-      en: "A sensory journey into the world of silk, where every fabric tells a story of softness and refinement.",
-    },
-    image: "/images/collections/silk-dreams.svg",
-    productCount: 5,
-  },
-};
-
 export const products: Product[] = [
   // ── 1. Soie Royale Dubai ──
   {
@@ -128,7 +77,6 @@ export const products: Product[] = [
     price: 890,
     inStock: true,
     category: categories.caftan,
-    collection: collections["royal-heritage"],
     variants: [
       {
         id: "var-001-1",
@@ -219,7 +167,6 @@ export const products: Product[] = [
     price: 750,
     inStock: true,
     category: categories.caftan,
-    collection: collections["royal-heritage"],
     variants: [
       {
         id: "var-002-1",
@@ -300,7 +247,6 @@ export const products: Product[] = [
     price: 650,
     inStock: true,
     category: categories.caftan,
-    collection: collections["royal-heritage"],
     variants: [
       {
         id: "var-003-1",
@@ -391,7 +337,6 @@ export const products: Product[] = [
     price: 420,
     inStock: true,
     category: categories.caftan,
-    collection: collections["silk-dreams"],
     variants: [
       {
         id: "var-004-1",
@@ -462,7 +407,6 @@ export const products: Product[] = [
     price: 950,
     inStock: true,
     category: categories.caftan,
-    collection: collections["royal-heritage"],
     variants: [
       {
         id: "var-005-1",
@@ -543,7 +487,6 @@ export const products: Product[] = [
     price: 380,
     inStock: true,
     category: categories.caftan,
-    collection: collections["casablanca-gold"],
     variants: [
       {
         id: "var-006-1",
@@ -624,7 +567,6 @@ export const products: Product[] = [
     price: 290,
     inStock: true,
     category: categories.caftan,
-    collection: collections["silk-dreams"],
     variants: [
       {
         id: "var-007-1",
@@ -705,7 +647,6 @@ export const products: Product[] = [
     price: 220,
     inStock: true,
     category: categories.jellaba,
-    collection: collections["royal-heritage"],
     variants: [
       {
         id: "var-008-1",
@@ -786,7 +727,6 @@ export const products: Product[] = [
     price: 580,
     inStock: true,
     category: categories.jellaba,
-    collection: collections["silk-dreams"],
     variants: [
       {
         id: "var-009-1",
@@ -857,7 +797,6 @@ export const products: Product[] = [
     price: 180,
     inStock: true,
     category: categories.jellaba,
-    collection: collections["royal-heritage"],
     variants: [
       {
         id: "var-010-1",
@@ -938,7 +877,6 @@ export const products: Product[] = [
     price: 490,
     inStock: true,
     category: categories.jellaba,
-    collection: collections["casablanca-gold"],
     variants: [
       {
         id: "var-011-1",
@@ -1019,7 +957,6 @@ export const products: Product[] = [
     price: 150,
     inStock: true,
     category: categories.jellaba,
-    collection: collections["royal-heritage"],
     variants: [
       {
         id: "var-012-1",
@@ -1090,7 +1027,6 @@ export const products: Product[] = [
     price: 820,
     inStock: true,
     category: categories.tekchita,
-    collection: collections["silk-dreams"],
     variants: [
       {
         id: "var-013-1",
@@ -1171,7 +1107,6 @@ export const products: Product[] = [
     price: 680,
     inStock: true,
     category: categories.tekchita,
-    collection: collections["casablanca-gold"],
     variants: [
       {
         id: "var-014-1",
@@ -1252,7 +1187,6 @@ export const products: Product[] = [
     price: 550,
     inStock: true,
     category: categories.tekchita,
-    collection: collections["royal-heritage"],
     variants: [
       {
         id: "var-015-1",
@@ -1323,7 +1257,6 @@ export const products: Product[] = [
     price: 1100,
     inStock: true,
     category: categories.tekchita,
-    collection: collections["silk-dreams"],
     variants: [
       {
         id: "var-016-1",

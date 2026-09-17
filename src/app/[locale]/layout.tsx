@@ -5,6 +5,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
 import {SiteChrome} from '@/components/layout/SiteChrome';
+import {getSiteSettings} from '@/lib/data/store';
 import '../globals.css';
 
 export function generateStaticParams() {
@@ -74,11 +75,13 @@ export default async function LocaleLayout({children, params}: LocaleLayoutProps
     notFound();
   }
 
+  const siteSettings = getSiteSettings();
+
   return (
     <html lang={lang} dir={dir} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <SiteChrome>{children}</SiteChrome>
+          <SiteChrome settings={siteSettings}>{children}</SiteChrome>
         </NextIntlClientProvider>
       </body>
     </html>

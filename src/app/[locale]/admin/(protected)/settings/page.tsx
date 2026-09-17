@@ -1,6 +1,6 @@
 import {setRequestLocale} from 'next-intl/server';
 import {SiteSettingsForm} from '@/components/admin/SiteSettingsForm';
-import {getDefaultSiteSettings} from '@/lib/siteSettings';
+import {getSiteSettings} from '@/lib/data/store';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -21,7 +21,7 @@ export default async function AdminSettingsPage({params}: Props) {
         </p>
       </div>
 
-      <SiteSettingsForm initialData={getDefaultSiteSettings()} />
+      <SiteSettingsForm initialData={getSiteSettings()} />
     </div>
   );
 }

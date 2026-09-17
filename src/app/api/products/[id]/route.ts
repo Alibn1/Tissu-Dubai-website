@@ -1,11 +1,13 @@
 import {NextRequest, NextResponse} from 'next/server';
-import {products} from '@/mock/products';
+import {getProductById, updateProduct, deleteProduct, type ProductInput} from '@/lib/data/store';
+import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
+import {missingVariantImageMessage, variantsMissingImage} from '@/lib/variantValidation';
 
 type Params = Promise<{id: string}>;
 
 export async function GET(_request: NextRequest, {params}: {params: Params}) {
   const {id} = await params;
-  const product = products.find((p) => p.id === id);
+  const product = getProductById(id);
   if (!product) {
     return NextResponse.json({error: 'Product not found'}, {status: 404});
   }
@@ -13,38 +15,63 @@ export async function GET(_request: NextRequest, {params}: {params: Params}) {
 }
 
 export async function PUT(request: NextRequest, {params}: {params: Params}) {
+  if (!isAdminRequest(request)) return unauthorizedResponse();
+
   const {id} = await params;
   const body = await request.json();
-
-  const productIndex = products.findIndex((p) => p.id === id);
-  if (productIndex === -1) {
+  const product = getProductById(id);
+  if (!product) {
     return NextResponse.json({error: 'Product not found'}, {status: 404});
   }
 
-  // Update fields on the in-memory product (persisted only in mock data for now)
-  const product = products[productIndex];
-  if (body.name !== undefined) product.name = body.name;
-  if (body.description !== undefined) product.description = body.description;
-  if (body.material !== undefined) product.material = body.material;
-  if (body.materialSlug !== undefined) product.materialSlug = body.materialSlug;
-  if (body.width !== undefined) product.width = body.width;
-  if (body.characteristics !== undefined) product.characteristics = body.characteristics;
-  if (body.price !== undefined) product.price = body.price;
-  if (body.inStock !== undefined) product.inStock = body.inStock;
-  if (body.featured !== undefined) product.featured = body.featured;
-  if (body.isNew !== undefined) product.isNew = body.isNew;
-  if (body.variants !== undefined) product.variants = body.variants;
+  const input: Partial<ProductInput> = {
+    name: body.name ?? product.name,
+    description: body.description ?? product.description,
+    material: body.material ?? product.material,
+    materialSlug: body.materialSlug ?? product.materialSlug,
+    characteristics: body.characteristics ?? product.characteristics,
+    width: body.width !== undefined ? body.width : product.width,
+    price: body.price !== undefined ? body.price : product.price,
+    inStock: body.inStock ?? product.inStock,
+    featured: body.featured ?? product.featured,
+    isNew: body.isNew ?? product.isNew,
+    variants: Array.isArray(body.variants)
+      ? body.variants.map((v: Record<string, unknown>) => ({
+          id: typeof v.id === 'string' ? v.id : undefined,
+          color: v.color ?? {fr: '', ar: '', en: ''},
+          colorHex: typeof v.colorHex === 'string' ? v.colorHex : '#000000',
+          sku: typeof v.sku === 'string' ? v.sku : '',
+          price: v.price == null ? null : Number(v.price),
+          inStock: v.inStock !== false,
+          images: Array.isArray(v.images) ? v.images : [],
+        }))
+      : undefined,
+  };
 
-  return NextResponse.json({success: true, product});
+  const missingImages = variantsMissingImage(input.variants ?? []);
+  if (missingImages.length > 0) {
+    return NextResponse.json(
+      {error: missingVariantImageMessage(missingImages.map((v) => v.color))},
+      {status: 400}
+    );
+  }
+
+  try {
+    const updated = updateProduct(id, input);
+    return NextResponse.json({success: true, product: updated});
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update product';
+    return NextResponse.json({error: message}, {status: 400});
+  }
 }
 
 export async function DELETE(_request: NextRequest, {params}: {params: Params}) {
+  if (!isAdminRequest(_request)) return unauthorizedResponse();
+
   const {id} = await params;
-  const index = products.findIndex((p) => p.id === id);
-  if (index === -1) {
+  const deleted = deleteProduct(id);
+  if (!deleted) {
     return NextResponse.json({error: 'Product not found'}, {status: 404});
   }
-
-  products.splice(index, 1);
   return NextResponse.json({success: true});
 }

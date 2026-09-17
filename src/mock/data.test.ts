@@ -1,7 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {products} from '@/mock/products';
 import {categories} from '@/mock/categories';
-import {collections} from '@/mock/collections';
 
 describe('Mock Data', () => {
   describe('Products', () => {
@@ -73,20 +72,6 @@ describe('Mock Data', () => {
         expect(cat.name.fr).toBeTruthy();
         expect(cat.name.ar).toBeTruthy();
         expect(cat.name.en).toBeTruthy();
-      });
-    });
-  });
-
-  describe('Collections', () => {
-    it('has 3 collections', () => {
-      expect(collections).toHaveLength(3);
-    });
-
-    it('all collections have translations', () => {
-      collections.forEach((col) => {
-        expect(col.name.fr).toBeTruthy();
-        expect(col.name.ar).toBeTruthy();
-        expect(col.name.en).toBeTruthy();
       });
     });
   });

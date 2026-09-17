@@ -1,4 +1,5 @@
 import {setRequestLocale} from 'next-intl/server';
+import {getCategories, getModels} from '@/lib/data/store';
 import {ProductForm} from '@/components/admin/ProductForm';
 import {ArrowLeft} from 'lucide-react';
 import {Link} from '@/i18n/navigation';
@@ -10,6 +11,9 @@ type Props = {
 export default async function AdminNewProductPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
+
+  const collections = getCategories();
+  const models = getModels();
 
   return (
     <div>
@@ -29,7 +33,7 @@ export default async function AdminNewProductPage({params}: Props) {
         </p>
       </div>
 
-      <ProductForm mode="create" />
+      <ProductForm mode="create" collections={collections} models={models} />
     </div>
   );
 }

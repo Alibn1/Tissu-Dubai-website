@@ -8,11 +8,11 @@ import {cn} from '@/lib/utils';
 import {ProductCard} from '@/components/product/ProductCard';
 import {Checkbox} from '@/components/ui/Checkbox';
 import {type Product, type Category, type Locale, type FilterState, type Model} from '@/types';
-import {getModels} from '@/lib/modelsStore';
 
 type CatalogContentProps = {
   initialProducts: Product[];
   categories: Category[];
+  models: Model[];
   locale: string;
   activeCategory?: string;
 };
@@ -28,6 +28,7 @@ const SORT_OPTIONS = [
 export function CatalogContent({
   initialProducts,
   categories,
+  models,
   locale,
   activeCategory
 }: CatalogContentProps) {
@@ -37,13 +38,11 @@ export function CatalogContent({
   const [filters, setFilters] = useState<FilterState>({
     categories: activeCategory ? [activeCategory] : [],
     materials: [],
-    collections: [],
     inStockOnly: false,
     search: '',
     sort: 'featured'
   });
 
-  const [models] = useState<Model[]>(() => getModels());
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [activeFilterTab, setActiveFilterTab] = useState<string>('categories');
 
@@ -129,7 +128,6 @@ export function CatalogContent({
     setFilters({
       categories: activeCategory ? [activeCategory] : [],
       materials: [],
-      collections: [],
       inStockOnly: false,
       search: '',
       sort: 'featured'

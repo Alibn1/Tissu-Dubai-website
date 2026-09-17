@@ -3,6 +3,7 @@ import {getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 import {getProducts, getCategoryBySlug, getCategories} from '@/lib/api';
+import {getModels} from '@/lib/data/store';
 import {CatalogContent} from '@/components/catalog/CatalogContent';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 
@@ -37,6 +38,7 @@ export default async function CategoryPage({params}: Props) {
     getProducts({category}),
     getCategories()
   ]);
+  const models = getModels();
 
   const t = await getTranslations('catalog');
   const tCat = await getTranslations('nav.fabrics');
@@ -67,6 +69,7 @@ export default async function CategoryPage({params}: Props) {
         <CatalogContent
           initialProducts={products}
           categories={categories}
+          models={models}
           locale={locale}
           activeCategory={category}
         />

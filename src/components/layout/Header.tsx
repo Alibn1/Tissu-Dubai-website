@@ -5,7 +5,7 @@ import {Link, useRouter, usePathname} from '@/i18n/navigation';
 import {Logo} from '@/components/ui/Logo';
 import {LanguageSwitcher} from '@/components/ui/LanguageSwitcher';
 import {cn} from '@/lib/utils';
-import {getDefaultSiteSettings} from '@/lib/siteSettings';
+import {type SiteSettings} from '@/lib/siteSettings';
 import {useState, useEffect, useCallback} from 'react';
 import {Menu, X, Phone, Truck} from 'lucide-react';
 
@@ -18,14 +18,14 @@ const navLinks = [
   {key: 'common.faq', href: '/faq'}
 ];
 
-export function Header() {
+export function Header({siteSettings}: {siteSettings: SiteSettings}) {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || getDefaultSiteSettings().contact.phones[0] || '';
+  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || siteSettings.contact.phones[0] || '';
 
   const isHome = pathname === `/${locale}` || pathname === '/';
 

@@ -2,7 +2,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {notFound} from 'next/navigation';
-import {getProductBySlug, getRelatedProducts} from '@/lib/api';
+import {getProductBySlug, getRelatedProducts, getProducts} from '@/lib/api';
 import {JsonLd} from '@/lib/seo/JsonLd';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 import {ProductGallery} from '@/components/product/ProductGallery';
@@ -17,7 +17,7 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const {products} = await import('@/mock/products');
+  const products = await getProducts();
   return products.map((p) => ({
     category: p.category.slug,
     slug: p.slug

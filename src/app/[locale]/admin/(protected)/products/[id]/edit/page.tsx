@@ -1,6 +1,6 @@
 import {notFound} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
-import {products} from '@/mock/products';
+import {getProductById, getModels} from '@/lib/data/store';
 import {ProductEditForm} from '@/components/admin/ProductEditForm';
 import {ArrowLeft} from 'lucide-react';
 import {Link} from '@/i18n/navigation';
@@ -13,8 +13,10 @@ export default async function AdminProductEditPage({params}: Props) {
   const {locale, id} = await params;
   setRequestLocale(locale);
 
-  const product = products.find((p) => p.id === id);
+  const product = getProductById(id);
   if (!product) notFound();
+
+  const models = getModels();
 
   return (
     <div className="min-h-[70vh]">
@@ -34,7 +36,7 @@ export default async function AdminProductEditPage({params}: Props) {
         </p>
       </div>
 
-      <ProductEditForm product={product} locale={locale} />
+      <ProductEditForm product={product} models={models} locale={locale} />
     </div>
   );
 }

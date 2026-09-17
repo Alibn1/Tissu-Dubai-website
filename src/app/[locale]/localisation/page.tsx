@@ -4,7 +4,7 @@ import {Metadata} from 'next';
 import {MapPin, Phone, Clock, ExternalLink, MessageCircle} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {GOOGLE_MAPS_EMBED_URL, GOOGLE_MAPS_LINK} from '@/lib/site';
-import {getDefaultSiteSettings} from '@/lib/siteSettings';
+import {getSiteSettings} from '@/lib/data/store';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -25,7 +25,7 @@ export default async function LocationPage({params}: Props) {
   const tHours = await getTranslations('location.hours');
   const tContact = await getTranslations('location.contact');
 
-  const defaults = getDefaultSiteSettings().contact;
+  const defaults = getSiteSettings().contact;
   const address = process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address;
   const phone = process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || '';
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || defaults.whatsappNumber || '';

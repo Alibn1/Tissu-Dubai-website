@@ -4,8 +4,15 @@ import {usePathname} from '@/i18n/navigation';
 import {Header} from '@/components/layout/Header';
 import {Footer} from '@/components/layout/Footer';
 import {WhatsAppButton} from '@/components/whatsapp/WhatsAppButton';
+import {type SiteSettings} from '@/lib/siteSettings';
 
-export function SiteChrome({children}: {children: React.ReactNode}) {
+export function SiteChrome({
+  settings,
+  children,
+}: {
+  settings: SiteSettings;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
 
   const isAdmin = pathname.startsWith('/admin');
@@ -16,9 +23,9 @@ export function SiteChrome({children}: {children: React.ReactNode}) {
 
   return (
     <>
-      <Header />
+      <Header siteSettings={settings} />
       <main className="flex-1 pt-[100px]">{children}</main>
-      <Footer />
+      <Footer siteSettings={settings} />
       <WhatsAppButton />
     </>
   );
