@@ -1,6 +1,6 @@
 import {type Locale} from '@/types';
 import {STORE_LOCATION} from '@/lib/site';
-import {getDefaultSiteSettings} from '@/lib/siteSettings';
+import {getSiteSettings} from '@/lib/data/store';
 
 type JsonLdProps = {
   locale: Locale;
@@ -10,7 +10,7 @@ type JsonLdProps = {
 
 export function JsonLd({locale, type, data = {}}: JsonLdProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  const defaults = getDefaultSiteSettings().contact;
+  const defaults = getSiteSettings().contact;
 
   const schemas: Record<string, unknown> = {
     LocalBusiness: {

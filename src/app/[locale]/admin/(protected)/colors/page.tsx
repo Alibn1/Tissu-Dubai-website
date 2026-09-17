@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import {setRequestLocale} from 'next-intl/server';
 import {Link} from '@/i18n/navigation';
-import {products} from '@/mock/products';
+import {getAllProducts} from '@/lib/data/store';
 import {ArrowLeft, Package, ChevronRight} from 'lucide-react';
 import {cn} from '@/lib/utils';
 
@@ -9,11 +9,13 @@ type Props = {
   params: Promise<{locale: string}>;
 };
 
-const variantCount = (p: (typeof products)[number]) => Math.max(p.variants?.length ?? 0, 1);
-
 export default async function AdminColorsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
+
+  const products = getAllProducts();
+
+  const variantCount = (p: (typeof products)[number]) => Math.max(p.variants?.length ?? 0, 1);
 
   const grouped = products.reduce<
     Record<string, {name: string; products: (typeof products)[number][]}>

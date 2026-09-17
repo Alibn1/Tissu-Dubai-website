@@ -7,12 +7,13 @@ import {Save, Loader2, Check} from 'lucide-react';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
 import {ModelSelect} from '@/components/admin/ModelSelect';
 import {ColorVariantsEditor, type ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
-import {getModels} from '@/lib/modelsStore';
 import type {Locale, Product, Model} from '@/types';
 import type {ProductTranslations, TranslatableFieldKey} from '@/lib/translation';
+import {missingVariantImageMessage} from '@/lib/variantValidation';
 
 type Props = {
   product: Product;
+  models: Model[];
   locale: string;
 };
 
@@ -47,14 +48,13 @@ function parseCharacteristics(product: Product, lang: Locale): {
   };
 }
 
-export function ProductEditForm({product}: Props) {
+export function ProductEditForm({product, models}: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const [models] = useState<Model[]>(() => getModels());
   const [modelId, setModelId] = useState<string>(() => {
-    const match = getModels().find(
+    const match = models.find(
       (m) => m.collectionSlug === product.category.slug && m.slug === product.materialSlug
     );
     return match?.id ?? '';
@@ -103,6 +103,21 @@ export function ProductEditForm({product}: Props) {
     }))
   );
 
+  const [variantError, setVariantError] = useState<{ids: string[]; message: string} | null>(null);
+
+  // Clear the error as soon as every flagged color has received an image.
+  const handleVariantsChange = (next: ColorVariantForm[]) => {
+    setColorVariants(next);
+    setVariantError((prev) => {
+      if (!prev) return prev;
+      const stillMissing = prev.ids.filter((id) => {
+        const v = next.find((x) => x.id === id);
+        return v ? v.image.trim() === '' : false;
+      });
+      return stillMissing.length === 0 ? null : {...prev, ids: stillMissing};
+    });
+  };
+
   const buildVariants = (): Product['variants'] => {
     const mapped = colorVariants.map((v) => {
       const existing = product.variants.find((pv) => pv.id === v.id);
@@ -150,6 +165,22 @@ export function ProductEditForm({product}: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const missingImage = colorVariants.filter((v) => v.image.trim() === '');
+    if (missingImage.length > 0) {
+      setVariantError({
+        ids: missingImage.map((v) => v.id),
+        message: missingVariantImageMessage(missingImage.map((v) => v.colorLabel)),
+      });
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`variant-row-${missingImage[0].id}`)
+          ?.scrollIntoView({behavior: 'smooth', block: 'center'});
+      });
+      return;
+    }
+    setVariantError(null);
+
     setSaving(true);
 
     try {
@@ -285,10 +316,17 @@ export function ProductEditForm({product}: Props) {
         <p className="mb-4 mt-1 text-sm text-brand-muted">
           Ajoutez plusieurs couleurs sous le même produit.
         </p>
-        <ColorVariantsEditor variants={colorVariants} onChange={setColorVariants} />
+        <ColorVariantsEditor
+          variants={colorVariants}
+          onChange={handleVariantsChange}
+          invalidIds={variantError?.ids ?? []}
+        />
       </section>
 
       {/* Save */}
+      {variantError && (
+        <p className="text-sm font-medium text-brand-error">{variantError.message}</p>
+      )}
       <div className="flex items-center gap-4">
         <button
           type="submit"

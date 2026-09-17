@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import {setRequestLocale} from 'next-intl/server';
-import {getDashboardData} from '@/mock/dashboard';
-import {getInquiries} from '@/lib/data/store';
+import {getDashboardData, getInquiries} from '@/lib/data/store';
 import {Package, ChevronRight, TrendingUp, MessageCircle} from 'lucide-react';
 import {Link} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
@@ -16,7 +15,7 @@ export default async function AdminDashboardPage({params}: Props) {
 
   const {totalProducts, totalColorVariants, categoryBreakdown, topRequested} = getDashboardData();
   const inquiries = getInquiries();
-  const recentInquiries = [...inquiries].reverse().slice(0, 10);
+  const recentInquiries = inquiries.slice(0, 10);
   const maxClicks = Math.max(...topRequested.map((p) => p.whatsappClicks), 1);
 
   const formatDate = (iso: string) =>
@@ -108,7 +107,13 @@ export default async function AdminDashboardPage({params}: Props) {
           </div>
 
           <ul className="divide-y divide-brand-border">
-            {topRequested.map((product, index) => (
+            {topRequested.length === 0 ? (
+              <li className="p-8 text-center text-sm text-brand-muted">
+                Aucun clic WhatsApp pour le moment. Les produits seront classés ici dès les
+                premières demandes.
+              </li>
+            ) : (
+              topRequested.map((product, index) => (
               <li key={product.id} className="flex items-center gap-3 px-5 py-3.5">
                 <span className="w-5 shrink-0 text-sm font-bold text-brand-muted">
                   {index + 1}
@@ -149,7 +154,8 @@ export default async function AdminDashboardPage({params}: Props) {
                   />
                 </div>
               </li>
-            ))}
+                ))
+            )}
           </ul>
         </section>
 

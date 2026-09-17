@@ -2,17 +2,17 @@
 
 import {useState} from 'react';
 import {cn} from '@/lib/utils';
-import type {Locale, Model} from '@/types';
+import type {Category, Locale, Model} from '@/types';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
 import {ModelSelect} from '@/components/admin/ModelSelect';
 import {FileUploadButton, ImagePreview} from '@/components/admin/imageUpload';
 import {ColorVariantsEditor, type ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
-import {getModels} from '@/lib/modelsStore';
 import {
   createEmptyTranslations,
   type ProductTranslations,
   type TranslatableFieldKey,
 } from '@/lib/translation';
+import {missingVariantImageMessage} from '@/lib/variantValidation';
 import {Package, Palette, Search as SearchIcon, Check, Loader2, Trash2} from 'lucide-react';
 
 // ── Types ──
@@ -49,12 +49,6 @@ const LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
   {key: 'fr', label: 'Français', dir: 'ltr'},
   {key: 'en', label: 'English', dir: 'ltr'},
   {key: 'ar', label: 'العربية', dir: 'rtl'},
-];
-
-const COLLECTIONS: {value: string; label: string}[] = [
-  {value: 'caftan', label: 'Caftan'},
-  {value: 'jellaba', label: 'Djellaba'},
-  {value: 'tekchita', label: 'Takchita'},
 ];
 
 const inputClass = cn(
@@ -212,9 +206,11 @@ type Props = {
   mode: 'create' | 'edit';
   productId?: string;
   initialData?: ProductFormData;
+  collections: Category[];
+  models: Model[];
 };
 
-export function ProductForm({mode, productId, initialData}: Props) {
+export function ProductForm({mode, productId, initialData, collections, models}: Props) {
   const [formData, setFormData] = useState<ProductFormData>(() => {
     const base = createEmptyFormData();
     return {
@@ -228,7 +224,8 @@ export function ProductForm({mode, productId, initialData}: Props) {
   });
   const [colorError, setColorError] = useState<string | null>(null);
   const [referenceError, setReferenceError] = useState<string | null>(null);
-  const [models] = useState<Model[]>(() => getModels());
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [variantError, setVariantError] = useState<{ids: string[]; message: string} | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -261,14 +258,28 @@ export function ProductForm({mode, productId, initialData}: Props) {
   const selectedModels = models.filter((m) => m.collectionSlug === formData.collection);
   const selectedModel = models.find((m) => m.id === formData.modelId) ?? null;
 
+  const setBaseImages = (next: string[]) => {
+    setField('baseImages', next);
+    if (next.some((img) => img.trim() !== '')) setImageError(null);
+  };
+
   const updateBaseImage = (index: number, value: string) =>
-    setField(
-      'baseImages',
-      formData.baseImages.map((img, i) => (i === index ? value : img))
-    );
+    setBaseImages(formData.baseImages.map((img, i) => (i === index ? value : img)));
 
   const removeBaseImage = (index: number) =>
-    setField('baseImages', formData.baseImages.filter((_, i) => i !== index));
+    setBaseImages(formData.baseImages.filter((_, i) => i !== index));
+
+  const handleVariantsChange = (next: ColorVariantForm[]) => {
+    setField('colorVariants', next);
+    setVariantError((prev) => {
+      if (!prev) return prev;
+      const stillMissing = prev.ids.filter((id) => {
+        const v = next.find((x) => x.id === id);
+        return v ? v.image.trim() === '' : false;
+      });
+      return stillMissing.length === 0 ? null : {...prev, ids: stillMissing};
+    });
+  };
 
   const resolveFinal = (lang: Locale, field: SeoFieldKey, auto: string) => {
     const seo = formData.seo[lang];
@@ -320,15 +331,17 @@ export function ProductForm({mode, productId, initialData}: Props) {
       ) as Record<Locale, string[]>;
     };
 
-    // The main color entered next to "Nom du produit" is ALWAYS saved as
-    // a color variant (first, "Principale" by default), so it shows up in
-    // "Variantes de couleur" on the edit page even if no extra color was added.
-    const baseVariants = [...colorVariants].sort(
-      (a, b) => Number(b.isDefault) - Number(a.isDefault)
-    );
+    // Colors are one shared pool: the main color entered next to "Nom du
+    // produit" + the colors added in "Variantes de couleur". Exactly one is
+    // "Principale" (the one shown on the product card). If a variant already
+    // matches the main color label, it plays the main-color role instead of
+    // adding a duplicate.
+    const baseVariants = [...colorVariants];
     const hasMainColor = (['fr', 'en', 'ar'] as Locale[]).some(
       (lang) => mainColor[lang].trim() !== ''
     );
+
+    let mainVariantId: string | null = null;
     let colorVariantsPayload: ColorVariantForm[] = baseVariants;
     if (hasMainColor) {
       const existingMainIndex = baseVariants.findIndex(
@@ -337,23 +350,36 @@ export function ProductForm({mode, productId, initialData}: Props) {
           v.colorLabel.fr.trim() === mainColor.fr.trim()
       );
       if (existingMainIndex === -1) {
+        mainVariantId = 'v-main';
+        // The main color's picture is the product's primary image.
+        const mainImage = baseImages.find((img) => img.trim() !== '') ?? '';
         colorVariantsPayload = [
           {
             id: 'v-main',
             colorLabel: mainColor,
-            image: '',
+            image: mainImage,
             inStock: true,
             isDefault: isMainColor,
           },
           ...baseVariants,
         ];
-      } else if (isMainColor) {
-        colorVariantsPayload = baseVariants.map((v, i) => ({
-          ...v,
-          isDefault: i === existingMainIndex,
-        }));
+      } else {
+        mainVariantId = baseVariants[existingMainIndex].id;
       }
     }
+
+    // Enforce a single "Principale": when the main-color checkbox is on, the
+    // main color is the only default; otherwise the variant marked "Principale"
+    // keeps its flag. The default ends up first so the card shows it.
+    if (isMainColor && mainVariantId) {
+      colorVariantsPayload = colorVariantsPayload.map((v) => ({
+        ...v,
+        isDefault: v.id === mainVariantId,
+      }));
+    }
+    colorVariantsPayload = [...colorVariantsPayload].sort(
+      (a, b) => Number(b.isDefault) - Number(a.isDefault)
+    );
 
     return {
       ...(mode === 'edit' && productId ? {id: productId} : {}),
@@ -383,15 +409,16 @@ export function ProductForm({mode, productId, initialData}: Props) {
   const saveProduct = async () => {
     const payload = buildPayload();
 
-    // TODO: replace with a real API call (one-line swap):
-    // const res = await fetch(mode === 'create' ? '/api/products' : `/api/products/${productId}`, {
-    //   method: mode === 'create' ? 'POST' : 'PUT',
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: JSON.stringify(payload),
-    // });
-    // return res.ok;
-    console.log(`[mock] ${mode === 'create' ? 'creating' : 'updating'} product`, payload);
-    return true;
+    const res = await fetch(
+      mode === 'create' ? '/api/products' : `/api/products/${productId}`,
+      {
+        method: mode === 'create' ? 'POST' : 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload),
+      }
+    );
+
+    return res.ok;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -403,16 +430,42 @@ export function ProductForm({mode, productId, initialData}: Props) {
     if (!hasMainColor) {
       setColorError('Saisissez la couleur principale du produit.');
       setReferenceError(null);
+      setImageError(null);
+      setVariantError(null);
       return;
     }
 
     if (!formData.reference.trim()) {
       setColorError(null);
       setReferenceError('Saisissez la référence du produit.');
+      setImageError(null);
+      setVariantError(null);
       return;
     }
     setColorError(null);
     setReferenceError(null);
+
+    if (!formData.baseImages.some((img) => img.trim() !== '')) {
+      setImageError('Ajoutez au moins une image du produit.');
+      setVariantError(null);
+      return;
+    }
+    setImageError(null);
+
+    const missingImage = formData.colorVariants.filter((v) => v.image.trim() === '');
+    if (missingImage.length > 0) {
+      setVariantError({
+        ids: missingImage.map((v) => v.id),
+        message: missingVariantImageMessage(missingImage.map((v) => v.colorLabel)),
+      });
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`variant-row-${missingImage[0].id}`)
+          ?.scrollIntoView({behavior: 'smooth', block: 'center'});
+      });
+      return;
+    }
+    setVariantError(null);
 
     setSaving(true);
     try {
@@ -471,13 +524,13 @@ export function ProductForm({mode, productId, initialData}: Props) {
           <div>
             <label className={labelClass}>Collection</label>
             <div className="flex flex-wrap gap-2">
-              {COLLECTIONS.map((col) => {
-                const active = formData.collection === col.value;
+              {collections.map((col) => {
+                const active = formData.collection === col.slug;
                 return (
                   <button
-                    key={col.value}
+                    key={col.slug}
                     type="button"
-                    onClick={() => selectCollection(col.value)}
+                    onClick={() => selectCollection(col.slug)}
                     aria-pressed={active}
                     className={cn(
                       'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all',
@@ -487,7 +540,7 @@ export function ProductForm({mode, productId, initialData}: Props) {
                     )}
                   >
                     {active && <Check className="h-3.5 w-3.5" />}
-                    {col.label}
+                    {col.name.fr}
                   </button>
                 );
               })}
@@ -579,7 +632,18 @@ export function ProductForm({mode, productId, initialData}: Props) {
             <div className="mt-3">
               <button
                 type="button"
-                onClick={() => setField('isMainColor', !formData.isMainColor)}
+                onClick={() => {
+                  // Only one "Principale" overall: enabling the main color
+                  // clears the per-variant default flags.
+                  const next = !formData.isMainColor;
+                  setFormData((f) => ({
+                    ...f,
+                    isMainColor: next,
+                    colorVariants: next
+                      ? f.colorVariants.map((v) => ({...v, isDefault: false}))
+                      : f.colorVariants,
+                  }));
+                }}
                 aria-pressed={formData.isMainColor}
                 className={cn(
                   'inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium transition-all',
@@ -618,10 +682,11 @@ export function ProductForm({mode, productId, initialData}: Props) {
               </div>
             ))}
             <FileUploadButton
-              onUpload={(dataUrl) => setField('baseImages', [...formData.baseImages, dataUrl])}
+              onUpload={(dataUrl) => setBaseImages([...formData.baseImages, dataUrl])}
               label="Ajouter une image"
             />
           </div>
+          {imageError && <p className="mt-2 text-xs text-brand-error">{imageError}</p>}
         </div>
       </Section>
 
@@ -633,7 +698,9 @@ export function ProductForm({mode, productId, initialData}: Props) {
       >
         <ColorVariantsEditor
           variants={formData.colorVariants}
-          onChange={(next) => setField('colorVariants', next)}
+          onChange={handleVariantsChange}
+          onDefaultChange={() => setField('isMainColor', false)}
+          invalidIds={variantError?.ids ?? []}
         />
       </Section>
 
@@ -696,6 +763,9 @@ export function ProductForm({mode, productId, initialData}: Props) {
       </Section>
 
       {/* ── Submit ── */}
+      {variantError && (
+        <p className="text-sm font-medium text-brand-error">{variantError.message}</p>
+      )}
       <div className="flex items-center gap-4">
         <button
           type="submit"

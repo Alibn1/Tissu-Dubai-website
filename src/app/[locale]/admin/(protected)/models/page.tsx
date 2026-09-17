@@ -1,4 +1,5 @@
 import {setRequestLocale} from 'next-intl/server';
+import {getCategories, getModels} from '@/lib/data/store';
 import {ModelsManager} from '@/components/admin/ModelsManager';
 
 type Props = {
@@ -8,6 +9,9 @@ type Props = {
 export default async function AdminModelsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
+
+  const collections = getCategories();
+  const models = getModels();
 
   return (
     <div className="min-h-[70vh]">
@@ -20,7 +24,7 @@ export default async function AdminModelsPage({params}: Props) {
         </p>
       </div>
 
-      <ModelsManager />
+      <ModelsManager collections={collections} initialModels={models} />
     </div>
   );
 }

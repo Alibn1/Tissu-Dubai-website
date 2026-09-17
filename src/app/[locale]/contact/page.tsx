@@ -3,7 +3,7 @@ import {getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {ContactForm} from '@/components/forms/ContactForm';
 import {MapPin, Phone, MessageCircle} from 'lucide-react';
-import {getDefaultSiteSettings} from '@/lib/siteSettings';
+import {getSiteSettings} from '@/lib/data/store';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -23,7 +23,7 @@ export default async function ContactPage({params}: Props) {
   const tHero = await getTranslations('contact.hero');
   const tInfo = await getTranslations('contact.info');
 
-  const defaults = getDefaultSiteSettings().contact;
+  const defaults = getSiteSettings().contact;
   const address = process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address;
   const phone = process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || '';
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || defaults.whatsappNumber || '';

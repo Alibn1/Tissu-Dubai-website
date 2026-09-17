@@ -287,15 +287,12 @@ export function SiteSettingsForm({initialData}: Props) {
   };
 
   const saveSettings = async (payload: SiteSettings): Promise<boolean> => {
-    // TODO: replace with a real API call:
-    // const res = await fetch('/api/site-settings', {
-    //   method: 'PUT',
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: JSON.stringify(payload),
-    // });
-    // return res.ok;
-    console.log('[mock] saving site settings', payload);
-    return true;
+    const res = await fetch('/api/site-settings', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+    return res.ok;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

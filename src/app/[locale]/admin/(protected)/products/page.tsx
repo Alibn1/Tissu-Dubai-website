@@ -1,5 +1,5 @@
 import {setRequestLocale} from 'next-intl/server';
-import {products} from '@/mock/products';
+import {getAllProducts} from '@/lib/data/store';
 import {Link} from '@/i18n/navigation';
 import {Package} from 'lucide-react';
 import {ProductsTable} from '@/components/admin/ProductsTable';
@@ -11,6 +11,8 @@ type Props = {
 export default async function AdminProductsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
+
+  const products = getAllProducts();
 
   return (
     <div className="min-h-[70vh]">

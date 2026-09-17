@@ -3,14 +3,14 @@ import {SectionHeading} from '@/components/ui/SectionHeading';
 import {cn} from '@/lib/utils';
 import {MapPin, Phone, Clock, ExternalLink} from 'lucide-react';
 import {GOOGLE_MAPS_EMBED_URL, GOOGLE_MAPS_LINK} from '@/lib/site';
-import {getDefaultSiteSettings} from '@/lib/siteSettings';
+import {getSiteSettings} from '@/lib/data/store';
 
 export async function StoreLocationSection() {
   const t = await getTranslations('home.storeLocation');
   const tLocation = await getTranslations('location');
   const tHours = await getTranslations('location.hours');
 
-  const defaults = getDefaultSiteSettings().contact;
+  const defaults = getSiteSettings().contact;
   const address = process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address;
   const phone = process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || '';
 

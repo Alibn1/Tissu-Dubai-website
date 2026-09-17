@@ -3,15 +3,8 @@
 import {useState} from 'react';
 import {cn} from '@/lib/utils';
 import {Shirt, Plus, Trash2, Check, Languages, Loader2} from 'lucide-react';
-import type {Locale, Model} from '@/types';
-import {getModels, saveModels, removeModel} from '@/lib/modelsStore';
+import type {Category, Locale, Model} from '@/types';
 import {clientTranslate, DEEPL_TARGET_CODE} from '@/lib/translation';
-
-const COLLECTIONS: {value: string; label: string}[] = [
-  {value: 'caftan', label: 'Caftan'},
-  {value: 'jellaba', label: 'Djellaba'},
-  {value: 'tekchita', label: 'Takchita'},
-];
 
 const NAME_LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
   {key: 'fr', label: 'Français', dir: 'ltr'},
@@ -80,9 +73,17 @@ function TranslateButton({
   );
 }
 
-export function ModelsManager() {
-  const [models, setModels] = useState<Model[]>(() => getModels());
-  const [collections, setCollections] = useState<string[]>(['caftan']);
+export function ModelsManager({
+  collections,
+  initialModels,
+}: {
+  collections: Category[];
+  initialModels: Model[];
+}) {
+  const [models, setModels] = useState<Model[]>(initialModels);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>(() =>
+    collections[0] ? [collections[0].slug] : []
+  );
   const [names, setNames] = useState<{fr: string; en: string; ar: string}>({
     fr: '',
     en: '',
@@ -90,39 +91,45 @@ export function ModelsManager() {
   });
   const [added, setAdded] = useState(false);
 
-  const refresh = () => setModels(getModels());
+  const refresh = async () => {
+    const res = await fetch('/api/models');
+    if (res.ok) setModels(await res.json());
+  };
 
   // Slug is generated automatically from the model name (no admin input needed).
   const sourceName = names.fr.trim() || names.en.trim() || names.ar.trim();
   const autoSlug = slugify(sourceName);
 
-  const canAdd = collections.length > 0 && autoSlug !== '';
+  const canAdd = selectedCollections.length > 0 && autoSlug !== '';
 
   const toggleCollection = (value: string) =>
-    setCollections((prev) =>
+    setSelectedCollections((prev) =>
       prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
     );
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canAdd) return;
     // One row per (model, collection): the same model can exist in several collections.
-    const current = getModels();
-    const base = {slug: autoSlug, name: {fr: names.fr.trim(), en: names.en.trim(), ar: names.ar.trim()}};
-    let next = current.filter((m) => !collections.includes(m.collectionSlug) || m.slug !== autoSlug);
-    for (const col of collections) {
-      next = next.concat([{...base, id: `${autoSlug}-${col}`, collectionSlug: col}]);
-    }
-    saveModels(next);
-    setModels(next);
+    const name = {fr: names.fr.trim(), en: names.en.trim(), ar: names.ar.trim()};
+    await Promise.all(
+      selectedCollections.map((col) =>
+        fetch('/api/models', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({id: `${autoSlug}-${col}`, slug: autoSlug, collectionSlug: col, name}),
+        })
+      )
+    );
+    await refresh();
     setNames({fr: '', en: '', ar: ''});
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
-  const handleDelete = (id: string) => {
-    removeModel(id);
-    refresh();
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/models/${encodeURIComponent(id)}`, {method: 'DELETE'});
+    await refresh();
   };
 
   // One-click translate: pick the first non-empty language (FR → EN → AR) and
@@ -163,13 +170,13 @@ export function ModelsManager() {
             <div>
               <label className={labelClass}>Collections</label>
               <div className="flex flex-wrap gap-2">
-                {COLLECTIONS.map((col) => {
-                  const active = collections.includes(col.value);
+                {collections.map((col) => {
+                  const active = selectedCollections.includes(col.slug);
                   return (
                     <button
-                      key={col.value}
+                      key={col.slug}
                       type="button"
-                      onClick={() => toggleCollection(col.value)}
+                      onClick={() => toggleCollection(col.slug)}
                       aria-pressed={active}
                       className={cn(
                         'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all',
@@ -179,7 +186,7 @@ export function ModelsManager() {
                       )}
                     >
                       {active && <Check className="h-3.5 w-3.5" />}
-                      {col.label}
+                      {col.name.fr}
                     </button>
                   );
                 })}
@@ -239,18 +246,18 @@ export function ModelsManager() {
 
       {/* Lists grouped by collection */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {COLLECTIONS.map((col) => {
+        {collections.map((col) => {
           const list = models
-            .filter((m) => m.collectionSlug === col.value)
+            .filter((m) => m.collectionSlug === col.slug)
             .sort((a, b) => a.name.fr.localeCompare(b.name.fr));
           return (
             <section
-              key={col.value}
+              key={col.slug}
               className="rounded-md border border-brand-border bg-brand-surface shadow-sm"
             >
               <div className="border-b border-brand-border px-5 py-3">
                 <h3 className="font-heading text-sm font-semibold text-brand-secondary">
-                  {col.label}
+                  {col.name.fr}
                   <span className="ml-2 text-xs font-normal text-brand-muted">
                     ({list.length})
                   </span>

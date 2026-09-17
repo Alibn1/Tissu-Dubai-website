@@ -22,7 +22,6 @@ export type Product = {
   price: number | null;
   inStock: boolean;
   category: Category;
-  collection?: Collection;
   variants: ProductVariant[];
   featured: boolean;
   isNew: boolean;
@@ -31,15 +30,6 @@ export type Product = {
 };
 
 export type Category = {
-  id: string;
-  slug: string;
-  name: Record<Locale, string>;
-  description: Record<Locale, string>;
-  image: string;
-  productCount: number;
-};
-
-export type Collection = {
   id: string;
   slug: string;
   name: Record<Locale, string>;
@@ -70,7 +60,6 @@ export type SortOption = {
 export type FilterState = {
   categories: string[];
   materials: string[];
-  collections: string[];
   inStockOnly: boolean;
   search: string;
   sort: string;
