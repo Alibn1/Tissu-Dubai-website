@@ -4,9 +4,11 @@ import {useTranslations} from 'next-intl';
 import {MessageCircle} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {buildWhatsAppUrl, getWhatsAppNumber} from '@/lib/whatsapp';
+import {useSiteSettings} from '@/lib/siteSettingsContext';
 
 export function WhatsAppCtaSection() {
   const t = useTranslations('home.whatsappCta');
+  const settings = useSiteSettings();
 
   return (
     <section className="py-16 sm:py-20">
@@ -32,7 +34,7 @@ export function WhatsAppCtaSection() {
           </p>
 
           <a
-            href={buildWhatsAppUrl(getWhatsAppNumber(), '')}
+            href={buildWhatsAppUrl(getWhatsAppNumber(settings), '')}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

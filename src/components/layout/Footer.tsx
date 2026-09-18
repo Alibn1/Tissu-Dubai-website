@@ -3,7 +3,7 @@ import {Link} from '@/i18n/navigation';
 import {Logo} from '@/components/ui/Logo';
 import {Phone} from 'lucide-react';
 import {GOOGLE_MAPS_EMBED_URL} from '@/lib/site';
-import {type SiteSettings} from '@/lib/siteSettings';
+import {resolveContact, type SiteSettings} from '@/lib/siteSettings';
 
 function InstagramIcon({className}: {className?: string}) {
   return (
@@ -33,12 +33,12 @@ function FacebookIcon({className}: {className?: string}) {
 
 export function Footer({siteSettings}: {siteSettings: SiteSettings}) {
   const t = useTranslations();
-  const defaults = siteSettings.contact;
-  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || '';
+  const contact = resolveContact(siteSettings);
+  const phone = contact.primaryPhone;
   const mapsUrl = GOOGLE_MAPS_EMBED_URL;
-  const instagram = process.env.NEXT_PUBLIC_INSTAGRAM_URL || defaults.social.instagram || '';
-  const facebook = process.env.NEXT_PUBLIC_FACEBOOK_URL || defaults.social.facebook || '';
-  const tiktok = process.env.NEXT_PUBLIC_TIKTOK_URL || defaults.social.tiktok || '';
+  const instagram = contact.social.instagram;
+  const facebook = contact.social.facebook;
+  const tiktok = contact.social.tiktok;
 
   const collections = [
     {label: t('nav.fabrics.caftanShort'), href: '/collections/caftan'},

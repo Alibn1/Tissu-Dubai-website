@@ -7,14 +7,14 @@ import {Search, SlidersHorizontal, X, ChevronDown, ArrowUpDown} from 'lucide-rea
 import {cn} from '@/lib/utils';
 import {ProductCard} from '@/components/product/ProductCard';
 import {Checkbox} from '@/components/ui/Checkbox';
-import {type Product, type Category, type Locale, type FilterState, type Model} from '@/types';
+import {type Product, type Collection, type Locale, type FilterState, type Model} from '@/types';
 
 type CatalogContentProps = {
   initialProducts: Product[];
-  categories: Category[];
+  collections: Collection[];
   models: Model[];
   locale: string;
-  activeCategory?: string;
+  activeCollection?: string;
 };
 
 const SORT_OPTIONS = [
@@ -27,16 +27,16 @@ const SORT_OPTIONS = [
 
 export function CatalogContent({
   initialProducts,
-  categories,
+  collections,
   models,
   locale,
-  activeCategory
+  activeCollection
 }: CatalogContentProps) {
   const t = useTranslations();
   const loc = locale as Locale;
 
   const [filters, setFilters] = useState<FilterState>({
-    categories: activeCategory ? [activeCategory] : [],
+    collections: activeCollection ? [activeCollection] : [],
     materials: [],
     inStockOnly: false,
     search: '',
@@ -44,7 +44,7 @@ export function CatalogContent({
   });
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [activeFilterTab, setActiveFilterTab] = useState<string>('categories');
+  const [activeFilterTab, setActiveFilterTab] = useState<string>('collections');
 
   const modelById = useMemo(() => {
     const map = new Map<string, Model>();
@@ -53,26 +53,26 @@ export function CatalogContent({
   }, [models]);
 
   // Only models that exist in the database are offered, and when a collection
-  // (category) is selected, its own models are shown.
+  // (collection) is selected, its own models are shown.
   const modelOptions = useMemo(
     () =>
-      filters.categories.length > 0
-        ? models.filter((m) => filters.categories.includes(m.collectionSlug))
+      filters.collections.length > 0
+        ? models.filter((m) => filters.collections.includes(m.collectionSlug))
         : models,
-    [models, filters.categories]
+    [models, filters.collections]
   );
 
   const filteredProducts = useMemo(() => {
     let result = [...initialProducts];
 
-    if (filters.categories.length > 0) {
-      result = result.filter((p) => filters.categories.includes(p.category.slug));
+    if (filters.collections.length > 0) {
+      result = result.filter((p) => filters.collections.includes(p.collection.slug));
     }
     if (filters.materials.length > 0) {
       result = result.filter((p) =>
         filters.materials.some((id) => {
           const model = modelById.get(id);
-          return model && model.slug === p.materialSlug && model.collectionSlug === p.category.slug;
+          return model && model.slug === p.materialSlug && model.collectionSlug === p.collection.slug;
         })
       );
     }
@@ -120,13 +120,13 @@ export function CatalogContent({
   }, []);
 
   const activeFilterCount =
-    filters.categories.length +
+    filters.collections.length +
     filters.materials.length +
     (filters.inStockOnly ? 1 : 0);
 
   const clearAllFilters = () => {
     setFilters({
-      categories: activeCategory ? [activeCategory] : [],
+      collections: activeCollection ? [activeCollection] : [],
       materials: [],
       inStockOnly: false,
       search: '',
@@ -213,7 +213,7 @@ export function CatalogContent({
             filters={filters}
             toggleFilter={toggleFilter}
             setFilters={setFilters}
-            categories={categories}
+            collections={collections}
             models={modelOptions}
             locale={loc}
             onClear={clearAllFilters}
@@ -277,7 +277,7 @@ export function CatalogContent({
                 filters={filters}
                 toggleFilter={toggleFilter}
                 setFilters={setFilters}
-                categories={categories}
+                collections={collections}
                 models={modelOptions}
                 locale={loc}
                 activeTab={activeFilterTab}
@@ -318,7 +318,7 @@ function FilterSidebar({
   filters,
   toggleFilter,
   setFilters,
-  categories,
+  collections,
   models,
   locale,
   onClear,
@@ -327,7 +327,7 @@ function FilterSidebar({
   filters: FilterState;
   toggleFilter: (type: keyof FilterState, value: string) => void;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
-  categories: Category[];
+  collections: Collection[];
   models: Model[];
   locale: Locale;
   onClear: () => void;
@@ -335,7 +335,7 @@ function FilterSidebar({
 }) {
   const t = useTranslations('catalog.filters');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    categories: true,
+    collections: true,
     materials: true,
     availability: true
   });
@@ -351,17 +351,17 @@ function FilterSidebar({
           onClick={onClear}
           className="mb-4 text-sm font-medium text-brand-primary hover:text-brand-secondary transition-colors"
         >
-          {t('categories').replace(/s$/, '')} × {activeFilterCount} — Clear all
+          {t('collections').replace(/s$/, '')} × {activeFilterCount} — Clear all
         </button>
       )}
 
-      {/* Categories */}
-      <FilterSection title={t('categories')} expanded={expandedSections.categories} onToggle={() => toggleSection('categories')}>
-        {categories.map((cat) => (
+      {/* Collections */}
+      <FilterSection title={t('collections')} expanded={expandedSections.collections} onToggle={() => toggleSection('collections')}>
+        {collections.map((cat) => (
           <Checkbox
             key={cat.id}
-            checked={filters.categories.includes(cat.slug)}
-            onChange={() => toggleFilter('categories', cat.slug)}
+            checked={filters.collections.includes(cat.slug)}
+            onChange={() => toggleFilter('collections', cat.slug)}
           >
             {cat.name[locale] || cat.name.fr}
           </Checkbox>
@@ -432,7 +432,7 @@ function FilterContent({
   filters,
   toggleFilter,
   setFilters,
-  categories,
+  collections,
   models,
   locale,
   activeTab,
@@ -441,7 +441,7 @@ function FilterContent({
   filters: FilterState;
   toggleFilter: (type: keyof FilterState, value: string) => void;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
-  categories: Category[];
+  collections: Collection[];
   models: Model[];
   locale: Locale;
   activeTab: string;
@@ -450,7 +450,7 @@ function FilterContent({
   const t = useTranslations('catalog.filters');
 
   const tabs = [
-    {id: 'categories', label: t('categories')},
+    {id: 'collections', label: t('collections')},
     {id: 'materials', label: t('materials')},
     {id: 'availability', label: t('availability')}
   ];
@@ -477,13 +477,13 @@ function FilterContent({
 
       {/* Tab content */}
       <div>
-        {activeTab === 'categories' && (
+        {activeTab === 'collections' && (
           <div className="space-y-1">
-            {categories.map((cat) => (
+            {collections.map((cat) => (
               <Checkbox
                 key={cat.id}
-                checked={filters.categories.includes(cat.slug)}
-                onChange={() => toggleFilter('categories', cat.slug)}
+                checked={filters.collections.includes(cat.slug)}
+                onChange={() => toggleFilter('collections', cat.slug)}
                 className="py-2"
               >
                 {cat.name[locale] || cat.name.fr}

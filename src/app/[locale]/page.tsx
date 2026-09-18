@@ -1,7 +1,7 @@
 import {setRequestLocale} from 'next-intl/server';
 import {JsonLd} from '@/lib/seo/JsonLd';
 import {HeroSection} from '@/components/home/HeroSection';
-import {CategoriesSection} from '@/components/home/CategoriesSection';
+import {CollectionsSection} from '@/components/home/CollectionsSection';
 import {FeaturedSection} from '@/components/home/FeaturedSection';
 import {NewArrivalsSection} from '@/components/home/NewArrivalsSection';
 import {BrandStorySection} from '@/components/home/BrandStorySection';
@@ -23,7 +23,7 @@ export default async function HomePage({params}: Props) {
       <JsonLd locale={locale as Locale} type="LocalBusiness" />
       <JsonLd locale={locale as Locale} type="WebSite" />
       <HeroSection />
-      <CategoriesSection />
+      <CollectionsSection />
       <FeaturedSection />
       <NewArrivalsSection />
       <BrandStorySection />

@@ -1,6 +1,6 @@
 import {setRequestLocale, getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
-import {CategoryCards} from '@/components/category/CategoryCards';
+import {CollectionCards} from '@/components/collection/CollectionCards';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -32,7 +32,7 @@ export default async function CollectionsPage({params}: Props) {
           <div className="mt-4 h-0.5 w-16 bg-brand-primary mx-auto" />
         </div>
 
-        <CategoryCards gridClassName="gap-6" />
+        <CollectionCards gridClassName="gap-6" />
       </div>
     </section>
   );

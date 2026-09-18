@@ -14,18 +14,18 @@ export function ProductsTable({
 }) {
   const [products, setProducts] = useState(initialProducts);
   const [query, setQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [collectionFilter, setCollectionFilter] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const categoryCounts = useMemo(() => {
+  const collectionCounts = useMemo(() => {
     const acc = new Map<string, {slug: string; name: string; count: number}>();
     for (const product of products) {
-      const slug = product.category.slug;
+      const slug = product.collection.slug;
       const existing = acc.get(slug);
       if (existing) {
         existing.count += 1;
       } else {
-        acc.set(slug, {slug, name: product.category.name.fr, count: 1});
+        acc.set(slug, {slug, name: product.collection.name.fr, count: 1});
       }
     }
     return [...acc.values()].sort((a, b) => b.count - a.count);
@@ -34,7 +34,7 @@ export function ProductsTable({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
-      if (categoryFilter && p.category.slug !== categoryFilter) return false;
+      if (collectionFilter && p.collection.slug !== collectionFilter) return false;
       if (!q) return true;
       const name = p.name[locale] || p.name.fr;
       return (
@@ -42,7 +42,7 @@ export function ProductsTable({
         p.reference.toLowerCase().includes(q)
       );
     });
-  }, [products, query, categoryFilter, locale]);
+  }, [products, query, collectionFilter, locale]);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Supprimer ce produit ? Cette action est irréversible.')) return;
@@ -57,9 +57,9 @@ export function ProductsTable({
 
   return (
     <>
-      {/* Category counts */}
+      {/* Collection counts */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        {categoryCounts.map((cat) => (
+        {collectionCounts.map((cat) => (
           <div
             key={cat.slug}
             className="flex items-center gap-2 rounded-md border border-brand-border bg-brand-surface px-4 py-2.5"
@@ -87,11 +87,11 @@ export function ProductsTable({
         <div className="flex items-center gap-2 rounded-md border border-brand-border bg-brand-surface px-3 py-2">
           <Filter className="h-4 w-4 text-brand-muted" />
           <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            value={collectionFilter}
+            onChange={(e) => setCollectionFilter(e.target.value)}
             className="bg-transparent text-sm text-brand-secondary outline-none"
           >
-            <option value="">Toutes les catégories</option>
+            <option value="">Toutes les collections</option>
             <option value="caftan">Caftans</option>
             <option value="jellaba">Djellabas</option>
             <option value="tekchita">Takchitas</option>
@@ -106,7 +106,7 @@ export function ProductsTable({
             <tr className="border-b border-brand-border bg-brand-light/50">
               <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Produit</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Référence</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Catégorie</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Collection</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Prix</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-brand-muted uppercase">Statut</th>
               <th className="px-4 py-3 text-right text-xs font-medium text-brand-muted uppercase">Actions</th>
@@ -134,7 +134,7 @@ export function ProductsTable({
                   <span className="text-xs font-mono text-brand-muted">{product.reference}</span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-sm text-brand-secondary capitalize">{product.category.slug}</span>
+                  <span className="text-sm text-brand-secondary capitalize">{product.collection.slug}</span>
                 </td>
                 <td className="px-4 py-3">
                   <span className="text-sm text-brand-secondary">

@@ -21,7 +21,7 @@ export type Product = {
   width: string;
   price: number | null;
   inStock: boolean;
-  category: Category;
+  collection: Collection;
   variants: ProductVariant[];
   featured: boolean;
   isNew: boolean;
@@ -29,7 +29,7 @@ export type Product = {
   characteristics: Record<Locale, string[]>;
 };
 
-export type Category = {
+export type Collection = {
   id: string;
   slug: string;
   name: Record<Locale, string>;
@@ -58,7 +58,7 @@ export type SortOption = {
 };
 
 export type FilterState = {
-  categories: string[];
+  collections: string[];
   materials: string[];
   inStockOnly: boolean;
   search: string;

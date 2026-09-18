@@ -33,16 +33,16 @@ export interface ContactInfo {
   social: {instagram?: string; tiktok?: string; facebook?: string};
 }
 
-export type CategoryCardId = 'caftan' | 'jellaba' | 'tekchita';
+export type CollectionCardId = 'caftan' | 'jellaba' | 'tekchita';
 
-export const CATEGORY_CARDS: ReadonlyArray<{id: CategoryCardId; label: string}> = [
+export const COLLECTION_CARDS: ReadonlyArray<{id: CollectionCardId; label: string}> = [
   {id: 'caftan', label: 'Caftan'},
   {id: 'jellaba', label: 'Djellaba'},
   {id: 'tekchita', label: 'Takchita'},
 ];
 
-export interface CategoryCard {
-  id: CategoryCardId;
+export interface CollectionCard {
+  id: CollectionCardId;
   image: string;
   title: TranslatableText;
   description: TranslatableText;
@@ -56,7 +56,7 @@ export interface HeroSettings {
 
 export interface HomepageContent {
   hero: HeroSettings;
-  categoryCards: CategoryCard[];
+  collectionCards: CollectionCard[];
 }
 
 export interface SiteSettings {
@@ -64,6 +64,22 @@ export interface SiteSettings {
   businessHours: BusinessHours[];
   faq: FaqEntry[];
   homepage: HomepageContent;
+}
+
+export interface ResolvedContact {
+  address: string;
+  phones: string[];
+  primaryPhone: string;
+  whatsappNumber: string;
+  social: {instagram: string; tiktok: string; facebook: string};
+}
+
+export interface BusinessHoursDisplay {
+  day: BusinessDay;
+  days: BusinessDay[];
+  label: string;
+  isClosed: boolean;
+  value: string;
 }
 
 // ── Constants ──
@@ -223,7 +239,7 @@ export function getDefaultSiteSettings(): SiteSettings {
           'اكتشفوا مجموعتنا الحصرية من الأقمشة الفاخرة، المختارة بعناية لتكون أساس أرقى الإبداعات.'
         ),
       },
-      categoryCards: [
+      collectionCards: [
         {
           id: 'caftan',
           image: '',
@@ -257,4 +273,122 @@ export function getDefaultSiteSettings(): SiteSettings {
       ],
     },
   };
+}
+
+// ── Migration / normalization ──
+
+type LegacyHomepage = Partial<HomepageContent> & {categoryCards?: CollectionCard[]};
+
+export function migrateSiteSettings(input: unknown): SiteSettings {
+  const defaults = getDefaultSiteSettings();
+  if (!input || typeof input !== 'object') return defaults;
+
+  const settings = input as Partial<SiteSettings> & {homepage?: LegacyHomepage};
+  const homepage: LegacyHomepage = settings.homepage ?? {};
+
+  return {
+    contact: settings.contact ?? defaults.contact,
+    businessHours: settings.businessHours ?? defaults.businessHours,
+    faq: settings.faq ?? defaults.faq,
+    homepage: {
+      hero: homepage.hero ?? defaults.homepage.hero,
+      collectionCards:
+        homepage.collectionCards ?? homepage.categoryCards ?? defaults.homepage.collectionCards,
+    },
+  };
+}
+
+// ── Resolution helpers ──
+// DB/admin settings are the source of truth; the NEXT_PUBLIC_* env vars are
+// only fallbacks for when a DB field is empty.
+
+const CLOSED_LABEL: Record<Locale, string> = {
+  fr: 'Fermé',
+  en: 'Closed',
+  ar: 'مغلق',
+};
+
+const DAY_INDEX: Record<BusinessDay, number> = {
+  monday: 0,
+  tuesday: 1,
+  wednesday: 2,
+  thursday: 3,
+  friday: 4,
+  saturday: 5,
+  sunday: 6,
+};
+
+export const WEEKDAY_SCHEMA_NAME: Record<BusinessDay, string> = {
+  monday: 'Monday',
+  tuesday: 'Tuesday',
+  wednesday: 'Wednesday',
+  thursday: 'Thursday',
+  friday: 'Friday',
+  saturday: 'Saturday',
+  sunday: 'Sunday',
+};
+
+export function weekdayLabel(day: BusinessDay, locale: Locale): string {
+  const date = new Date(Date.UTC(2024, 0, 1 + DAY_INDEX[day]));
+  return new Intl.DateTimeFormat(locale, {weekday: 'long', timeZone: 'UTC'}).format(date);
+}
+
+export function resolveContact(settings: SiteSettings): ResolvedContact {
+  const contact = settings.contact;
+  const phones = contact.phones.map((phone) => phone.trim()).filter(Boolean);
+
+  return {
+    address: contact.address.trim() || process.env.NEXT_PUBLIC_STORE_ADDRESS || '',
+    phones,
+    primaryPhone: phones[0] || process.env.NEXT_PUBLIC_STORE_PHONE || '',
+    whatsappNumber: contact.whatsappNumber.trim() || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '',
+    social: {
+      instagram: contact.social.instagram || process.env.NEXT_PUBLIC_INSTAGRAM_URL || '',
+      tiktok: contact.social.tiktok || process.env.NEXT_PUBLIC_TIKTOK_URL || '',
+      facebook: contact.social.facebook || process.env.NEXT_PUBLIC_FACEBOOK_URL || '',
+    },
+  };
+}
+
+export function formatBusinessHours(
+  hours: BusinessHours[],
+  locale: Locale
+): BusinessHoursDisplay[] {
+  const byIndex = new Map<BusinessDay, BusinessHours>();
+  for (const hour of hours) {
+    if (DAY_INDEX[hour.day] !== undefined) byIndex.set(hour.day, hour);
+  }
+  const ordered = DAY_ORDER.map((day) => byIndex.get(day)).filter(
+    (h): h is BusinessHours => h != null
+  );
+
+  // Group consecutive days that share the exact same schedule into a single row.
+  const runs: Array<{days: BusinessDay[]; isClosed: boolean; value: string}> = [];
+  for (const hour of ordered) {
+    const value =
+      hour.isClosed || !hour.openTime || !hour.closeTime
+        ? CLOSED_LABEL[locale]
+        : `${hour.openTime} – ${hour.closeTime}`;
+    const current = runs[runs.length - 1];
+    if (current && current.value === value) {
+      current.days.push(hour.day);
+    } else {
+      runs.push({days: [hour.day], isClosed: hour.isClosed, value});
+    }
+  }
+
+  return runs.map((run) => ({
+    day: run.days[0],
+    days: run.days,
+    label: weekdayRangeLabel(run.days, locale),
+    isClosed: run.isClosed,
+    value: run.value,
+  }));
+}
+
+function weekdayRangeLabel(days: BusinessDay[], locale: Locale): string {
+  const start = weekdayLabel(days[0], locale);
+  if (days.length === 1) return start;
+  const end = weekdayLabel(days[days.length - 1], locale);
+  return `${start} – ${end}`;
 }

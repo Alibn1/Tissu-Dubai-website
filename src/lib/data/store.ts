@@ -1,6 +1,6 @@
 import {getDb} from '@/db';
-import type {Category, Locale, Model, Product, ProductVariant} from '@/types';
-import {getDefaultSiteSettings, type SiteSettings} from '@/lib/siteSettings';
+import type {Collection, Locale, Model, Product, ProductVariant} from '@/types';
+import {getDefaultSiteSettings, migrateSiteSettings, type SiteSettings} from '@/lib/siteSettings';
 
 type Row = Record<string, unknown>;
 
@@ -30,7 +30,7 @@ function nowId(prefix: string): string {
 
 // ── Row mappers ──
 
-function mapCategoryRow(row: Row): Category {
+function mapCollectionRow(row: Row): Collection {
   return {
     id: String(row.id),
     slug: String(row.slug),
@@ -66,18 +66,18 @@ function mapVariantRow(row: Row): ProductVariant {
   };
 }
 
-function mapProductRow(row: Row, variants: ProductVariant[], categoryCounts: Map<string, number>): Product {
-  const category = {
-    id: String(row.cat_id),
-    slug: String(row.cat_slug),
-    name: {fr: String(row.cat_name_fr ?? ''), ar: String(row.cat_name_ar ?? ''), en: String(row.cat_name_en ?? '')},
+function mapProductRow(row: Row, variants: ProductVariant[], collectionCounts: Map<string, number>): Product {
+  const collection = {
+    id: String(row.col_id),
+    slug: String(row.col_slug),
+    name: {fr: String(row.col_name_fr ?? ''), ar: String(row.col_name_ar ?? ''), en: String(row.col_name_en ?? '')},
     description: {
-      fr: String(row.cat_desc_fr ?? ''),
-      ar: String(row.cat_desc_ar ?? ''),
-      en: String(row.cat_desc_en ?? ''),
+      fr: String(row.col_desc_fr ?? ''),
+      ar: String(row.col_desc_ar ?? ''),
+      en: String(row.col_desc_en ?? ''),
     },
-    image: String(row.cat_image ?? ''),
-    productCount: categoryCounts.get(String(row.cat_slug)) ?? 0,
+    image: String(row.col_image ?? ''),
+    productCount: collectionCounts.get(String(row.col_slug)) ?? 0,
   };
 
   return {
@@ -95,7 +95,7 @@ function mapProductRow(row: Row, variants: ProductVariant[], categoryCounts: Map
     width: String(row.width ?? ''),
     price: row.price == null ? null : Number(row.price),
     inStock: Boolean(row.in_stock),
-    category,
+    collection,
     variants,
     featured: Boolean(row.featured),
     isNew: Boolean(row.is_new),
@@ -111,17 +111,17 @@ function mapProductRow(row: Row, variants: ProductVariant[], categoryCounts: Map
 const PRODUCT_SELECT = `
 SELECT
   p.*,
-  c.id AS cat_id,
-  c.slug AS cat_slug,
-  c.name_fr AS cat_name_fr,
-  c.name_ar AS cat_name_ar,
-  c.name_en AS cat_name_en,
-  c.description_fr AS cat_desc_fr,
-  c.description_ar AS cat_desc_ar,
-  c.description_en AS cat_desc_en,
-  c.image AS cat_image
+  c.id AS col_id,
+  c.slug AS col_slug,
+  c.name_fr AS col_name_fr,
+  c.name_ar AS col_name_ar,
+  c.name_en AS col_name_en,
+  c.description_fr AS col_desc_fr,
+  c.description_ar AS col_desc_ar,
+  c.description_en AS col_desc_en,
+  c.image AS col_image
 FROM products p
-JOIN collections c ON c.slug = p.category_slug
+JOIN collections c ON c.slug = p.collection_slug
 `;
 
 function loadVariants(): Map<string, ProductVariant[]> {
@@ -137,31 +137,31 @@ function loadVariants(): Map<string, ProductVariant[]> {
   return map;
 }
 
-function loadCategoryCounts(): Map<string, number> {
+function loadCollectionCounts(): Map<string, number> {
   const db = getDb();
   const map = new Map<string, number>();
-  const rows = db.prepare('SELECT category_slug, COUNT(*) AS n FROM products GROUP BY category_slug').all() as Row[];
-  for (const row of rows) map.set(String(row.category_slug), Number(row.n));
+  const rows = db.prepare('SELECT collection_slug, COUNT(*) AS n FROM products GROUP BY collection_slug').all() as Row[];
+  for (const row of rows) map.set(String(row.collection_slug), Number(row.n));
   return map;
 }
 
 // ── Collections (the public "collections"/garment types) ──
 
-export function getCategories(): Category[] {
+export function getCollections(): Collection[] {
   const db = getDb();
-  const counts = loadCategoryCounts();
+  const counts = loadCollectionCounts();
   const rows = db
-    .prepare('SELECT *, (SELECT COUNT(*) FROM products p WHERE p.category_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order')
+    .prepare('SELECT *, (SELECT COUNT(*) FROM products p WHERE p.collection_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order')
     .all() as Row[];
-  return rows.map((r) => ({...mapCategoryRow(r), productCount: Number(r.product_count ?? counts.get(String(r.slug)) ?? 0)}));
+  return rows.map((r) => ({...mapCollectionRow(r), productCount: Number(r.product_count ?? counts.get(String(r.slug)) ?? 0)}));
 }
 
-export function getCategoryBySlug(slug: string): Category | null {
+export function getCollectionBySlug(slug: string): Collection | null {
   const db = getDb();
   const row = db
-    .prepare('SELECT *, (SELECT COUNT(*) FROM products p WHERE p.category_slug = collections.slug) AS product_count FROM collections WHERE slug = ?')
+    .prepare('SELECT *, (SELECT COUNT(*) FROM products p WHERE p.collection_slug = collections.slug) AS product_count FROM collections WHERE slug = ?')
     .get(slug) as Row | undefined;
-  return row ? mapCategoryRow(row) : null;
+  return row ? mapCollectionRow(row) : null;
 }
 
 // ── Models ──
@@ -202,7 +202,7 @@ export function removeModel(id: string): boolean {
 export function getAllProducts(): Product[] {
   const db = getDb();
   const variants = loadVariants();
-  const counts = loadCategoryCounts();
+  const counts = loadCollectionCounts();
   const rows = db.prepare(`${PRODUCT_SELECT} ORDER BY p.created_at DESC, p.slug`).all() as Row[];
   return rows.map((row) => mapProductRow(row, variants.get(String(row.id)) ?? [], counts));
 }
@@ -210,17 +210,17 @@ export function getAllProducts(): Product[] {
 export function getProductById(id: string): Product | null {
   const db = getDb();
   const variants = loadVariants();
-  const counts = loadCategoryCounts();
+  const counts = loadCollectionCounts();
   const row = db.prepare(`${PRODUCT_SELECT} WHERE p.id = ?`).get(id) as Row | undefined;
   return row ? mapProductRow(row, variants.get(String(row.id)) ?? [], counts) : null;
 }
 
-export function getProductBySlug(slug: string, category?: string): Product | null {
+export function getProductBySlug(slug: string, collection?: string): Product | null {
   const db = getDb();
   const variants = loadVariants();
-  const counts = loadCategoryCounts();
-  const row = category
-    ? (db.prepare(`${PRODUCT_SELECT} WHERE p.slug = ? AND p.category_slug = ?`).get(slug, category) as Row | undefined)
+  const counts = loadCollectionCounts();
+  const row = collection
+    ? (db.prepare(`${PRODUCT_SELECT} WHERE p.slug = ? AND p.collection_slug = ?`).get(slug, collection) as Row | undefined)
     : (db.prepare(`${PRODUCT_SELECT} WHERE p.slug = ?`).get(slug) as Row | undefined);
   return row ? mapProductRow(row, variants.get(String(row.id)) ?? [], counts) : null;
 }
@@ -240,7 +240,7 @@ export type ProductInput = {
   name: Record<Locale, string>;
   slug?: string;
   reference: string;
-  categorySlug: string;
+  collectionSlug: string;
   description?: Record<Locale, string>;
   material?: Record<Locale, string>;
   materialSlug?: string;
@@ -259,7 +259,7 @@ type ProductRow = {
   slug: string;
   name: Record<Locale, string>;
   reference: string;
-  categorySlug: string;
+  collectionSlug: string;
   description?: Record<Locale, string>;
   material?: Record<Locale, string>;
   materialSlug?: string;
@@ -274,7 +274,7 @@ type ProductRow = {
 
 function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
   db.prepare(
-    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, category_slug, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
+    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, collection_slug, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        slug = excluded.slug,
@@ -294,7 +294,7 @@ function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
        in_stock = excluded.in_stock,
        featured = excluded.featured,
        is_new = excluded.is_new,
-       category_slug = excluded.category_slug,
+       collection_slug = excluded.collection_slug,
        characteristics_fr = excluded.characteristics_fr,
        characteristics_ar = excluded.characteristics_ar,
        characteristics_en = excluded.characteristics_en,
@@ -319,7 +319,7 @@ function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
     product.inStock ? 1 : 0,
     product.featured ? 1 : 0,
     product.isNew ? 1 : 0,
-    product.categorySlug,
+    product.collectionSlug,
     JSON.stringify(product.characteristics?.fr ?? []),
     JSON.stringify(product.characteristics?.ar ?? []),
     JSON.stringify(product.characteristics?.en ?? []),
@@ -361,7 +361,7 @@ export function createProduct(input: ProductInput): Product {
     id,
     slug,
     ...input,
-    categorySlug: input.categorySlug,
+    collectionSlug: input.collectionSlug,
     inStock: input.inStock ?? true,
     featured: input.featured ?? false,
     isNew: input.isNew ?? false,
@@ -378,7 +378,7 @@ export function updateProduct(id: string, input: Partial<ProductInput>): Product
   const merged: ProductInput = {
     name: input.name ?? existing.name,
     reference: input.reference ?? existing.reference,
-    categorySlug: input.categorySlug ?? existing.category.slug,
+    collectionSlug: input.collectionSlug ?? existing.collection.slug,
     description: input.description ?? existing.description,
     material: input.material ?? existing.material,
     materialSlug: input.materialSlug ?? existing.materialSlug,
@@ -419,8 +419,8 @@ export function getSiteSettings(): SiteSettings {
   const db = getDb();
   const row = db.prepare('SELECT value FROM site_settings WHERE key = ?').get(SITE_SETTINGS_KEY) as Row | undefined;
   if (!row) return getDefaultSiteSettings();
-  const parsed = parseJSON<SiteSettings>(row.value, null as unknown as SiteSettings);
-  return parsed ?? getDefaultSiteSettings();
+  const parsed = parseJSON<unknown>(row.value, null);
+  return migrateSiteSettings(parsed);
 }
 
 export function saveSiteSettings(settings: SiteSettings): void {
@@ -491,7 +491,7 @@ export function markInquiryRead(id: string): boolean {
 
 // ── Dashboard stats ──
 
-export type CategoryBreakdown = {
+export type CollectionBreakdown = {
   slug: string;
   name: string;
   count: number;
@@ -503,7 +503,7 @@ export type ProductStat = Product & {whatsappClicks: number};
 export type DashboardData = {
   totalProducts: number;
   totalColorVariants: number;
-  categoryBreakdown: CategoryBreakdown[];
+  collectionBreakdown: CollectionBreakdown[];
   topRequested: ProductStat[];
   products: ProductStat[];
 };
@@ -527,16 +527,16 @@ export function getDashboardData(): DashboardData {
 
   const totalColorVariants = productStats.reduce((sum, p) => sum + Math.max(p.variants?.length ?? 0, 1), 0);
 
-  const byCategory = productStats.reduce<Map<string, {slug: string; name: string; count: number}>>((acc, p) => {
-    const slug = p.category.slug;
-    const name = p.category.name.fr;
+  const byCollection = productStats.reduce<Map<string, {slug: string; name: string; count: number}>>((acc, p) => {
+    const slug = p.collection.slug;
+    const name = p.collection.name.fr;
     const current = acc.get(slug) ?? {slug, name, count: 0};
     current.count += 1;
     acc.set(slug, current);
     return acc;
   }, new Map());
 
-  const categoryBreakdown: CategoryBreakdown[] = Array.from(byCategory.values()).map(({slug, name, count}) => ({
+  const collectionBreakdown: CollectionBreakdown[] = Array.from(byCollection.values()).map(({slug, name, count}) => ({
     slug,
     name,
     count,
@@ -548,5 +548,5 @@ export function getDashboardData(): DashboardData {
     .sort((a, b) => b.whatsappClicks - a.whatsappClicks)
     .slice(0, 5);
 
-  return {totalProducts: productStats.length, totalColorVariants, categoryBreakdown, topRequested, products: productStats};
+  return {totalProducts: productStats.length, totalColorVariants, collectionBreakdown, topRequested, products: productStats};
 }

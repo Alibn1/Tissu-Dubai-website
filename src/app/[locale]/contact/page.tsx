@@ -4,6 +4,7 @@ import {Metadata} from 'next';
 import {ContactForm} from '@/components/forms/ContactForm';
 import {MapPin, Phone, MessageCircle} from 'lucide-react';
 import {getSiteSettings} from '@/lib/data/store';
+import {resolveContact} from '@/lib/siteSettings';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -19,14 +20,11 @@ export default async function ContactPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations('contact');
   const tHero = await getTranslations('contact.hero');
   const tInfo = await getTranslations('contact.info');
 
-  const defaults = getSiteSettings().contact;
-  const address = process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address;
-  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || '';
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || defaults.whatsappNumber || '';
+  const {address, phones, whatsappNumber} = resolveContact(getSiteSettings());
+  const phone = phones[0] || '';
 
   return (
     <section className="py-10 sm:py-16">
@@ -67,12 +65,19 @@ export default async function ContactPage({params}: Props) {
                 <Phone className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-primary" />
                 <div>
                   <p className="text-sm font-medium text-brand-secondary">{tInfo('phone')}</p>
-                  <a
-                    href={`tel:${phone}`}
-                    className="text-sm text-brand-muted hover:text-brand-primary transition-colors"
-                  >
-                    {phone}
-                  </a>
+                  {phones.length > 0 ? (
+                    phones.map((number) => (
+                      <a
+                        key={number}
+                        href={`tel:${number}`}
+                        className="block text-sm text-brand-muted hover:text-brand-primary transition-colors"
+                      >
+                        {number}
+                      </a>
+                    ))
+                  ) : (
+                    <span className="text-sm text-brand-muted">{phone}</span>
+                  )}
                 </div>
               </div>
 
@@ -81,12 +86,12 @@ export default async function ContactPage({params}: Props) {
                 <div>
                   <p className="text-sm font-medium text-brand-secondary">{tInfo('whatsapp')}</p>
                   <a
-                    href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
+                    href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-brand-muted hover:text-brand-primary transition-colors"
                   >
-                    {whatsapp}
+                    {whatsappNumber}
                   </a>
                 </div>
               </div>

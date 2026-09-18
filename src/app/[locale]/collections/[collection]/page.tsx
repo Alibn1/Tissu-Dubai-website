@@ -2,23 +2,23 @@ import {setRequestLocale} from 'next-intl/server';
 import {getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {notFound} from 'next/navigation';
-import {getProducts, getCategoryBySlug, getCategories} from '@/lib/api';
+import {getProducts, getCollectionBySlug, getCollections} from '@/lib/api';
 import {getModels} from '@/lib/data/store';
 import {CatalogContent} from '@/components/catalog/CatalogContent';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 
 type Props = {
-  params: Promise<{locale: string; category: string}>;
+  params: Promise<{locale: string; collection: string}>;
 };
 
 export async function generateStaticParams() {
-  const categories = await getCategories();
-  return categories.map((c) => ({category: c.slug}));
+  const collections = await getCollections();
+  return collections.map((c) => ({collection: c.slug}));
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
-  const {locale, category} = await params;
-  const cat = await getCategoryBySlug(category);
+  const {locale, collection} = await params;
+  const cat = await getCollectionBySlug(collection);
   if (!cat) return {};
   const name = cat.name[locale as keyof typeof cat.name] || cat.name.fr;
   return {
@@ -27,16 +27,16 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   };
 }
 
-export default async function CategoryPage({params}: Props) {
-  const {locale, category} = await params;
+export default async function CollectionPage({params}: Props) {
+  const {locale, collection} = await params;
   setRequestLocale(locale);
 
-  const cat = await getCategoryBySlug(category);
+  const cat = await getCollectionBySlug(collection);
   if (!cat) notFound();
 
-  const [products, categories] = await Promise.all([
-    getProducts({category}),
-    getCategories()
+  const [products, collections] = await Promise.all([
+    getProducts({collection}),
+    getCollections()
   ]);
   const models = getModels();
 
@@ -68,10 +68,10 @@ export default async function CategoryPage({params}: Props) {
 
         <CatalogContent
           initialProducts={products}
-          categories={categories}
+          collections={collections}
           models={models}
           locale={locale}
-          activeCategory={category}
+          activeCollection={collection}
         />
       </div>
     </section>

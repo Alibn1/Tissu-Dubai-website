@@ -1,22 +1,21 @@
-import type {Product, Category} from '@/types';
+import type {Product, Collection} from '@/types';
 import {
   getAllProducts,
   getProductBySlug as getProductBySlugFromStore,
-  getCategories as getCategoriesFromStore,
-  getCategoryBySlug as getCategoryBySlugFromStore,
+  getCollections as getCollectionsFromStore,
   getSiteSettings,
 } from '@/lib/data/store';
-import type {CategoryCard, HomepageContent} from '@/lib/siteSettings';
+import type {CollectionCard, HomepageContent} from '@/lib/siteSettings';
 
 function getHomepageContent(): HomepageContent {
   return getSiteSettings().homepage;
 }
 
-function loadMergedCategories(): Category[] {
+function loadMergedCollections(): Collection[] {
   const homepage = getHomepageContent();
-  const cardsBySlug = new Map<string, CategoryCard>(homepage.categoryCards.map((card) => [card.id, card]));
+  const cardsBySlug = new Map<string, CollectionCard>(homepage.collectionCards.map((card) => [card.id, card]));
 
-  return getCategoriesFromStore().map((cat) => {
+  return getCollectionsFromStore().map((cat) => {
     const card = cardsBySlug.get(cat.slug);
     if (!card) return cat;
     return {
@@ -29,7 +28,7 @@ function loadMergedCategories(): Category[] {
 }
 
 export async function getProducts(filters?: {
-  category?: string;
+  collection?: string;
   material?: string;
   color?: string;
   inStockOnly?: boolean;
@@ -38,8 +37,8 @@ export async function getProducts(filters?: {
 }): Promise<Product[]> {
   let filtered = [...getAllProducts()];
 
-  if (filters?.category) {
-    filtered = filtered.filter((p) => p.category.slug === filters.category);
+  if (filters?.collection) {
+    filtered = filtered.filter((p) => p.collection.slug === filters.collection);
   }
   if (filters?.material) {
     filtered = filtered.filter((p) => p.materialSlug === filters.material);
@@ -87,8 +86,8 @@ export async function getProducts(filters?: {
   return filtered;
 }
 
-export async function getProductBySlug(slug: string, category?: string): Promise<Product | null> {
-  return getProductBySlugFromStore(slug, category);
+export async function getProductBySlug(slug: string, collection?: string): Promise<Product | null> {
+  return getProductBySlugFromStore(slug, collection);
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
@@ -99,12 +98,12 @@ export async function getNewArrivals(limit = 8): Promise<Product[]> {
   return getAllProducts().filter((p) => p.isNew).slice(0, limit);
 }
 
-export async function getCategories(): Promise<Category[]> {
-  return loadMergedCategories();
+export async function getCollections(): Promise<Collection[]> {
+  return loadMergedCollections();
 }
 
-export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  const merged = loadMergedCategories();
+export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
+  const merged = loadMergedCollections();
   return merged.find((c) => c.slug === slug) || null;
 }
 
@@ -113,7 +112,7 @@ export async function getRelatedProducts(product: Product, limit = 4): Promise<P
     .filter(
       (p) =>
         p.id !== product.id &&
-        (p.category.slug === product.category.slug || p.materialSlug === product.materialSlug)
+        (p.collection.slug === product.collection.slug || p.materialSlug === product.materialSlug)
     )
     .slice(0, limit);
 }

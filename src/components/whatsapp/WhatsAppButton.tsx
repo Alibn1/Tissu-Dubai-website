@@ -5,6 +5,7 @@ import {MessageCircle} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {type Locale} from '@/types';
 import {buildWhatsAppUrl, getWhatsAppNumber} from '@/lib/whatsapp';
+import {useSiteSettings} from '@/lib/siteSettingsContext';
 
 const greetings: Record<Locale, string> = {
   fr: 'Bonjour, je suis intéressé(e) par vos tissus.',
@@ -15,9 +16,10 @@ const greetings: Record<Locale, string> = {
 export function WhatsAppButton({className}: {className?: string}) {
   const t = useTranslations();
   const locale = useLocale() as Locale;
+  const settings = useSiteSettings();
 
   const handleClick = () => {
-    const number = getWhatsAppNumber();
+    const number = getWhatsAppNumber(settings);
     if (!number) return;
 
     window.open(

@@ -2,7 +2,7 @@
 
 import {useState} from 'react';
 import {cn} from '@/lib/utils';
-import type {Category, Locale, Model} from '@/types';
+import type {Collection, Locale, Model} from '@/types';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
 import {ModelSelect} from '@/components/admin/ModelSelect';
 import {FileUploadButton, ImagePreview} from '@/components/admin/imageUpload';
@@ -206,7 +206,7 @@ type Props = {
   mode: 'create' | 'edit';
   productId?: string;
   initialData?: ProductFormData;
-  collections: Category[];
+  collections: Collection[];
   models: Model[];
 };
 
