@@ -1,5 +1,5 @@
 import type {Locale} from '@/types';
-import {getDefaultSiteSettings} from '@/lib/siteSettings';
+import {getDefaultSiteSettings, type SiteSettings} from '@/lib/siteSettings';
 
 type WhatsAppMessageParams = {
   productName: string;
@@ -51,8 +51,9 @@ export function buildWhatsAppUrl(phoneNumber: string, message: string): string {
   return `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
 }
 
-export function getWhatsAppNumber(): string {
+export function getWhatsAppNumber(settings?: SiteSettings | null): string {
   return (
+    settings?.contact?.whatsappNumber?.trim() ||
     process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ||
     getDefaultSiteSettings().contact.whatsappNumber ||
     ''

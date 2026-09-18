@@ -1,14 +1,25 @@
 'use client';
 
-import {useTranslations} from 'next-intl';
+import {useTranslations, useLocale} from 'next-intl';
 import Image from 'next/image';
 import {Link} from '@/i18n/navigation';
 import {MessageCircle, ArrowRight} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {buildWhatsAppUrl, getWhatsAppNumber} from '@/lib/whatsapp';
+import {useSiteSettings} from '@/lib/siteSettingsContext';
+import type {Locale} from '@/types';
+
+const DEFAULT_HERO_IMAGE = '/images/Herobackground.jpg';
 
 export function HeroSection() {
   const t = useTranslations('home.hero');
+  const locale = useLocale() as Locale;
+  const settings = useSiteSettings();
+
+  const hero = settings?.homepage?.hero;
+  const image = hero?.image?.trim() || DEFAULT_HERO_IMAGE;
+  const title = hero?.title?.[locale]?.trim() || t('title');
+  const subtitle = hero?.subtitle?.[locale]?.trim() || t('description');
 
   return (
     <section className="relative overflow-hidden">
@@ -16,10 +27,11 @@ export function HeroSection() {
         <div className="relative overflow-hidden rounded-md border border-brand-border">
           {/* Hero background image */}
           <Image
-            src="/images/Herobackground.jpg"
-            alt="Tissu Dubai"
+            src={image}
+            alt={title}
             fill
             priority
+            unoptimized
             sizes="(max-width: 1024px) 100vw, 100vw"
             className="object-cover"
           />
@@ -29,11 +41,11 @@ export function HeroSection() {
           {/* Content overlaid on the image */}
           <div className="relative max-w-2xl py-16 px-6 sm:py-24 sm:px-10 lg:py-28">
             <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl md:text-5xl leading-tight">
-              {t('title')}
+              {title}
             </h1>
 
             <p className="mt-4 text-base text-white/80 sm:text-lg md:mt-6 md:text-xl max-w-xl leading-relaxed">
-              {t('description')}
+              {subtitle}
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4 md:mt-10">
@@ -53,7 +65,7 @@ export function HeroSection() {
               </Link>
 
               <a
-                href={buildWhatsAppUrl(getWhatsAppNumber(), '')}
+                href={buildWhatsAppUrl(getWhatsAppNumber(settings), '')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(

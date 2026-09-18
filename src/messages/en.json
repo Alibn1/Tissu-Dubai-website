@@ -53,7 +53,7 @@
       "discover": "Explore our fabrics",
       "whatsapp": "Order via WhatsApp"
     },
-    "categories": {
+    "collections": {
       "title": "Our Collections",
       "subtitle": "Exceptional fabrics for every creation",
       "caftan": {
@@ -149,7 +149,7 @@
     "noResults": "No fabric matches your search.",
     "clearFilters": "Clear filters",
     "filters": {
-      "categories": "Categories",
+      "collections": "Collections",
       "materials": "Models",
       "colors": "Colors",
       "availability": "Availability",

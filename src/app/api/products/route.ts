@@ -9,7 +9,7 @@ export async function GET() {
     name: p.name,
     slug: p.slug,
     reference: p.reference,
-    category: p.category.slug,
+    collection: p.collection.slug,
     price: p.price,
     inStock: p.inStock,
     featured: p.featured,
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     description: body.description,
     material: body.material,
     materialSlug: typeof body.materialSlug === 'string' ? body.materialSlug : '',
-    categorySlug: typeof body.collection === 'string' ? body.collection : '',
+    collectionSlug: typeof body.collection === 'string' ? body.collection : '',
     width: typeof body.width === 'string' ? body.width : firstNonEmpty(body.width),
     price: body.price == null ? null : Number(body.price),
     inStock: body.inStock !== false,
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       : [],
   };
 
-  if (!input.reference || !input.categorySlug) {
+  if (!input.reference || !input.collectionSlug) {
     return NextResponse.json(
       {error: 'Les champs "reference" et "collection" sont obligatoires.'},
       {status: 400}

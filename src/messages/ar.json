@@ -53,7 +53,7 @@
       "discover": "اكتشفوا أقمشتنا",
       "whatsapp": "اطلب عبر واتساب"
     },
-    "categories": {
+    "collections": {
       "title": "عوالمنا",
       "subtitle": "أقمشة استثنائية لكل إبداع",
       "caftan": {
@@ -149,7 +149,7 @@
     "noResults": "لا يوجد قماش يطابق بحثكم.",
     "clearFilters": "مسح التصفية",
     "filters": {
-      "categories": "الفئات",
+      "collections": "المجموعات",
       "materials": "الموديلات",
       "colors": "الألوان",
       "availability": "التوفر",

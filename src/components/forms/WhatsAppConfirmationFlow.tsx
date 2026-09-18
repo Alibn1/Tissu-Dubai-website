@@ -5,6 +5,7 @@ import {useTranslations} from 'next-intl';
 import {MessageCircle} from 'lucide-react';
 import {Modal} from '@/components/ui/Modal';
 import {buildWhatsAppUrl, getWhatsAppNumber} from '@/lib/whatsapp';
+import {useSiteSettings} from '@/lib/siteSettingsContext';
 import {cn} from '@/lib/utils';
 
 export const phoneRegex = /^(\+?212|0)[5-7]\d{8}$/;
@@ -69,6 +70,7 @@ export function WhatsAppConfirmationFlow({
   onSent
 }: WhatsAppConfirmationFlowProps) {
   const t = useTranslations('confirmation');
+  const settings = useSiteSettings();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [values, setValues] = useState<FieldValues>({});
@@ -122,7 +124,7 @@ export function WhatsAppConfirmationFlow({
   const send = () => {
     const message = buildMessage(values);
     window.open(
-      buildWhatsAppUrl(getWhatsAppNumber(), message),
+      buildWhatsAppUrl(getWhatsAppNumber(settings), message),
       '_blank',
       'noopener,noreferrer'
     );

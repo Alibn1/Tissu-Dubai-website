@@ -13,7 +13,7 @@ export default async function AdminDashboardPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const {totalProducts, totalColorVariants, categoryBreakdown, topRequested} = getDashboardData();
+  const {totalProducts, totalColorVariants, collectionBreakdown, topRequested} = getDashboardData();
   const inquiries = getInquiries();
   const recentInquiries = inquiries.slice(0, 10);
   const maxClicks = Math.max(...topRequested.map((p) => p.whatsappClicks), 1);
@@ -70,9 +70,9 @@ export default async function AdminDashboardPage({params}: Props) {
           </Link>
         </div>
 
-        {/* Category cards */}
+        {/* Collection cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {categoryBreakdown.map((cat) => (
+          {collectionBreakdown.map((cat) => (
             <div
               key={cat.slug}
               className="rounded-md border border-brand-border bg-brand-surface p-5 shadow-sm"

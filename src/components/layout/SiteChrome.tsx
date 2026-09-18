@@ -5,6 +5,7 @@ import {Header} from '@/components/layout/Header';
 import {Footer} from '@/components/layout/Footer';
 import {WhatsAppButton} from '@/components/whatsapp/WhatsAppButton';
 import {type SiteSettings} from '@/lib/siteSettings';
+import {SiteSettingsProvider} from '@/lib/siteSettingsContext';
 
 export function SiteChrome({
   settings,
@@ -22,11 +23,11 @@ export function SiteChrome({
   }
 
   return (
-    <>
+    <SiteSettingsProvider settings={settings}>
       <Header siteSettings={settings} />
       <main className="flex-1 pt-[100px]">{children}</main>
       <Footer siteSettings={settings} />
       <WhatsAppButton />
-    </>
+    </SiteSettingsProvider>
   );
 }

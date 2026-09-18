@@ -1,6 +1,7 @@
 import {type Locale} from '@/types';
 import {STORE_LOCATION} from '@/lib/site';
 import {getSiteSettings} from '@/lib/data/store';
+import {resolveContact, WEEKDAY_SCHEMA_NAME} from '@/lib/siteSettings';
 
 type JsonLdProps = {
   locale: Locale;
@@ -10,7 +11,17 @@ type JsonLdProps = {
 
 export function JsonLd({locale, type, data = {}}: JsonLdProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  const defaults = getSiteSettings().contact;
+  const settings = getSiteSettings();
+  const contact = resolveContact(settings);
+
+  const openingHours = settings.businessHours
+    .filter((hour) => !hour.isClosed && hour.openTime && hour.closeTime)
+    .map((hour) => ({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: WEEKDAY_SCHEMA_NAME[hour.day],
+      opens: hour.openTime,
+      closes: hour.closeTime
+    }));
 
   const schemas: Record<string, unknown> = {
     LocalBusiness: {
@@ -23,26 +34,19 @@ export function JsonLd({locale, type, data = {}}: JsonLdProps) {
         en: 'Premium fabric specialist in Casablanca, Morocco'
       }[locale],
       url: baseUrl,
-      telephone: process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || null,
+      telephone: contact.primaryPhone || null,
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'Casablanca',
         addressCountry: 'MA',
-        streetAddress: process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address
+        streetAddress: contact.address
       },
       geo: {
         '@type': 'GeoCoordinates',
         latitude: STORE_LOCATION.latitude,
         longitude: STORE_LOCATION.longitude
       },
-      openingHoursSpecification: [
-        {
-          '@type': 'OpeningHoursSpecification',
-          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-          opens: '09:00',
-          closes: '19:00'
-        }
-      ],
+      openingHoursSpecification: openingHours,
       priceRange: '$$',
       ...data
     },

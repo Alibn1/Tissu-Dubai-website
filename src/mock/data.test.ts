@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest';
 import {products} from '@/mock/products';
-import {categories} from '@/mock/categories';
+import {collections} from '@/mock/collections';
 
 describe('Mock Data', () => {
   describe('Products', () => {
@@ -22,10 +22,10 @@ describe('Mock Data', () => {
       });
     });
 
-    it('has products in each category', () => {
-      const slugs = categories.map((c) => c.slug);
+    it('has products in each collection', () => {
+      const slugs = collections.map((c) => c.slug);
       slugs.forEach((slug) => {
-        const filtered = products.filter((p) => p.category.slug === slug);
+        const filtered = products.filter((p) => p.collection.slug === slug);
         expect(filtered.length).toBeGreaterThan(0);
       });
     });
@@ -62,13 +62,13 @@ describe('Mock Data', () => {
     });
   });
 
-  describe('Categories', () => {
-    it('has 3 categories', () => {
-      expect(categories).toHaveLength(3);
+  describe('Collections', () => {
+    it('has 3 collections', () => {
+      expect(collections).toHaveLength(3);
     });
 
-    it('all categories have translations', () => {
-      categories.forEach((cat) => {
+    it('all collections have translations', () => {
+      collections.forEach((cat) => {
         expect(cat.name.fr).toBeTruthy();
         expect(cat.name.ar).toBeTruthy();
         expect(cat.name.en).toBeTruthy();

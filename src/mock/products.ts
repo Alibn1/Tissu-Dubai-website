@@ -1,6 +1,6 @@
 import type { Product } from "@/types";
 
-const categories = {
+const collections = {
   caftan: {
     id: "cat-caftan",
     slug: "caftan",
@@ -76,7 +76,7 @@ export const products: Product[] = [
     width: "140cm",
     price: 890,
     inStock: true,
-    category: categories.caftan,
+    collection: collections.caftan,
     variants: [
       {
         id: "var-001-1",
@@ -166,7 +166,7 @@ export const products: Product[] = [
     width: "130cm",
     price: 750,
     inStock: true,
-    category: categories.caftan,
+    collection: collections.caftan,
     variants: [
       {
         id: "var-002-1",
@@ -246,7 +246,7 @@ export const products: Product[] = [
     width: "150cm",
     price: 650,
     inStock: true,
-    category: categories.caftan,
+    collection: collections.caftan,
     variants: [
       {
         id: "var-003-1",
@@ -336,7 +336,7 @@ export const products: Product[] = [
     width: "140cm",
     price: 420,
     inStock: true,
-    category: categories.caftan,
+    collection: collections.caftan,
     variants: [
       {
         id: "var-004-1",
@@ -406,7 +406,7 @@ export const products: Product[] = [
     width: "130cm",
     price: 950,
     inStock: true,
-    category: categories.caftan,
+    collection: collections.caftan,
     variants: [
       {
         id: "var-005-1",
@@ -486,7 +486,7 @@ export const products: Product[] = [
     width: "160cm",
     price: 380,
     inStock: true,
-    category: categories.caftan,
+    collection: collections.caftan,
     variants: [
       {
         id: "var-006-1",
@@ -566,7 +566,7 @@ export const products: Product[] = [
     width: "140cm",
     price: 290,
     inStock: true,
-    category: categories.caftan,
+    collection: collections.caftan,
     variants: [
       {
         id: "var-007-1",
@@ -646,7 +646,7 @@ export const products: Product[] = [
     width: "150cm",
     price: 220,
     inStock: true,
-    category: categories.jellaba,
+    collection: collections.jellaba,
     variants: [
       {
         id: "var-008-1",
@@ -726,7 +726,7 @@ export const products: Product[] = [
     width: "145cm",
     price: 580,
     inStock: true,
-    category: categories.jellaba,
+    collection: collections.jellaba,
     variants: [
       {
         id: "var-009-1",
@@ -796,7 +796,7 @@ export const products: Product[] = [
     width: "150cm",
     price: 180,
     inStock: true,
-    category: categories.jellaba,
+    collection: collections.jellaba,
     variants: [
       {
         id: "var-010-1",
@@ -876,7 +876,7 @@ export const products: Product[] = [
     width: "145cm",
     price: 490,
     inStock: true,
-    category: categories.jellaba,
+    collection: collections.jellaba,
     variants: [
       {
         id: "var-011-1",
@@ -956,7 +956,7 @@ export const products: Product[] = [
     width: "145cm",
     price: 150,
     inStock: true,
-    category: categories.jellaba,
+    collection: collections.jellaba,
     variants: [
       {
         id: "var-012-1",
@@ -1026,7 +1026,7 @@ export const products: Product[] = [
     width: "140cm",
     price: 820,
     inStock: true,
-    category: categories.tekchita,
+    collection: collections.tekchita,
     variants: [
       {
         id: "var-013-1",
@@ -1106,7 +1106,7 @@ export const products: Product[] = [
     width: "135cm",
     price: 680,
     inStock: true,
-    category: categories.tekchita,
+    collection: collections.tekchita,
     variants: [
       {
         id: "var-014-1",
@@ -1186,7 +1186,7 @@ export const products: Product[] = [
     width: "150cm",
     price: 550,
     inStock: true,
-    category: categories.tekchita,
+    collection: collections.tekchita,
     variants: [
       {
         id: "var-015-1",
@@ -1256,7 +1256,7 @@ export const products: Product[] = [
     width: "140cm",
     price: 1100,
     inStock: true,
-    category: categories.tekchita,
+    collection: collections.tekchita,
     variants: [
       {
         id: "var-016-1",

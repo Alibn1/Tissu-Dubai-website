@@ -1,6 +1,6 @@
-import type {Category} from '@/types';
+import type {Collection} from '@/types';
 
-export const categories: Category[] = [
+export const collections: Collection[] = [
   {
     id: 'cat-1',
     slug: 'caftan',

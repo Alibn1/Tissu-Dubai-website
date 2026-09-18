@@ -53,7 +53,7 @@
       "discover": "Découvrir nos tissus",
       "whatsapp": "Commander via WhatsApp"
     },
-    "categories": {
+    "collections": {
       "title": "Nos Univers",
       "subtitle": "Des tissus d'exception pour chaque création",
       "caftan": {
@@ -149,7 +149,7 @@
     "noResults": "Aucun tissu ne correspond à votre recherche.",
     "clearFilters": "Effacer les filtres",
     "filters": {
-      "categories": "Catégories",
+      "collections": "Collections",
       "materials": "Modèles",
       "colors": "Couleurs",
       "availability": "Disponibilité",

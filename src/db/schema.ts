@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS products (
   in_stock INTEGER NOT NULL DEFAULT 1,
   featured INTEGER NOT NULL DEFAULT 0,
   is_new INTEGER NOT NULL DEFAULT 0,
-  category_slug TEXT NOT NULL REFERENCES collections(slug),
+  collection_slug TEXT NOT NULL REFERENCES collections(slug),
   characteristics_fr TEXT NOT NULL DEFAULT '[]',
   characteristics_ar TEXT NOT NULL DEFAULT '[]',
   characteristics_en TEXT NOT NULL DEFAULT '[]',
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_slug);
+CREATE INDEX IF NOT EXISTS idx_products_collection ON products(collection_slug);
 
 CREATE TABLE IF NOT EXISTS product_variants (
   id TEXT PRIMARY KEY,

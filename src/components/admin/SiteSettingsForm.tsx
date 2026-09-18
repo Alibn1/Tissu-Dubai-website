@@ -5,13 +5,13 @@ import {cn} from '@/lib/utils';
 import type {Locale} from '@/types';
 import {
   createEmptyText,
-  CATEGORY_CARDS,
+  COLLECTION_CARDS,
   DAY_LABELS,
   getDefaultSiteSettings,
   SOCIAL_LABELS,
   type BusinessDay,
-  type CategoryCard,
-  type CategoryCardId,
+  type CollectionCard,
+  type CollectionCardId,
   type ContactInfo,
   type SiteSettings,
 } from '@/lib/siteSettings';
@@ -212,7 +212,7 @@ export function SiteSettingsForm({initialData}: Props) {
     updateFaqField(entryId, lang, key, value);
   };
 
-  // ── Homepage (hero + category cards) ──
+  // ── Homepage (hero + collection cards) ──
 
   const updateHeroImage = (url: string) =>
     setSettings((prev) => ({
@@ -229,21 +229,21 @@ export function SiteSettingsForm({initialData}: Props) {
       },
     }));
 
-  const setCardImage = (id: CategoryCardId, url: string) =>
+  const setCardImage = (id: CollectionCardId, url: string) =>
     setSettings((prev) => ({
       ...prev,
       homepage: {
         ...prev.homepage,
-        categoryCards: prev.homepage.categoryCards.map((c) => (c.id === id ? {...c, image: url} : c)),
+        collectionCards: prev.homepage.collectionCards.map((c) => (c.id === id ? {...c, image: url} : c)),
       },
     }));
 
-  const updateCardField = (id: CategoryCardId, key: 'title' | 'description', lang: Locale, value: string) =>
+  const updateCardField = (id: CollectionCardId, key: 'title' | 'description', lang: Locale, value: string) =>
     setSettings((prev) => ({
       ...prev,
       homepage: {
         ...prev.homepage,
-        categoryCards: prev.homepage.categoryCards.map((c) =>
+        collectionCards: prev.homepage.collectionCards.map((c) =>
           c.id === id ? {...c, [key]: {...c[key], [lang]: value}} : c
         ),
       },
@@ -261,12 +261,12 @@ export function SiteSettingsForm({initialData}: Props) {
       value
     );
 
-  const cardFieldsFor = (card: CategoryCard): LocalizedField[] => [
+  const cardFieldsFor = (card: CollectionCard): LocalizedField[] => [
     {id: `title-${card.id}`, label: 'Titre', value: card.title},
     {id: `desc-${card.id}`, label: 'Description', value: card.description, textarea: true},
   ];
 
-  const handleCardChange = (card: CategoryCard, fieldId: string, lang: Locale, value: string) =>
+  const handleCardChange = (card: CollectionCard, fieldId: string, lang: Locale, value: string) =>
     updateCardField(card.id, fieldId.startsWith('title-') ? 'title' : 'description', lang, value);
 
   // ── Save (mock, swap for a real GET/PUT /api/site-settings later) ──
@@ -509,7 +509,7 @@ export function SiteSettingsForm({initialData}: Props) {
         </section>
       )}
 
-      {/* ── 4. Homepage (hero + category cards) ── */}
+      {/* ── 4. Homepage (hero + collection cards) ── */}
       {activeTab === 'home' && (
         <div className="space-y-6">
           <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
@@ -540,12 +540,12 @@ export function SiteSettingsForm({initialData}: Props) {
 
           <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
             <SectionHeader
-              title="Cartes de catégories — Caftan, Djellaba, Takchita"
-              subtitle="Trois cartes fixes correspondant aux catégories du site : image, titre et description de chacune"
+              title="Cartes de collections — Caftan, Djellaba, Takchita"
+              subtitle="Trois cartes fixes correspondant aux collections du site : image, titre et description de chacune"
             />
             <div className="space-y-6 p-5">
-              {settings.homepage.categoryCards.map((card) => {
-                const cardLabel = CATEGORY_CARDS.find((c) => c.id === card.id)?.label ?? card.id;
+              {settings.homepage.collectionCards.map((card) => {
+                const cardLabel = COLLECTION_CARDS.find((c) => c.id === card.id)?.label ?? card.id;
                 return (
                   <div key={card.id} className="space-y-4 rounded-md border border-brand-border p-4">
                     <h3 className="font-heading text-sm font-semibold text-brand-secondary">

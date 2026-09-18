@@ -1,18 +1,21 @@
-import {getTranslations} from 'next-intl/server';
+import {getTranslations, getLocale} from 'next-intl/server';
 import {SectionHeading} from '@/components/ui/SectionHeading';
 import {cn} from '@/lib/utils';
 import {MapPin, Phone, Clock, ExternalLink} from 'lucide-react';
 import {GOOGLE_MAPS_EMBED_URL, GOOGLE_MAPS_LINK} from '@/lib/site';
 import {getSiteSettings} from '@/lib/data/store';
+import {formatBusinessHours, resolveContact} from '@/lib/siteSettings';
+import type {Locale} from '@/types';
 
 export async function StoreLocationSection() {
   const t = await getTranslations('home.storeLocation');
   const tLocation = await getTranslations('location');
   const tHours = await getTranslations('location.hours');
 
-  const defaults = getSiteSettings().contact;
-  const address = process.env.NEXT_PUBLIC_STORE_ADDRESS || defaults.address;
-  const phone = process.env.NEXT_PUBLIC_STORE_PHONE || defaults.phones[0] || '';
+  const settings = getSiteSettings();
+  const {address, phones} = resolveContact(settings);
+  const hours = formatBusinessHours(settings.businessHours, (await getLocale()) as Locale);
+  const phone = phones[0] || '';
 
   return (
     <section className="py-16 sm:py-20">
@@ -54,16 +57,13 @@ export async function StoreLocationSection() {
                   {tHours('title')}
                 </h3>
                 <div className="mt-1 space-y-1 text-sm text-brand-muted">
-                  <p>
-                    <span className="font-medium">{tHours('weekdays')}</span>
-                    {' — '}
-                    {tHours('weekdaysHours')}
-                  </p>
-                  <p>
-                    <span className="font-medium">{tHours('sunday')}</span>
-                    {' — '}
-                    {tHours('sundayHours')}
-                  </p>
+                  {hours.map((entry) => (
+                    <p key={entry.day} className="capitalize">
+                      <span className="font-medium">{entry.label}</span>
+                      {' — '}
+                      {entry.value}
+                    </p>
+                  ))}
                 </div>
               </div>
             </div>

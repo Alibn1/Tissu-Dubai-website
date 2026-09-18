@@ -13,13 +13,13 @@ import {RelatedProducts} from '@/components/product/RelatedProducts';
 import {type Locale} from '@/types';
 
 type Props = {
-  params: Promise<{locale: string; category: string; slug: string}>;
+  params: Promise<{locale: string; collection: string; slug: string}>;
 };
 
 export async function generateStaticParams() {
   const products = await getProducts();
   return products.map((p) => ({
-    category: p.category.slug,
+    collection: p.collection.slug,
     slug: p.slug
   }));
 }
@@ -44,10 +44,10 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 }
 
 export default async function ProductDetailPage({params}: Props) {
-  const {locale, category, slug} = await params;
+  const {locale, collection, slug} = await params;
   setRequestLocale(locale);
 
-  const product = await getProductBySlug(slug, category);
+  const product = await getProductBySlug(slug, collection);
   if (!product) notFound();
 
   const relatedProducts = await getRelatedProducts(product, 4);
@@ -58,8 +58,8 @@ export default async function ProductDetailPage({params}: Props) {
   const breadcrumbs = [
     {name: t('home'), url: '/'},
     {name: t('collections'), url: '/collections'},
-    {name: product.category.name[loc] || product.category.name.fr, url: `/collections/${product.category.slug}`},
-    {name: product.name[loc] || product.name.fr, url: `/collections/${product.category.slug}/${product.slug}`}
+    {name: product.collection.name[loc] || product.collection.name.fr, url: `/collections/${product.collection.slug}`},
+    {name: product.name[loc] || product.name.fr, url: `/collections/${product.collection.slug}/${product.slug}`}
   ];
 
   return (

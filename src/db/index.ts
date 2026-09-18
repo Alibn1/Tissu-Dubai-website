@@ -2,7 +2,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {dirname} from 'node:path';
 import {existsSync, mkdirSync, unlinkSync} from 'node:fs';
 import {SCHEMA_SQL} from '@/db/schema';
-import {categories as mockCategories} from '@/mock/categories';
+import {collections as mockCollections} from '@/mock/collections';
 import {products as mockProducts} from '@/mock/products';
 import {mockModels} from '@/mock/models';
 import {getDefaultSiteSettings} from '@/lib/siteSettings';
@@ -26,6 +26,7 @@ export function getDb(): DatabaseSync {
 
   database.exec('BEGIN IMMEDIATE;');
   try {
+    migrateSchema(database);
     database.exec(SCHEMA_SQL);
     seedIfEmpty(database);
     database.exec('COMMIT;');
@@ -64,6 +65,22 @@ export function resetDatabase(): void {
   getDb();
 }
 
+/**
+ * Brings databases created before the `category` -> `collection` rename up to
+ * date. Must run before SCHEMA_SQL, because the schema's index on
+ * `collection_slug` would otherwise reference a column that does not exist yet.
+ */
+function migrateSchema(database: DatabaseSync) {
+  const columns = database.prepare('PRAGMA table_info(products)').all() as {name: string}[];
+  const names = new Set(columns.map((column) => column.name));
+
+  if (names.has('category_slug') && !names.has('collection_slug')) {
+    database.exec('ALTER TABLE products RENAME COLUMN category_slug TO collection_slug;');
+  }
+
+  database.exec('DROP INDEX IF EXISTS idx_products_category;');
+}
+
 function seedIfEmpty(database: DatabaseSync) {
   const {count} = database.prepare('SELECT COUNT(*) AS count FROM collections').get() as {count: number};
   if (count > 0) return;
@@ -77,7 +94,7 @@ function seedDatabase(database: DatabaseSync) {
     `INSERT INTO collections (id, slug, name_fr, name_ar, name_en, description_fr, description_ar, description_en, image, sort_order, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
-  mockCategories.forEach((cat, index) => {
+  mockCollections.forEach((cat, index) => {
     insertCollection.run(
       cat.id,
       cat.slug,
@@ -89,12 +106,12 @@ function seedDatabase(database: DatabaseSync) {
       cat.description.en,
       cat.image,
       index,
-      new Date(now - (mockCategories.length - index) * 1000).toISOString()
+      new Date(now - (mockCollections.length - index) * 1000).toISOString()
     );
   });
 
   const insertProduct = database.prepare(
-    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, category_slug, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
+    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, collection_slug, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertVariant = database.prepare(
@@ -123,7 +140,7 @@ function seedDatabase(database: DatabaseSync) {
       product.inStock ? 1 : 0,
       product.featured ? 1 : 0,
       product.isNew ? 1 : 0,
-      product.category.slug,
+      product.collection.slug,
       JSON.stringify(product.characteristics?.fr ?? []),
       JSON.stringify(product.characteristics?.ar ?? []),
       JSON.stringify(product.characteristics?.en ?? []),

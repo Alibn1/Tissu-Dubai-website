@@ -19,12 +19,12 @@ afterAll(async () => {
 
 describe('DB-backed store', () => {
   it('seeds the catalog from mock data', async () => {
-    const {getAllProducts, getCategories, getModels, getSiteSettings, getInquiries} =
+    const {getAllProducts, getCollections, getModels, getSiteSettings, getInquiries} =
       await import('@/lib/data/store');
 
     const products = getAllProducts();
     expect(products.length).toBe(16);
-    expect(getCategories().length).toBe(3);
+    expect(getCollections().length).toBe(3);
     expect(getModels().length).toBeGreaterThan(0);
     expect(getInquiries()).toEqual([]);
 
@@ -32,7 +32,7 @@ describe('DB-backed store', () => {
     expect(settings.contact.whatsappNumber).toBeTruthy();
 
     const first = products[0];
-    expect(first.category.slug.length).toBeGreaterThan(0);
+    expect(first.collection.slug.length).toBeGreaterThan(0);
     expect(first.name.en).toBeTruthy();
     expect(first.variants.length).toBeGreaterThan(0);
     expect(first.images.length).toBeGreaterThan(0);
@@ -44,7 +44,7 @@ describe('DB-backed store', () => {
     const created = store.createProduct({
       name: {fr: 'Test', ar: 'تجربة', en: 'Test'},
       reference: 'TD-TEST-001',
-      categorySlug: 'caftan',
+      collectionSlug: 'caftan',
       price: 100,
       variants: [{color: {fr: 'Rouge', ar: 'أحمر', en: 'Red'}, price: 100, inStock: true}],
     });
@@ -66,7 +66,7 @@ describe('DB-backed store', () => {
     const created = store.createProduct({
       name: {fr: 'Images', ar: 'صور', en: 'Images'},
       reference: 'TD-IMG-001',
-      categorySlug: 'caftan',
+      collectionSlug: 'caftan',
       images: ['/images/products/product-1.svg'],
       variants: [
         {

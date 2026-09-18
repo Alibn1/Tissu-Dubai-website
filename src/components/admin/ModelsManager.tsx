@@ -3,7 +3,7 @@
 import {useState} from 'react';
 import {cn} from '@/lib/utils';
 import {Shirt, Plus, Trash2, Check, Languages, Loader2} from 'lucide-react';
-import type {Category, Locale, Model} from '@/types';
+import type {Collection, Locale, Model} from '@/types';
 import {clientTranslate, DEEPL_TARGET_CODE} from '@/lib/translation';
 
 const NAME_LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
@@ -77,7 +77,7 @@ export function ModelsManager({
   collections,
   initialModels,
 }: {
-  collections: Category[];
+  collections: Collection[];
   initialModels: Model[];
 }) {
   const [models, setModels] = useState<Model[]>(initialModels);

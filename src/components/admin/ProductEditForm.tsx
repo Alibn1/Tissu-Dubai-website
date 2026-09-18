@@ -55,12 +55,12 @@ export function ProductEditForm({product, models}: Props) {
 
   const [modelId, setModelId] = useState<string>(() => {
     const match = models.find(
-      (m) => m.collectionSlug === product.category.slug && m.slug === product.materialSlug
+      (m) => m.collectionSlug === product.collection.slug && m.slug === product.materialSlug
     );
     return match?.id ?? '';
   });
 
-  const selectedModels = models.filter((m) => m.collectionSlug === product.category.slug);
+  const selectedModels = models.filter((m) => m.collectionSlug === product.collection.slug);
   const selectedModel = models.find((m) => m.id === modelId) ?? null;
 
   const initialTranslations = useMemo<ProductTranslations>(() => {
@@ -249,7 +249,7 @@ export function ProductEditForm({product, models}: Props) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Collection</label>
-            <p className={cn(inputClass, 'text-brand-muted')}>{product.category.name.fr}</p>
+            <p className={cn(inputClass, 'text-brand-muted')}>{product.collection.name.fr}</p>
           </div>
           <div>
             <label className={labelClass}>Modèle</label>

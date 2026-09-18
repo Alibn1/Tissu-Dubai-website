@@ -2,6 +2,8 @@ import {setRequestLocale} from 'next-intl/server';
 import {getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {FaqAccordion} from '@/components/FaqAccordion';
+import {getSiteSettings} from '@/lib/data/store';
+import type {Locale} from '@/types';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -17,15 +19,25 @@ export default async function FaqPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations('faq');
+  const loc = locale as Locale;
+  const settings = getSiteSettings();
+
+  let questions = settings.faq
+    .map((entry) => ({
+      question: entry.question[loc]?.trim() || entry.question.fr,
+      answer: entry.answer[loc]?.trim() || entry.answer.fr
+    }))
+    .filter((entry) => entry.question);
+
+  if (questions.length === 0) {
+    const t = await getTranslations('faq');
+    questions = [0, 1, 2, 3, 4, 5, 6].map((i) => ({
+      question: t(`questions.${i}.question`),
+      answer: t(`questions.${i}.answer`)
+    }));
+  }
+
   const tHero = await getTranslations('faq.hero');
-
-  const questionKeys = [0, 1, 2, 3, 4, 5, 6];
-
-  const questions = questionKeys.map((i) => ({
-    question: t(`questions.${i}.question`),
-    answer: t(`questions.${i}.answer`)
-  }));
 
   return (
     <section className="py-10 sm:py-16">

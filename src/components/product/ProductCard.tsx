@@ -19,7 +19,7 @@ export function ProductCard({product, className}: ProductCardProps) {
 
   return (
     <Link
-      href={`/collections/${product.category.slug}/${product.slug}`}
+      href={`/collections/${product.collection.slug}/${product.slug}`}
       className={cn(
         'group block',
         className
