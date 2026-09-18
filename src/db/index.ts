@@ -2,46 +2,66 @@ import {DatabaseSync} from 'node:sqlite';
 import {dirname} from 'node:path';
 import {existsSync, mkdirSync, unlinkSync} from 'node:fs';
 import {SCHEMA_SQL} from '@/db/schema';
+import {createWorkersDatabase, type WorkersDatabase} from '@/db/workers';
 import {collections as mockCollections} from '@/mock/collections';
 import {products as mockProducts} from '@/mock/products';
 import {mockModels} from '@/mock/models';
 import {getDefaultSiteSettings} from '@/lib/siteSettings';
 
-const DEFAULT_DB_PATH = `${process.cwd()}/data/tissu.db`;
+let db: DatabaseSync | WorkersDatabase | null = null;
 
-let db: DatabaseSync | null = null;
+type DbHandle = DatabaseSync | WorkersDatabase;
 
-export function getDb(): DatabaseSync {
+export function getDb(): DbHandle {
   if (db) return db;
 
-  const dbPath = process.env.TISSU_DB_PATH || DEFAULT_DB_PATH;
-  mkdirSync(dirname(dbPath), {recursive: true});
-
-  const database = new DatabaseSync(dbPath);
-  // Wait (instead of failing) when several processes open the same file at
-  // once, e.g. Turbopack build workers collecting page data in parallel.
-  database.exec('PRAGMA busy_timeout = 15000;');
-  database.exec('PRAGMA foreign_keys = ON;');
-  database.exec('PRAGMA journal_mode = WAL;');
-
-  database.exec('BEGIN IMMEDIATE;');
   try {
-    migrateSchema(database);
-    database.exec(SCHEMA_SQL);
-    seedIfEmpty(database);
-    database.exec('COMMIT;');
-  } catch (error) {
-    try {
-      database.exec('ROLLBACK;');
-    } catch {
-      // ignore rollback failures (e.g. no active transaction)
-    }
-    database.close();
-    throw error;
-  }
+    const dbPath = process.env.TISSU_DB_PATH || `${process.cwd()}/data/tissu.db`;
+    mkdirSync(dirname(dbPath), {recursive: true});
 
-  db = database;
-  return db;
+    const database = new DatabaseSync(dbPath);
+    // Wait (instead of failing) when several processes open the same file at
+    // once, e.g. Turbopack build workers collecting page data in parallel.
+    database.exec('PRAGMA busy_timeout = 15000;');
+    database.exec('PRAGMA foreign_keys = ON;');
+    database.exec('PRAGMA journal_mode = WAL;');
+
+    database.exec('BEGIN IMMEDIATE;');
+    try {
+      migrateSchema(database);
+      database.exec(SCHEMA_SQL);
+      seedIfEmpty(database);
+      database.exec('COMMIT;');
+    } catch (error) {
+      try {
+        database.exec('ROLLBACK;');
+      } catch {
+        // ignore rollback failures (e.g. no active transaction)
+      }
+      database.close();
+      throw error;
+    }
+
+    db = database;
+    return db;
+  } catch (error) {
+    // Workers runtime: neither `fs` nor `node:sqlite` are real. Fall back to
+    // the in-memory database seeded from mock data so every request no longer
+    // 500s. Keep the error visible for local debugging but do not rethrow.
+    if (!(error instanceof Error && (error.message.includes('not implemented') || error.message.includes('no such module')))) {
+      console.error('[db] file-based sqlite unavailable, using in-memory fallback:', error instanceof Error ? error.message : error);
+    }
+    const database = createWorkersDatabase();
+    try {
+      migrateSchema(database);
+      database.exec(SCHEMA_SQL);
+      seedIfEmpty(database);
+    } catch (seedError) {
+      console.error('[db] failed to initialise in-memory database:', seedError instanceof Error ? seedError.message : seedError);
+    }
+    db = database;
+    return db;
+  }
 }
 
 /** Closes the singleton connection (used by tests during teardown). */
@@ -54,13 +74,17 @@ export function closeDb(): void {
 
 /** Recreates the local database from scratch and re-seeds it from mock data. */
 export function resetDatabase(): void {
-  const dbPath = process.env.TISSU_DB_PATH || DEFAULT_DB_PATH;
   if (db) {
     db.close();
     db = null;
   }
-  if (existsSync(/* turbopackIgnore: true */ dbPath)) {
-    unlinkSync(/* turbopackIgnore: true */ dbPath);
+  try {
+    const dbPath = process.env.TISSU_DB_PATH || `${process.cwd()}/data/tissu.db`;
+    if (existsSync(/* turbopackIgnore: true */ dbPath)) {
+      unlinkSync(/* turbopackIgnore: true */ dbPath);
+    }
+  } catch {
+    // filesystem unavailable (Workers runtime)
   }
   getDb();
 }
@@ -70,7 +94,7 @@ export function resetDatabase(): void {
  * date. Must run before SCHEMA_SQL, because the schema's index on
  * `collection_slug` would otherwise reference a column that does not exist yet.
  */
-function migrateSchema(database: DatabaseSync) {
+function migrateSchema(database: DbHandle) {
   const columns = database.prepare('PRAGMA table_info(products)').all() as {name: string}[];
   const names = new Set(columns.map((column) => column.name));
 
@@ -81,13 +105,13 @@ function migrateSchema(database: DatabaseSync) {
   database.exec('DROP INDEX IF EXISTS idx_products_category;');
 }
 
-function seedIfEmpty(database: DatabaseSync) {
+function seedIfEmpty(database: DbHandle) {
   const {count} = database.prepare('SELECT COUNT(*) AS count FROM collections').get() as {count: number};
   if (count > 0) return;
   seedDatabase(database);
 }
 
-function seedDatabase(database: DatabaseSync) {
+function seedDatabase(database: DbHandle) {
   const now = Date.now();
 
   const insertCollection = database.prepare(
