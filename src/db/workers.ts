@@ -74,10 +74,14 @@ type VariantsRow = {
 type ModelsRow = {
   id: string;
   slug: string;
-  collection_slug: string;
   name_fr: string;
   name_ar: string;
   name_en: string;
+};
+
+type ModelCollectionsRow = {
+  model_id: string;
+  collection_slug: string;
 };
 
 type SiteSettingsRow = {key: string; value: string};
@@ -93,13 +97,21 @@ type InquiriesRow = {
   created_at: string;
 };
 
+type InquiryCountsRow = {
+  reference: string;
+  n: number;
+  updated_at: string | null;
+};
+
 interface Tables {
   collections: CollectionsRow[];
   products: ProductsRow[];
   product_variants: VariantsRow[];
   models: ModelsRow[];
+  model_collections: ModelCollectionsRow[];
   site_settings: SiteSettingsRow[];
   inquiries: InquiriesRow[];
+  inquiry_counts: InquiryCountsRow[];
 }
 
 const PRODUCT_COLUMNS = [
@@ -160,8 +172,10 @@ export class WorkersDatabase {
     products: [],
     product_variants: [],
     models: [],
+    model_collections: [],
     site_settings: [],
     inquiries: [],
+    inquiry_counts: [],
   };
 
   exec(sql: string): void {
@@ -170,7 +184,12 @@ export class WorkersDatabase {
       .map((part) => part.trim())
       .filter((part) => part.length > 0);
     for (const statement of statements) {
-      const lower = statement.toLowerCase();
+      const cleaned = statement
+        .split('\n')
+        .filter((line) => !line.trim().startsWith('--'))
+        .join('\n')
+        .trim();
+      const lower = cleaned.toLowerCase();
       if (
         lower.startsWith('pragma ') ||
         lower.startsWith('begin') ||
@@ -182,7 +201,7 @@ export class WorkersDatabase {
       ) {
         continue;
       }
-      throw new Error(`[workers-db] unsupported exec statement: ${statement}`);
+      throw new Error(`[workers-db] unsupported exec statement: ${cleaned}`);
     }
   }
 
@@ -209,6 +228,14 @@ export class WorkersDatabase {
       };
     }
 
+    if (normalized === 'select count(*) as count from inquiry_counts') {
+      return {
+        all: () => [],
+        get: () => ({count: this.tables.inquiry_counts.length}),
+        run: () => ({changes: 0}),
+      };
+    }
+
     if (normalized === 'select * from product_variants order by sort_order') {
       return {
         all: () => [...this.tables.product_variants] as WorkersRow[],
@@ -231,13 +258,44 @@ export class WorkersDatabase {
       return {all: () => rows, get: () => undefined, run: () => ({changes: 0})};
     }
 
-    if (normalized === 'select * from models order by collection_slug, name_fr') {
-      const rows = [...this.tables.models].sort((a, b) => (a.collection_slug === b.collection_slug ? a.name_fr.localeCompare(b.name_fr) : a.collection_slug.localeCompare(b.collection_slug)));
+    if (normalized === 'select * from models order by name_fr') {
+      const rows = [...this.tables.models].sort((a, b) => a.name_fr.localeCompare(b.name_fr));
       return {all: () => rows as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
+    }
+
+    if (normalized === 'select * from model_collections') {
+      return {all: () => [...this.tables.model_collections] as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
+    }
+
+    if (normalized === 'insert into inquiry_counts (reference, n, updated_at) select reference, count(*) as n, max(created_at) from inquiries group by reference') {
+      return {
+        all: () => [],
+        get: () => undefined,
+        run: () => {
+          const counts = new Map<string, {n: number; updatedAt: string | null}>();
+          for (const inquiry of this.tables.inquiries) {
+            const current = counts.get(inquiry.reference) ?? {n: 0, updatedAt: null};
+            current.n += 1;
+            if (!current.updatedAt || inquiry.created_at > current.updatedAt) current.updatedAt = inquiry.created_at;
+            counts.set(inquiry.reference, current);
+          }
+          for (const [reference, {n, updatedAt}] of counts) {
+            const existing = this.tables.inquiry_counts.find((entry) => entry.reference === reference);
+            if (existing) existing.n = n;
+            else this.tables.inquiry_counts.push({reference, n, updated_at: updatedAt});
+          }
+          return {changes: counts.size};
+        },
+      };
     }
 
     if (normalized === 'select * from inquiries order by created_at desc') {
       const rows = [...this.tables.inquiries].sort((a, b) => b.created_at.localeCompare(a.created_at));
+      return {all: () => rows as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
+    }
+
+    if (normalized === 'select reference, n from inquiry_counts') {
+      const rows = [...this.tables.inquiry_counts];
       return {all: () => rows as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
     }
 
@@ -296,7 +354,21 @@ export class WorkersDatabase {
           const target = String(params[0]);
           const before = this.tables.models.length;
           this.tables.models = this.tables.models.filter((model) => model.id !== target);
+          this.tables.model_collections = this.tables.model_collections.filter((link) => link.model_id !== target);
           return {changes: before - this.tables.models.length};
+        },
+      };
+    }
+
+    if (normalized === 'delete from model_collections where model_id = ?') {
+      return {
+        all: () => [],
+        get: () => undefined,
+        run: (...params) => {
+          const target = String(params[0]);
+          const before = this.tables.model_collections.length;
+          this.tables.model_collections = this.tables.model_collections.filter((link) => link.model_id !== target);
+          return {changes: before - this.tables.model_collections.length};
         },
       };
     }
@@ -328,6 +400,56 @@ export class WorkersDatabase {
       };
     }
 
+    if (normalized === 'insert into inquiry_counts (reference, n, updated_at) values (?, 1, ?) on conflict(reference) do update set n = n + 1, updated_at = excluded.updated_at') {
+      return {
+        all: () => [],
+        get: () => undefined,
+        run: (...params) => {
+          const reference = String(params[0]);
+          const updatedAt = String(params[1] ?? null);
+          const row = this.tables.inquiry_counts.find((entry) => entry.reference === reference);
+          if (row) {
+            row.n += 1;
+            row.updated_at = updatedAt;
+          } else {
+            this.tables.inquiry_counts.push({reference, n: 1, updated_at: updatedAt});
+          }
+          return {changes: 1};
+        },
+      };
+    }
+
+    if (normalized === 'delete from inquiries where julianday(created_at) < julianday(\'now\', ?)') {
+      return {
+        all: () => [],
+        get: () => undefined,
+        run: (...params) => {
+          const modifier = String(params[0] ?? '');
+          const match = /-(\d+)\s*days?/.exec(modifier);
+          const days = match ? Number(match[1]) : 0;
+          const cutoff = days > 0 ? Date.now() - days * 86_400_000 : 0;
+          const before = this.tables.inquiries.length;
+          this.tables.inquiries = this.tables.inquiries.filter((inquiry) => new Date(inquiry.created_at).getTime() >= cutoff);
+          return {changes: before - this.tables.inquiries.length};
+        },
+      };
+    }
+
+    if (normalized === 'delete from inquiries where id not in (select id from inquiries order by created_at desc limit ?)') {
+      return {
+        all: () => [],
+        get: () => undefined,
+        run: (...params) => {
+          const maxRows = Math.max(0, Number(params[0] ?? 0));
+          const sorted = [...this.tables.inquiries].sort((a, b) => b.created_at.localeCompare(a.created_at));
+          const keep = new Set(sorted.slice(0, maxRows).map((inquiry) => inquiry.id));
+          const before = this.tables.inquiries.length;
+          this.tables.inquiries = this.tables.inquiries.filter((inquiry) => keep.has(inquiry.id));
+          return {changes: before - this.tables.inquiries.length};
+        },
+      };
+    }
+
     const insert = /^insert into ([a-z_]+) \(([^)]+)\) values \((.+)\)/.exec(normalized);
     if (insert) {
       const [, table, columnsSql] = insert;
@@ -352,6 +474,9 @@ export class WorkersDatabase {
               break;
             case 'models':
               this.upsertRow('models', row as ModelsRow);
+              break;
+            case 'model_collections':
+              this.upsertLink(row as ModelCollectionsRow);
               break;
             case 'site_settings':
               this.upsertRow('site_settings', row as SiteSettingsRow);
@@ -392,6 +517,13 @@ export class WorkersDatabase {
     const index = entries.findIndex((entry) => entry.id === ((row as {id?: string}).id ?? ''));
     if (index >= 0) entries[index] = row;
     else entries.push(row);
+  }
+
+  upsertLink(link: ModelCollectionsRow): void {
+    const existing = this.tables.model_collections.find(
+      (entry) => entry.model_id === link.model_id && entry.collection_slug === link.collection_slug
+    );
+    if (!existing) this.tables.model_collections.push(link);
   }
 
   selectAllCollections(): WorkersRow[] {

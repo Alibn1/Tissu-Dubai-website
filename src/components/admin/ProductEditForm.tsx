@@ -7,13 +7,14 @@ import {Save, Loader2, Check} from 'lucide-react';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
 import {ModelSelect} from '@/components/admin/ModelSelect';
 import {ColorVariantsEditor, type ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
-import type {Locale, Product, Model} from '@/types';
+import type {Collection, Locale, Product, Model} from '@/types';
 import type {ProductTranslations, TranslatableFieldKey} from '@/lib/translation';
 import {missingVariantImageMessage} from '@/lib/variantValidation';
 
 type Props = {
   product: Product;
   models: Model[];
+  collections: Collection[];
   locale: string;
 };
 
@@ -48,19 +49,25 @@ function parseCharacteristics(product: Product, lang: Locale): {
   };
 }
 
-export function ProductEditForm({product, models}: Props) {
+export function ProductEditForm({product, models, collections}: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const [collectionSlug, setCollectionSlug] = useState(product.collection.slug);
   const [modelId, setModelId] = useState<string>(() => {
     const match = models.find(
-      (m) => m.collectionSlug === product.collection.slug && m.slug === product.materialSlug
+      (m) => m.collectionSlugs.includes(product.collection.slug) && m.slug === product.materialSlug
     );
     return match?.id ?? '';
   });
 
-  const selectedModels = models.filter((m) => m.collectionSlug === product.collection.slug);
+  const selectCollection = (slug: string) => {
+    setCollectionSlug(slug);
+    setModelId('');
+  };
+
+  const selectedModels = models.filter((m) => m.collectionSlugs.includes(collectionSlug));
   const selectedModel = models.find((m) => m.id === modelId) ?? null;
 
   const initialTranslations = useMemo<ProductTranslations>(() => {
@@ -183,6 +190,14 @@ export function ProductEditForm({product, models}: Props) {
 
     setSaving(true);
 
+    // The "Principale" variant's picture becomes the product's main picture so
+    // cards, lists and shared images follow the selected principale.
+    const principaleImage =
+      colorVariants.find((v) => v.isDefault)?.image ?? colorVariants[0]?.image ?? '';
+    const images = principaleImage
+      ? [principaleImage, ...product.images.filter((img) => img !== principaleImage)]
+      : product.images;
+
     try {
       const res = await fetch(`/api/products/${product.id}`, {
         method: 'PUT',
@@ -190,6 +205,8 @@ export function ProductEditForm({product, models}: Props) {
         body: JSON.stringify({
           name: pick('name'),
           description: pick('description'),
+          collection: collectionSlug,
+          images,
           material: selectedModel?.name ?? product.material,
           materialSlug: selectedModel?.slug ?? product.materialSlug,
           characteristics: {
@@ -249,7 +266,28 @@ export function ProductEditForm({product, models}: Props) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Collection</label>
-            <p className={cn(inputClass, 'text-brand-muted')}>{product.collection.name.fr}</p>
+            <div className="flex flex-wrap gap-2">
+              {collections.map((col) => {
+                const active = collectionSlug === col.slug;
+                return (
+                  <button
+                    key={col.slug}
+                    type="button"
+                    onClick={() => selectCollection(col.slug)}
+                    aria-pressed={active}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all',
+                      active
+                        ? 'border-brand-primary bg-brand-primary text-white shadow-sm'
+                        : 'border-brand-border bg-transparent text-brand-muted hover:border-brand-primary/60 hover:text-brand-secondary'
+                    )}
+                  >
+                    {active && <Check className="h-3.5 w-3.5" />}
+                    {col.name.fr}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div>
             <label className={labelClass}>Modèle</label>
@@ -257,7 +295,11 @@ export function ProductEditForm({product, models}: Props) {
               models={selectedModels}
               value={modelId}
               onChange={setModelId}
-              placeholder="Sélectionner un modèle"
+              placeholder={
+                selectedModels.length > 0
+                  ? 'Sélectionner un modèle'
+                  : 'Aucun modèle pour cette collection'
+              }
             />
           </div>
         </div>

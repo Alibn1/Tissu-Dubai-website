@@ -52,12 +52,11 @@ export function CatalogContent({
     return map;
   }, [models]);
 
-  // Only models that exist in the database are offered, and when a collection
-  // (collection) is selected, its own models are shown.
+  // Only models linked to a selected collection are offered.
   const modelOptions = useMemo(
     () =>
       filters.collections.length > 0
-        ? models.filter((m) => filters.collections.includes(m.collectionSlug))
+        ? models.filter((m) => m.collectionSlugs.some((slug) => filters.collections.includes(slug)))
         : models,
     [models, filters.collections]
   );
@@ -72,7 +71,7 @@ export function CatalogContent({
       result = result.filter((p) =>
         filters.materials.some((id) => {
           const model = modelById.get(id);
-          return model && model.slug === p.materialSlug && model.collectionSlug === p.collection.slug;
+          return model && model.slug === p.materialSlug && model.collectionSlugs.includes(p.collection.slug);
         })
       );
     }

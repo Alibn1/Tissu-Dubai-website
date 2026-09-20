@@ -11,9 +11,9 @@ export async function POST(request: NextRequest) {
   if (!isAdminRequest(request)) return unauthorizedResponse();
 
   const body = await request.json().catch(() => null);
-  if (!body || typeof body.slug !== 'string' || typeof body.collectionSlug !== 'string') {
+  if (!body || typeof body.slug !== 'string' || !Array.isArray(body.collectionSlugs)) {
     return NextResponse.json(
-      {error: 'Les champs "slug" et "collectionSlug" sont obligatoires.'},
+      {error: 'Les champs "slug" et "collectionSlugs" (tableau) sont obligatoires.'},
       {status: 400}
     );
   }
@@ -24,10 +24,14 @@ export async function POST(request: NextRequest) {
     en: typeof body.name?.en === 'string' ? body.name.en : '',
   };
 
+  const collectionSlugs = body.collectionSlugs.filter(
+    (collectionSlug: unknown) => typeof collectionSlug === 'string'
+  );
+
   const model: Model = {
-    id: typeof body.id === 'string' && body.id ? body.id : `${body.slug}-${body.collectionSlug}`,
+    id: typeof body.id === 'string' && body.id ? body.id : body.slug,
     slug: body.slug,
-    collectionSlug: body.collectionSlug,
+    collectionSlugs,
     name,
   };
 

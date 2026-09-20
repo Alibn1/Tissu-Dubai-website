@@ -29,12 +29,14 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
     description: body.description ?? product.description,
     material: body.material ?? product.material,
     materialSlug: body.materialSlug ?? product.materialSlug,
+    collectionSlug: typeof body.collection === 'string' ? body.collection : undefined,
     characteristics: body.characteristics ?? product.characteristics,
     width: body.width !== undefined ? body.width : product.width,
     price: body.price !== undefined ? body.price : product.price,
     inStock: body.inStock ?? product.inStock,
     featured: body.featured ?? product.featured,
     isNew: body.isNew ?? product.isNew,
+    images: Array.isArray(body.images) ? body.images : undefined,
     variants: Array.isArray(body.variants)
       ? body.variants.map((v: Record<string, unknown>) => ({
           id: typeof v.id === 'string' ? v.id : undefined,

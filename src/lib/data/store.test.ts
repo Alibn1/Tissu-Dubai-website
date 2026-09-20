@@ -97,10 +97,14 @@ describe('DB-backed store', () => {
 
   it('upserts and removes models', async () => {
     const store = await import('@/lib/data/store');
-    store.upsertModel({id: 'new-model', slug: 'new-model', collectionSlug: 'caftan', name: {fr: 'Nouveau', ar: 'جديد', en: 'New'}});
-    expect(store.getModels().find((m) => m.id === 'new-model')).toBeTruthy();
+    store.upsertModel({id: 'new-model', slug: 'new-model', collectionSlugs: ['caftan', 'tekchita'], name: {fr: 'Nouveau', ar: 'جديد', en: 'New'}});
+    const upserted = store.getModelsByCollection('caftan').find((m) => m.id === 'new-model');
+    expect(upserted).toBeTruthy();
+    expect(upserted?.collectionSlugs).toEqual(['caftan', 'tekchita']);
+    expect(store.getModelsByCollection('tekchita').some((m) => m.id === 'new-model')).toBe(true);
     expect(store.removeModel('new-model')).toBe(true);
     expect(store.getModels().find((m) => m.id === 'new-model')).toBeUndefined();
+    expect(store.getModelsByCollection('tekchita').some((m) => m.id === 'new-model')).toBe(false);
   });
 
   it('tracks inquiries and reports real dashboard stats', async () => {
@@ -116,6 +120,34 @@ describe('DB-backed store', () => {
     expect(data.totalProducts).toBe(16);
     const top = data.topRequested.find((p) => p.reference === 'TD-CAF-0001');
     expect(top?.whatsappClicks).toBe(1);
+  });
+
+  it('prunes raw inquiries but keeps the all-time "most requested" counter', async () => {
+    const store = await import('@/lib/data/store');
+
+    // Backfill simulates history that predates the counter table.
+    store.addInquiry({productName: 'Soie Royale Dubai', reference: 'TD-CAF-0001', color: 'Doré', quantity: 1, locale: 'fr'});
+
+    // Override retention for this test only: keep at most 3 raw rows.
+    const previousRows = process.env.INQUIRY_MAX_ROWS;
+    process.env.INQUIRY_MAX_ROWS = '3';
+
+    try {
+      for (let i = 0; i < 5; i += 1) {
+        store.addInquiry({productName: 'Soie Royale Dubai', reference: 'TD-CAF-0001', color: `C${i}`, quantity: 1, locale: 'fr'});
+      }
+
+      // The raw log stays bounded…
+      expect(store.getInquiries().length).toBeLessThanOrEqual(3);
+
+      // …but the "Produits les plus demandés" count reflects ALL inquiries (2 + 5).
+      const data = store.getDashboardData();
+      const top = data.topRequested.find((p) => p.reference === 'TD-CAF-0001');
+      expect(top?.whatsappClicks).toBe(7);
+    } finally {
+      if (previousRows === undefined) delete process.env.INQUIRY_MAX_ROWS;
+      else process.env.INQUIRY_MAX_ROWS = previousRows;
+    }
   });
 
   it('persists site settings', async () => {

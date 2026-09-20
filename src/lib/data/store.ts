@@ -45,11 +45,11 @@ function mapCollectionRow(row: Row): Collection {
   };
 }
 
-function mapModelRow(row: Row): Model {
+function mapModelRow(row: Row, collectionSlugs: string[]): Model {
   return {
     id: String(row.id),
     slug: String(row.slug),
-    collectionSlug: String(row.collection_slug),
+    collectionSlugs,
     name: {fr: String(row.name_fr ?? ''), ar: String(row.name_ar ?? ''), en: String(row.name_en ?? '')},
   };
 }
@@ -166,28 +166,47 @@ export function getCollectionBySlug(slug: string): Collection | null {
 
 // ── Models ──
 
+function loadModelCollectionLinks(): Map<string, string[]> {
+  const db = getDb();
+  const map = new Map<string, string[]>();
+  const rows = db.prepare('SELECT * FROM model_collections').all() as Row[];
+  for (const row of rows) {
+    const modelId = String(row.model_id);
+    const list = map.get(modelId) ?? [];
+    list.push(String(row.collection_slug));
+    map.set(modelId, list);
+  }
+  return map;
+}
+
 export function getModels(): Model[] {
   const db = getDb();
-  const rows = db.prepare('SELECT * FROM models ORDER BY collection_slug, name_fr').all() as Row[];
-  return rows.map(mapModelRow);
+  const links = loadModelCollectionLinks();
+  const rows = db.prepare('SELECT * FROM models ORDER BY name_fr').all() as Row[];
+  return rows.map((row) => mapModelRow(row, links.get(String(row.id)) ?? []));
 }
 
 export function getModelsByCollection(collectionSlug: string): Model[] {
-  return getModels().filter((m) => m.collectionSlug === collectionSlug);
+  return getModels().filter((m) => m.collectionSlugs.includes(collectionSlug));
 }
 
 export function upsertModel(model: Model): Model {
   const db = getDb();
   db.prepare(
-    `INSERT INTO models (id, slug, collection_slug, name_fr, name_ar, name_en)
-     VALUES (?, ?, ?, ?, ?, ?)
+    `INSERT INTO models (id, slug, name_fr, name_ar, name_en)
+     VALUES (?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        slug = excluded.slug,
-       collection_slug = excluded.collection_slug,
        name_fr = excluded.name_fr,
        name_ar = excluded.name_ar,
        name_en = excluded.name_en`
-  ).run(model.id, model.slug, model.collectionSlug, model.name.fr, model.name.ar, model.name.en);
+  ).run(model.id, model.slug, model.name.fr, model.name.ar, model.name.en);
+
+  db.prepare('DELETE FROM model_collections WHERE model_id = ?').run(model.id);
+  const insertLink = db.prepare('INSERT INTO model_collections (model_id, collection_slug) VALUES (?, ?)');
+  for (const collectionSlug of model.collectionSlugs) {
+    insertLink.run(model.id, collectionSlug);
+  }
   return model;
 }
 
@@ -459,6 +478,35 @@ export function getInquiries(): InquiryEntry[] {
   }));
 }
 
+// Retention policy for the raw `inquiries` log. The aggregate
+// `inquiry_counts` table is never pruned, so "Produits les plus demandés"
+// stays accurate even after old rows are deleted. Tune via env vars
+// (unit=days / rows); defaults keep the table tiny.
+function readRetentionPolicy(): {maxDays: number; maxRows: number} {
+  const maxDays = Number(process.env.INQUIRY_MAX_DAYS ?? 90);
+  const maxRows = Number(process.env.INQUIRY_MAX_ROWS ?? 500);
+  return {
+    maxDays: Number.isFinite(maxDays) && maxDays > 0 ? maxDays : 0,
+    maxRows: Number.isFinite(maxRows) && maxRows > 0 ? maxRows : 0,
+  };
+}
+
+function pruneInquiries(db: ReturnType<typeof getDb>): void {
+  const {maxDays, maxRows} = readRetentionPolicy();
+  if (maxDays > 0) {
+    db.prepare(`DELETE FROM inquiries WHERE julianday(created_at) < julianday('now', ?)`).run(
+      `-${maxDays} days`
+    );
+  }
+  if (maxRows > 0) {
+    db.prepare(
+      `DELETE FROM inquiries WHERE id NOT IN (
+         SELECT id FROM inquiries ORDER BY created_at DESC LIMIT ?
+       )`
+    ).run(maxRows);
+  }
+}
+
 export function addInquiry(entry: Omit<InquiryEntry, 'id' | 'createdAt' | 'read'>): InquiryEntry {
   const db = getDb();
   const newEntry: InquiryEntry = {
@@ -480,6 +528,11 @@ export function addInquiry(entry: Omit<InquiryEntry, 'id' | 'createdAt' | 'read'
     0,
     newEntry.createdAt
   );
+  db.prepare(
+    `INSERT INTO inquiry_counts (reference, n, updated_at) VALUES (?, 1, ?)
+     ON CONFLICT(reference) DO UPDATE SET n = n + 1, updated_at = excluded.updated_at`
+  ).run(newEntry.reference, newEntry.createdAt);
+  pruneInquiries(db);
   return newEntry;
 }
 
@@ -511,7 +564,7 @@ export type DashboardData = {
 function getInquiryCountByReference(): Map<string, number> {
   const db = getDb();
   const map = new Map<string, number>();
-  const rows = db.prepare('SELECT reference, COUNT(*) AS n FROM inquiries GROUP BY reference').all() as Row[];
+  const rows = db.prepare('SELECT reference, n FROM inquiry_counts').all() as Row[];
   for (const row of rows) map.set(String(row.reference), Number(row.n));
   return map;
 }

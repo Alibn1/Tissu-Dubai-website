@@ -10,9 +10,9 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
 
   const {id} = await params;
   const body = await request.json();
-  if (typeof body.slug !== 'string' || typeof body.collectionSlug !== 'string') {
+  if (typeof body.slug !== 'string' || !Array.isArray(body.collectionSlugs)) {
     return NextResponse.json(
-      {error: 'Les champs "slug" et "collectionSlug" sont obligatoires.'},
+      {error: 'Les champs "slug" et "collectionSlugs" (tableau) sont obligatoires.'},
       {status: 400}
     );
   }
@@ -23,7 +23,11 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
     en: typeof body.name?.en === 'string' ? body.name.en : '',
   };
 
-  upsertModel({id, slug: body.slug, collectionSlug: body.collectionSlug, name});
+  const collectionSlugs = body.collectionSlugs.filter(
+    (collectionSlug: unknown) => typeof collectionSlug === 'string'
+  );
+
+  upsertModel({id, slug: body.slug, collectionSlugs, name});
   return NextResponse.json({success: true});
 }
 

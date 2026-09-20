@@ -65,15 +65,21 @@ CREATE INDEX IF NOT EXISTS idx_variants_product ON product_variants(product_id);
 
 CREATE TABLE IF NOT EXISTS models (
   id TEXT PRIMARY KEY,
-  slug TEXT NOT NULL,
-  collection_slug TEXT NOT NULL REFERENCES collections(slug),
+  slug TEXT NOT NULL UNIQUE,
   name_fr TEXT NOT NULL DEFAULT '',
   name_ar TEXT NOT NULL DEFAULT '',
-  name_en TEXT NOT NULL DEFAULT '',
-  UNIQUE(slug, collection_slug)
+  name_en TEXT NOT NULL DEFAULT ''
 );
 
-CREATE INDEX IF NOT EXISTS idx_models_collection ON models(collection_slug);
+-- Many-to-many between models and collections: one model can belong to
+-- several collections without duplicating the model row.
+CREATE TABLE IF NOT EXISTS model_collections (
+  model_id TEXT NOT NULL REFERENCES models(id) ON DELETE CASCADE,
+  collection_slug TEXT NOT NULL REFERENCES collections(slug) ON DELETE CASCADE,
+  PRIMARY KEY (model_id, collection_slug)
+);
+
+CREATE INDEX IF NOT EXISTS idx_model_collections_collection ON model_collections(collection_slug);
 
 CREATE TABLE IF NOT EXISTS site_settings (
   key TEXT PRIMARY KEY,
@@ -92,4 +98,12 @@ CREATE TABLE IF NOT EXISTS inquiries (
 );
 
 CREATE INDEX IF NOT EXISTS idx_inquiries_reference ON inquiries(reference);
+
+-- Running per-reference counter so "Produits les plus demandés" stays
+-- accurate forever even after old raw inquiry rows are pruned.
+CREATE TABLE IF NOT EXISTS inquiry_counts (
+  reference TEXT PRIMARY KEY,
+  n INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT
+);
 `;
