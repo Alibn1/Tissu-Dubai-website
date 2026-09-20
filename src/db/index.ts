@@ -2,7 +2,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {dirname} from 'node:path';
 import {existsSync, mkdirSync, unlinkSync} from 'node:fs';
 import {SCHEMA_SQL} from '@/db/schema';
-import {createWorkersDatabase, type WorkersDatabase} from '@/db/workers';
+import {createWorkersDatabase, WorkersDatabase} from '@/db/workers';
 import {collections as mockCollections} from '@/mock/collections';
 import {products as mockProducts} from '@/mock/products';
 import {mockModels} from '@/mock/models';
@@ -31,6 +31,7 @@ export function getDb(): DbHandle {
       migrateSchema(database);
       database.exec(SCHEMA_SQL);
       seedIfEmpty(database);
+      backfillInquiryCounts(database);
       database.exec('COMMIT;');
     } catch (error) {
       try {
@@ -56,6 +57,7 @@ export function getDb(): DbHandle {
       migrateSchema(database);
       database.exec(SCHEMA_SQL);
       seedIfEmpty(database);
+      backfillInquiryCounts(database);
     } catch (seedError) {
       console.error('[db] failed to initialise in-memory database:', seedError instanceof Error ? seedError.message : seedError);
     }
@@ -103,12 +105,103 @@ function migrateSchema(database: DbHandle) {
   }
 
   database.exec('DROP INDEX IF EXISTS idx_products_category;');
+
+  // The in-memory Workers fallback starts fresh from mock data every boot and
+  // only mirrors the closed set of statements issued by the store, so schema
+  // reshaping is a no-op there.
+  if (database instanceof WorkersDatabase) return;
+
+  migrateModelsToJunction(database);
+}
+
+type ModelRow = {
+  id: string;
+  slug: string;
+  name_fr: string;
+  name_ar: string;
+  name_en: string;
+  collection_slug?: string;
+};
+
+/**
+ * One-time migration from the old (models.collection_slug, UNIQUE(slug,
+ * collection_slug)) design to the junction-table design. Old databases may
+ * hold several rows for the same model (e.g. `soie-caftan` + `soie-tekchita`):
+ * deduplicate by slug keeping the first row, then recreate the table and link
+ * every (model, collection) pair through model_collections.
+ */
+function migrateModelsToJunction(database: Exclude<DbHandle, WorkersDatabase>) {
+  const columns = database.prepare('PRAGMA table_info(models)').all() as {name: string}[];
+  if (!columns.some((column) => column.name === 'collection_slug')) return;
+
+  const oldRows = database.prepare('SELECT * FROM models').all() as ModelRow[];
+  if (oldRows.length === 0) {
+    // No rows to preserve: drop the old-shaped table and let SCHEMA_SQL
+    // recreate both models and model_collections in the new shape.
+    database.exec('DROP TABLE IF EXISTS models;');
+    return;
+  }
+
+  const canonicalBySlug = new Map<string, ModelRow>();
+  for (const row of oldRows) {
+    if (!canonicalBySlug.has(row.slug)) canonicalBySlug.set(row.slug, row);
+  }
+
+  database.exec('ALTER TABLE models RENAME TO models_old_v2;');
+  database.exec(`
+    CREATE TABLE models (
+      id TEXT PRIMARY KEY,
+      slug TEXT NOT NULL UNIQUE,
+      name_fr TEXT NOT NULL DEFAULT '',
+      name_ar TEXT NOT NULL DEFAULT '',
+      name_en TEXT NOT NULL DEFAULT ''
+    );
+    CREATE TABLE IF NOT EXISTS model_collections (
+      model_id TEXT NOT NULL REFERENCES models(id) ON DELETE CASCADE,
+      collection_slug TEXT NOT NULL REFERENCES collections(slug) ON DELETE CASCADE,
+      PRIMARY KEY (model_id, collection_slug)
+    );
+    CREATE INDEX IF NOT EXISTS idx_model_collections_collection ON model_collections(collection_slug);
+  `);
+
+  const insertModel = database.prepare(
+    'INSERT INTO models (id, slug, name_fr, name_ar, name_en) VALUES (?, ?, ?, ?, ?)'
+  );
+  const insertLink = database.prepare(
+    'INSERT OR IGNORE INTO model_collections (model_id, collection_slug) VALUES (?, ?)'
+  );
+  for (const [slug, row] of canonicalBySlug) {
+    insertModel.run(row.id, slug, row.name_fr, row.name_ar, row.name_en);
+  }
+  for (const row of oldRows) {
+    const canonical = canonicalBySlug.get(row.slug)!;
+    insertLink.run(canonical.id, row.collection_slug);
+  }
+
+  database.exec('DROP TABLE models_old_v2;');
 }
 
 function seedIfEmpty(database: DbHandle) {
   const {count} = database.prepare('SELECT COUNT(*) AS count FROM collections').get() as {count: number};
   if (count > 0) return;
   seedDatabase(database);
+}
+
+/**
+ * One-time migration: materialise `inquiry_counts` from the raw rows that
+ * existed before the counter table was introduced. Idempotent — after the
+ * first successful run, `inquiry_counts` is non-empty and the `WHERE`
+ * guard skips it entirely (new rows keep the counter authoritative).
+ */
+function backfillInquiryCounts(database: DbHandle) {
+  const {count} = database.prepare('SELECT COUNT(*) AS count FROM inquiry_counts').get() as {count: number};
+  if (count > 0) return;
+  database
+    .prepare(
+      `INSERT INTO inquiry_counts (reference, n, updated_at)
+       SELECT reference, COUNT(*) AS n, MAX(created_at) FROM inquiries GROUP BY reference`
+    )
+    .run();
 }
 
 function seedDatabase(database: DbHandle) {
@@ -190,18 +283,23 @@ function seedDatabase(database: DbHandle) {
   });
 
   const insertModel = database.prepare(
-    `INSERT INTO models (id, slug, collection_slug, name_fr, name_ar, name_en)
-     VALUES (?, ?, ?, ?, ?, ?)`
+    `INSERT INTO models (id, slug, name_fr, name_ar, name_en)
+     VALUES (?, ?, ?, ?, ?)`
+  );
+  const insertModelCollection = database.prepare(
+    `INSERT INTO model_collections (model_id, collection_slug) VALUES (?, ?)`
   );
   mockModels.forEach((model) => {
     insertModel.run(
       model.id,
       model.slug,
-      model.collectionSlug,
       model.name.fr,
       model.name.ar,
       model.name.en
     );
+    model.collectionSlugs.forEach((collectionSlug) => {
+      insertModelCollection.run(model.id, collectionSlug);
+    });
   });
 
   database

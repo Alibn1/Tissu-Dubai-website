@@ -41,7 +41,7 @@ export type Collection = {
 export type Model = {
   id: string;
   slug: string;
-  collectionSlug: string;
+  collectionSlugs: string[];
   name: Record<Locale, string>;
 };
 

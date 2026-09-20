@@ -255,7 +255,7 @@ export function ProductForm({mode, productId, initialData, collections, models}:
   const selectCollection = (collection: string) =>
     setFormData((f) => ({...f, collection, modelId: ''}));
 
-  const selectedModels = models.filter((m) => m.collectionSlug === formData.collection);
+  const selectedModels = models.filter((m) => m.collectionSlugs.includes(formData.collection));
   const selectedModel = models.find((m) => m.id === formData.modelId) ?? null;
 
   const setBaseImages = (next: string[]) => {
@@ -381,6 +381,14 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       (a, b) => Number(b.isDefault) - Number(a.isDefault)
     );
 
+    // The "Principale" picture also becomes the product's first image so the
+    // product card and shared images show the chosen principale color.
+    const principaleImage =
+      colorVariantsPayload.find((v) => v.isDefault)?.image ?? colorVariantsPayload[0]?.image ?? '';
+    const syncedBaseImages = principaleImage
+      ? [principaleImage, ...baseImages.filter((img) => img !== principaleImage)]
+      : baseImages;
+
     return {
       ...(mode === 'edit' && productId ? {id: productId} : {}),
       name: pick('name'),
@@ -399,7 +407,7 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       inStock,
       featured,
       isNew,
-      baseImages,
+      baseImages: syncedBaseImages,
       isMainColor,
       colorVariants: colorVariantsPayload,
       seo,

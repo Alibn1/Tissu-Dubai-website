@@ -1,6 +1,6 @@
 import {notFound} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
-import {getProductById, getModels} from '@/lib/data/store';
+import {getCollections, getModels, getProductById} from '@/lib/data/store';
 import {ProductEditForm} from '@/components/admin/ProductEditForm';
 import {ArrowLeft} from 'lucide-react';
 import {Link} from '@/i18n/navigation';
@@ -17,6 +17,7 @@ export default async function AdminProductEditPage({params}: Props) {
   if (!product) notFound();
 
   const models = getModels();
+  const collections = getCollections();
 
   return (
     <div className="min-h-[70vh]">
@@ -36,7 +37,7 @@ export default async function AdminProductEditPage({params}: Props) {
         </p>
       </div>
 
-      <ProductEditForm product={product} models={models} locale={locale} />
+      <ProductEditForm product={product} models={models} collections={collections} locale={locale} />
     </div>
   );
 }

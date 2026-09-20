@@ -110,18 +110,15 @@ export function ModelsManager({
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canAdd) return;
-    // One row per (model, collection): the same model can exist in several collections.
+    // One row per model; its collections are stored in the junction table so
+    // the same model can exist in several collections without duplication.
     const name = {fr: names.fr.trim(), en: names.en.trim(), ar: names.ar.trim()};
-    await Promise.all(
-      selectedCollections.map((col) =>
-        fetch('/api/models', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({id: `${autoSlug}-${col}`, slug: autoSlug, collectionSlug: col, name}),
-        })
-      )
-    );
-    await refresh();
+    const res = await fetch('/api/models', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: autoSlug, slug: autoSlug, collectionSlugs: selectedCollections, name}),
+    });
+    if (res.ok) await refresh();
     setNames({fr: '', en: '', ar: ''});
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -248,7 +245,7 @@ export function ModelsManager({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {collections.map((col) => {
           const list = models
-            .filter((m) => m.collectionSlug === col.slug)
+            .filter((m) => m.collectionSlugs.includes(col.slug))
             .sort((a, b) => a.name.fr.localeCompare(b.name.fr));
           return (
             <section
