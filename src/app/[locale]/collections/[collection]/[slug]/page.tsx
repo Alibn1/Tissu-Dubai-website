@@ -18,10 +18,12 @@ type Props = {
 
 export async function generateStaticParams() {
   const products = await getProducts();
-  return products.map((p) => ({
-    collection: p.collection.slug,
-    slug: p.slug
-  }));
+  return products.flatMap((p) =>
+    p.collections.map((c) => ({
+      collection: c.slug,
+      slug: p.slug,
+    }))
+  );
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
@@ -47,7 +49,7 @@ export default async function ProductDetailPage({params}: Props) {
   const {locale, collection, slug} = await params;
   setRequestLocale(locale);
 
-  const product = await getProductBySlug(slug, collection);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   const relatedProducts = await getRelatedProducts(product, 4);
@@ -55,11 +57,17 @@ export default async function ProductDetailPage({params}: Props) {
   const loc = locale as Locale;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
+  const productCollection =
+    product.collections.find((c) => c.slug === collection) ?? product.collections[0] ?? null;
+
   const breadcrumbs = [
     {name: t('home'), url: '/'},
     {name: t('collections'), url: '/collections'},
-    {name: product.collection.name[loc] || product.collection.name.fr, url: `/collections/${product.collection.slug}`},
-    {name: product.name[loc] || product.name.fr, url: `/collections/${product.collection.slug}/${product.slug}`}
+    {
+      name: productCollection?.name[loc] || productCollection?.name.fr || collection,
+      url: `/collections/${collection}`,
+    },
+    {name: product.name[loc] || product.name.fr, url: `/collections/${collection}/${product.slug}`}
   ];
 
   return (

@@ -47,10 +47,17 @@ type Props = {
   // Optional slot rendered to the right of the "Nom" field (e.g. for color input).
   // Receives the active locale so the caller can render per-language content.
   nameRightSlot?: (activeLang: Locale) => React.ReactNode;
+  // An extra per-language value living outside `translations` (e.g. the main
+  // color) that must also be filled when the section "Traduire" is pressed.
+  extraTranslate?: {
+    value: (lang: Locale) => string;
+    onChange: (lang: Locale, value: string) => void;
+  };
 };
 
-export function MultilingualFields({translations, onChange, exclude = [], rightSlot, nameRightSlot}: Props) {
+export function MultilingualFields({translations, onChange, exclude = [], rightSlot, nameRightSlot, extraTranslate}: Props) {
   const [active, setActive] = useState<Locale>('fr');
+  const [extraError, setExtraError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<Locale, FieldErrors>>({
     en: createEmptyErrors(),
     fr: createEmptyErrors(),
@@ -74,15 +81,40 @@ export function MultilingualFields({translations, onChange, exclude = [], rightS
   };
 
   // True when at least one field has content in any language (so the button can act).
-  const hasAnythingToTranslate = visibleFields.some((field) => findSource(field) !== null);
+  const hasAnythingToTranslate =
+    visibleFields.some((field) => findSource(field) !== null) ||
+    (extraTranslate !== undefined &&
+      SOURCE_ORDER.some((lang) => extraTranslate.value(lang).trim() !== ''));
 
   // One-click translate: for every filled field, translate its source value into
   // ALL the other languages (overwriting them), so the button can be pressed
   // again after editing a source language.
   const translateAll = async () => {
     setErrors({en: createEmptyErrors(), fr: createEmptyErrors(), ar: createEmptyErrors()});
+    setExtraError(null);
     let failed = false;
     const tasks: Promise<void>[] = [];
+
+    if (extraTranslate) {
+      const extraSource = SOURCE_ORDER.find((lang) => extraTranslate.value(lang).trim() !== '');
+      if (extraSource) {
+        const extraText = extraTranslate.value(extraSource).trim();
+        for (const target of SOURCE_ORDER) {
+          if (target === extraSource) continue;
+          tasks.push(
+            (async () => {
+              try {
+                const translated = await clientTranslate(extraText, DEEPL_TARGET_CODE[target]);
+                extraTranslate.onChange(target, translated);
+              } catch (err) {
+                failed = true;
+                setExtraError(err instanceof Error ? err.message : 'Échec de la traduction');
+              }
+            })()
+          );
+        }
+      }
+    }
 
     for (const field of visibleFields) {
       const source = findSource(field);
@@ -166,17 +198,22 @@ export function MultilingualFields({translations, onChange, exclude = [], rightS
             .filter((field) => !INLINE_FIELDS.includes(field))
             .map((field) => (
               field === 'name' ? (
-                <div key={field} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FieldContent
-                    label={FIELD_LABELS[field]}
-                    placeholder={FIELD_PLACEHOLDERS[field]}
-                    dir={activeLang.dir}
-                    value={translations[active][field]}
-                    textarea={TEXTAREAS.includes(field)}
-                    error={errors[active][field]}
-                    onChange={(v) => onChange(active, field, v)}
-                  />
-                  {nameRightSlot?.(active)}
+                <div key={field}>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FieldContent
+                      label={FIELD_LABELS[field]}
+                      placeholder={FIELD_PLACEHOLDERS[field]}
+                      dir={activeLang.dir}
+                      value={translations[active][field]}
+                      textarea={TEXTAREAS.includes(field)}
+                      error={errors[active][field]}
+                      onChange={(v) => onChange(active, field, v)}
+                    />
+                    {nameRightSlot?.(active)}
+                  </div>
+                  {extraError && (
+                    <p className="mt-1 text-xs text-brand-error">{extraError}</p>
+                  )}
                 </div>
               ) : (
                 <FieldContent

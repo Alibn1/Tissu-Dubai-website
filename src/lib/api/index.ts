@@ -38,7 +38,7 @@ export async function getProducts(filters?: {
   let filtered = [...getAllProducts()];
 
   if (filters?.collection) {
-    filtered = filtered.filter((p) => p.collection.slug === filters.collection);
+    filtered = filtered.filter((p) => p.collections.some((c) => c.slug === filters.collection));
   }
   if (filters?.material) {
     filtered = filtered.filter((p) => p.materialSlug === filters.material);
@@ -86,8 +86,8 @@ export async function getProducts(filters?: {
   return filtered;
 }
 
-export async function getProductBySlug(slug: string, collection?: string): Promise<Product | null> {
-  return getProductBySlugFromStore(slug, collection);
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  return getProductBySlugFromStore(slug);
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
@@ -112,7 +112,8 @@ export async function getRelatedProducts(product: Product, limit = 4): Promise<P
     .filter(
       (p) =>
         p.id !== product.id &&
-        (p.collection.slug === product.collection.slug || p.materialSlug === product.materialSlug)
+        (p.collections.some((c) => product.collections.some((pc) => pc.slug === c.slug)) ||
+          p.materialSlug === product.materialSlug)
     )
     .slice(0, limit);
 }

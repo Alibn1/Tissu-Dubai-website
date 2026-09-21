@@ -54,20 +54,30 @@ export function ProductEditForm({product, models, collections}: Props) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const [collectionSlug, setCollectionSlug] = useState(product.collection.slug);
+  const [collectionSlugs, setCollectionSlugs] = useState<string[]>(product.collections.map((c) => c.slug));
   const [modelId, setModelId] = useState<string>(() => {
     const match = models.find(
-      (m) => m.collectionSlugs.includes(product.collection.slug) && m.slug === product.materialSlug
+      (m) =>
+        m.slug === product.materialSlug &&
+        product.collections.some((c) => m.collectionSlugs.includes(c.slug))
     );
     return match?.id ?? '';
   });
 
-  const selectCollection = (slug: string) => {
-    setCollectionSlug(slug);
-    setModelId('');
+  const toggleCollection = (slug: string) => {
+    const next = collectionSlugs.includes(slug)
+      ? collectionSlugs.filter((s) => s !== slug)
+      : [...collectionSlugs, slug];
+    const modelStillValid = models.some(
+      (m) => m.id === modelId && m.collectionSlugs.some((s) => next.includes(s))
+    );
+    setCollectionSlugs(next);
+    if (!modelStillValid) setModelId('');
   };
 
-  const selectedModels = models.filter((m) => m.collectionSlugs.includes(collectionSlug));
+  const selectedModels = models.filter((m) =>
+    m.collectionSlugs.some((slug) => collectionSlugs.includes(slug))
+  );
   const selectedModel = models.find((m) => m.id === modelId) ?? null;
 
   const initialTranslations = useMemo<ProductTranslations>(() => {
@@ -205,7 +215,7 @@ export function ProductEditForm({product, models, collections}: Props) {
         body: JSON.stringify({
           name: pick('name'),
           description: pick('description'),
-          collection: collectionSlug,
+          collectionSlugs,
           images,
           material: selectedModel?.name ?? product.material,
           materialSlug: selectedModel?.slug ?? product.materialSlug,
@@ -265,15 +275,15 @@ export function ProductEditForm({product, models, collections}: Props) {
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Collection</label>
+            <label className={labelClass}>Collections</label>
             <div className="flex flex-wrap gap-2">
               {collections.map((col) => {
-                const active = collectionSlug === col.slug;
+                const active = collectionSlugs.includes(col.slug);
                 return (
                   <button
                     key={col.slug}
                     type="button"
-                    onClick={() => selectCollection(col.slug)}
+                    onClick={() => toggleCollection(col.slug)}
                     aria-pressed={active}
                     className={cn(
                       'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all',
@@ -298,7 +308,7 @@ export function ProductEditForm({product, models, collections}: Props) {
               placeholder={
                 selectedModels.length > 0
                   ? 'Sélectionner un modèle'
-                  : 'Aucun modèle pour cette collection'
+                  : 'Aucun modèle pour ces collections'
               }
             />
           </div>

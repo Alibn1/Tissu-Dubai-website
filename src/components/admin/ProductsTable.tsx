@@ -20,12 +20,13 @@ export function ProductsTable({
   const collectionCounts = useMemo(() => {
     const acc = new Map<string, {slug: string; name: string; count: number}>();
     for (const product of products) {
-      const slug = product.collection.slug;
-      const existing = acc.get(slug);
-      if (existing) {
-        existing.count += 1;
-      } else {
-        acc.set(slug, {slug, name: product.collection.name.fr, count: 1});
+      for (const collection of product.collections) {
+        const existing = acc.get(collection.slug);
+        if (existing) {
+          existing.count += 1;
+        } else {
+          acc.set(collection.slug, {slug: collection.slug, name: collection.name.fr, count: 1});
+        }
       }
     }
     return [...acc.values()].sort((a, b) => b.count - a.count);
@@ -34,7 +35,7 @@ export function ProductsTable({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
-      if (collectionFilter && p.collection.slug !== collectionFilter) return false;
+      if (collectionFilter && !p.collections.some((c) => c.slug === collectionFilter)) return false;
       if (!q) return true;
       const name = p.name[locale] || p.name.fr;
       return (
@@ -92,9 +93,11 @@ export function ProductsTable({
             className="bg-transparent text-sm text-brand-secondary outline-none"
           >
             <option value="">Toutes les collections</option>
-            <option value="caftan">Caftans</option>
-            <option value="jellaba">Djellabas</option>
-            <option value="tekchita">Takchitas</option>
+            {collectionCounts.map((cat) => (
+              <option key={cat.slug} value={cat.slug}>
+                {cat.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -134,7 +137,9 @@ export function ProductsTable({
                   <span className="text-xs font-mono text-brand-muted">{product.reference}</span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-sm text-brand-secondary capitalize">{product.collection.slug}</span>
+                  <span className="text-sm text-brand-secondary capitalize">
+                    {product.collections.map((c) => c.slug).join(', ')}
+                  </span>
                 </td>
                 <td className="px-4 py-3">
                   <span className="text-sm text-brand-secondary">

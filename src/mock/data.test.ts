@@ -25,7 +25,7 @@ describe('Mock Data', () => {
     it('has products in each collection', () => {
       const slugs = collections.map((c) => c.slug);
       slugs.forEach((slug) => {
-        const filtered = products.filter((p) => p.collection.slug === slug);
+        const filtered = products.filter((p) => p.collections.some((c) => c.slug === slug));
         expect(filtered.length).toBeGreaterThan(0);
       });
     });

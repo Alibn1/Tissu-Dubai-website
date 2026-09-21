@@ -21,7 +21,7 @@ export type Product = {
   width: string;
   price: number | null;
   inStock: boolean;
-  collection: Collection;
+  collections: Collection[];
   variants: ProductVariant[];
   featured: boolean;
   isNew: boolean;

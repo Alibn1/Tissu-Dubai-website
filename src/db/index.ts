@@ -112,6 +112,46 @@ function migrateSchema(database: DbHandle) {
   if (database instanceof WorkersDatabase) return;
 
   migrateModelsToJunction(database);
+  migrateProductsToJunction(database);
+}
+
+type ProductRowForMigration = {
+  id: string;
+  collection_slug: string;
+};
+
+/**
+ * One-time migration from the old (products.collection_slug, one collection
+ * per product) design to the many-to-many junction-table design. Moves every
+ * product's single collection link into product_collections, then drops the
+ * now-unused column so new rows insert without it.
+ */
+function migrateProductsToJunction(database: Exclude<DbHandle, WorkersDatabase>) {
+  const columns = database.prepare('PRAGMA table_info(products)').all() as {name: string}[];
+  if (!columns.some((column) => column.name === 'collection_slug')) return;
+
+  database.exec('DROP INDEX IF EXISTS idx_products_collection;');
+
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS product_collections (
+      product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      collection_slug TEXT NOT NULL REFERENCES collections(slug) ON DELETE CASCADE,
+      PRIMARY KEY (product_id, collection_slug)
+    );
+  `);
+
+  const leftovers = database
+    .prepare('SELECT id, collection_slug FROM products')
+    .all() as ProductRowForMigration[];
+  for (const row of leftovers) {
+    if (row.collection_slug && row.collection_slug !== '') {
+      database
+        .prepare('INSERT OR IGNORE INTO product_collections (product_id, collection_slug) VALUES (?, ?)')
+        .run(row.id, row.collection_slug);
+    }
+  }
+
+  database.exec('ALTER TABLE products DROP COLUMN collection_slug;');
 }
 
 type ModelRow = {
@@ -228,8 +268,11 @@ function seedDatabase(database: DbHandle) {
   });
 
   const insertProduct = database.prepare(
-    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, collection_slug, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  const insertProductCollection = database.prepare(
+    `INSERT INTO product_collections (product_id, collection_slug) VALUES (?, ?)`
   );
   const insertVariant = database.prepare(
     `INSERT INTO product_variants (id, product_id, color_fr, color_ar, color_en, color_hex, sku, price, in_stock, sort_order, images)
@@ -257,7 +300,6 @@ function seedDatabase(database: DbHandle) {
       product.inStock ? 1 : 0,
       product.featured ? 1 : 0,
       product.isNew ? 1 : 0,
-      product.collection.slug,
       JSON.stringify(product.characteristics?.fr ?? []),
       JSON.stringify(product.characteristics?.ar ?? []),
       JSON.stringify(product.characteristics?.en ?? []),
@@ -265,6 +307,9 @@ function seedDatabase(database: DbHandle) {
       created,
       created
     );
+    (product.collections ?? []).forEach((collection) => {
+      insertProductCollection.run(product.id, collection.slug);
+    });
     product.variants.forEach((variant, vIndex) => {
       insertVariant.run(
         variant.id,
