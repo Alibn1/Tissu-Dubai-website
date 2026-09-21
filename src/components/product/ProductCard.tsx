@@ -16,10 +16,11 @@ export function ProductCard({product, className}: ProductCardProps) {
 
   const name = product.name[locale] || product.name.fr;
   const material = product.material[locale] || product.material.fr;
+  const primaryCollection = product.collections[0]?.slug ?? 'all';
 
   return (
     <Link
-      href={`/collections/${product.collection.slug}/${product.slug}`}
+      href={`/collections/${primaryCollection}/${product.slug}`}
       className={cn(
         'group block',
         className

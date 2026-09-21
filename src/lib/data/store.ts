@@ -66,19 +66,13 @@ function mapVariantRow(row: Row): ProductVariant {
   };
 }
 
-function mapProductRow(row: Row, variants: ProductVariant[], collectionCounts: Map<string, number>): Product {
-  const collection = {
-    id: String(row.col_id),
-    slug: String(row.col_slug),
-    name: {fr: String(row.col_name_fr ?? ''), ar: String(row.col_name_ar ?? ''), en: String(row.col_name_en ?? '')},
-    description: {
-      fr: String(row.col_desc_fr ?? ''),
-      ar: String(row.col_desc_ar ?? ''),
-      en: String(row.col_desc_en ?? ''),
-    },
-    image: String(row.col_image ?? ''),
-    productCount: collectionCounts.get(String(row.col_slug)) ?? 0,
-  };
+function mapProductRow(row: Row, variants: ProductVariant[], collectionSlugs: string[], collectionCounts: Map<string, number>): Product {
+  const collections: Collection[] = collectionSlugs.map((slug) => {
+    const collection = collectionMap.get(slug);
+    return collection
+      ? {...collection, productCount: collectionCounts.get(slug) ?? collection.productCount}
+      : {id: '', slug, name: {fr: '', ar: '', en: ''}, description: {fr: '', ar: '', en: ''}, image: '', productCount: collectionCounts.get(slug) ?? 0};
+  });
 
   return {
     id: String(row.id),
@@ -95,7 +89,7 @@ function mapProductRow(row: Row, variants: ProductVariant[], collectionCounts: M
     width: String(row.width ?? ''),
     price: row.price == null ? null : Number(row.price),
     inStock: Boolean(row.in_stock),
-    collection,
+    collections,
     variants,
     featured: Boolean(row.featured),
     isNew: Boolean(row.is_new),
@@ -109,30 +103,19 @@ function mapProductRow(row: Row, variants: ProductVariant[], collectionCounts: M
 }
 
 const PRODUCT_SELECT = `
-SELECT
-  p.*,
-  c.id AS col_id,
-  c.slug AS col_slug,
-  c.name_fr AS col_name_fr,
-  c.name_ar AS col_name_ar,
-  c.name_en AS col_name_en,
-  c.description_fr AS col_desc_fr,
-  c.description_ar AS col_desc_ar,
-  c.description_en AS col_desc_en,
-  c.image AS col_image
+SELECT p.*
 FROM products p
-JOIN collections c ON c.slug = p.collection_slug
 `;
 
-function loadVariants(): Map<string, ProductVariant[]> {
+function loadProductCollectionLinks(): Map<string, string[]> {
   const db = getDb();
-  const map = new Map<string, ProductVariant[]>();
-  const rows = db.prepare('SELECT * FROM product_variants ORDER BY sort_order').all() as Row[];
+  const map = new Map<string, string[]>();
+  const rows = db.prepare('SELECT * FROM product_collections').all() as Row[];
   for (const row of rows) {
-    const key = String(row.product_id);
-    const list = map.get(key) ?? [];
-    list.push(mapVariantRow(row));
-    map.set(key, list);
+    const productId = String(row.product_id);
+    const list = map.get(productId) ?? [];
+    list.push(String(row.collection_slug));
+    map.set(productId, list);
   }
   return map;
 }
@@ -140,26 +123,31 @@ function loadVariants(): Map<string, ProductVariant[]> {
 function loadCollectionCounts(): Map<string, number> {
   const db = getDb();
   const map = new Map<string, number>();
-  const rows = db.prepare('SELECT collection_slug, COUNT(*) AS n FROM products GROUP BY collection_slug').all() as Row[];
+  const rows = db.prepare('SELECT collection_slug, COUNT(*) AS n FROM product_collections GROUP BY collection_slug').all() as Row[];
   for (const row of rows) map.set(String(row.collection_slug), Number(row.n));
   return map;
+}
+
+let collectionMap = new Map<string, Collection>();
+
+function refreshCollectionMap(): void {
+  collectionMap = new Map(getCollections().map((c) => [c.slug, c]));
 }
 
 // ── Collections (the public "collections"/garment types) ──
 
 export function getCollections(): Collection[] {
   const db = getDb();
-  const counts = loadCollectionCounts();
   const rows = db
-    .prepare('SELECT *, (SELECT COUNT(*) FROM products p WHERE p.collection_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order')
+    .prepare('SELECT *, (SELECT COUNT(*) FROM product_collections pc WHERE pc.collection_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order')
     .all() as Row[];
-  return rows.map((r) => ({...mapCollectionRow(r), productCount: Number(r.product_count ?? counts.get(String(r.slug)) ?? 0)}));
+  return rows.map((r) => ({...mapCollectionRow(r), productCount: Number(r.product_count ?? 0)}));
 }
 
 export function getCollectionBySlug(slug: string): Collection | null {
   const db = getDb();
   const row = db
-    .prepare('SELECT *, (SELECT COUNT(*) FROM products p WHERE p.collection_slug = collections.slug) AS product_count FROM collections WHERE slug = ?')
+    .prepare('SELECT *, (SELECT COUNT(*) FROM product_collections pc WHERE pc.collection_slug = collections.slug) AS product_count FROM collections WHERE slug = ?')
     .get(slug) as Row | undefined;
   return row ? mapCollectionRow(row) : null;
 }
@@ -218,30 +206,47 @@ export function removeModel(id: string): boolean {
 
 // ── Products ──
 
+function loadVariantsByProduct(): Map<string, ProductVariant[]> {
+  const db = getDb();
+  const map = new Map<string, ProductVariant[]>();
+  const rows = db.prepare('SELECT * FROM product_variants ORDER BY sort_order').all() as Row[];
+  for (const row of rows) {
+    const key = String(row.product_id);
+    const list = map.get(key) ?? [];
+    list.push(mapVariantRow(row));
+    map.set(key, list);
+  }
+  return map;
+}
+
 export function getAllProducts(): Product[] {
   const db = getDb();
-  const variants = loadVariants();
+  const variants = loadVariantsByProduct();
+  const links = loadProductCollectionLinks();
   const counts = loadCollectionCounts();
+  refreshCollectionMap();
   const rows = db.prepare(`${PRODUCT_SELECT} ORDER BY p.created_at DESC, p.slug`).all() as Row[];
-  return rows.map((row) => mapProductRow(row, variants.get(String(row.id)) ?? [], counts));
+  return rows.map((row) => mapProductRow(row, variants.get(String(row.id)) ?? [], links.get(String(row.id)) ?? [], counts));
 }
 
 export function getProductById(id: string): Product | null {
   const db = getDb();
-  const variants = loadVariants();
+  const variants = loadVariantsByProduct();
+  const links = loadProductCollectionLinks();
   const counts = loadCollectionCounts();
+  refreshCollectionMap();
   const row = db.prepare(`${PRODUCT_SELECT} WHERE p.id = ?`).get(id) as Row | undefined;
-  return row ? mapProductRow(row, variants.get(String(row.id)) ?? [], counts) : null;
+  return row ? mapProductRow(row, variants.get(String(row.id)) ?? [], links.get(String(row.id)) ?? [], counts) : null;
 }
 
-export function getProductBySlug(slug: string, collection?: string): Product | null {
+export function getProductBySlug(slug: string): Product | null {
   const db = getDb();
-  const variants = loadVariants();
+  const variants = loadVariantsByProduct();
+  const links = loadProductCollectionLinks();
   const counts = loadCollectionCounts();
-  const row = collection
-    ? (db.prepare(`${PRODUCT_SELECT} WHERE p.slug = ? AND p.collection_slug = ?`).get(slug, collection) as Row | undefined)
-    : (db.prepare(`${PRODUCT_SELECT} WHERE p.slug = ?`).get(slug) as Row | undefined);
-  return row ? mapProductRow(row, variants.get(String(row.id)) ?? [], counts) : null;
+  refreshCollectionMap();
+  const row = db.prepare(`${PRODUCT_SELECT} WHERE p.slug = ?`).get(slug) as Row | undefined;
+  return row ? mapProductRow(row, variants.get(String(row.id)) ?? [], links.get(String(row.id)) ?? [], counts) : null;
 }
 
 export type ProductVariantInput = {
@@ -259,7 +264,7 @@ export type ProductInput = {
   name: Record<Locale, string>;
   slug?: string;
   reference: string;
-  collectionSlug: string;
+  collectionSlugs: string[];
   description?: Record<Locale, string>;
   material?: Record<Locale, string>;
   materialSlug?: string;
@@ -276,9 +281,9 @@ export type ProductInput = {
 type ProductRow = {
   id: string;
   slug: string;
-  name: Record<Locale, string>;
   reference: string;
-  collectionSlug: string;
+  name: Record<Locale, string>;
+  collectionSlugs: string[];
   description?: Record<Locale, string>;
   material?: Record<Locale, string>;
   materialSlug?: string;
@@ -293,8 +298,8 @@ type ProductRow = {
 
 function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
   db.prepare(
-    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, collection_slug, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        slug = excluded.slug,
        reference = excluded.reference,
@@ -313,7 +318,6 @@ function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
        in_stock = excluded.in_stock,
        featured = excluded.featured,
        is_new = excluded.is_new,
-       collection_slug = excluded.collection_slug,
        characteristics_fr = excluded.characteristics_fr,
        characteristics_ar = excluded.characteristics_ar,
        characteristics_en = excluded.characteristics_en,
@@ -338,7 +342,6 @@ function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
     product.inStock ? 1 : 0,
     product.featured ? 1 : 0,
     product.isNew ? 1 : 0,
-    product.collectionSlug,
     JSON.stringify(product.characteristics?.fr ?? []),
     JSON.stringify(product.characteristics?.ar ?? []),
     JSON.stringify(product.characteristics?.en ?? []),
@@ -346,6 +349,12 @@ function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
     new Date().toISOString(),
     new Date().toISOString()
   );
+
+  db.prepare('DELETE FROM product_collections WHERE product_id = ?').run(product.id);
+  const insertLink = db.prepare('INSERT INTO product_collections (product_id, collection_slug) VALUES (?, ?)');
+  for (const collectionSlug of product.collectionSlugs) {
+    insertLink.run(product.id, collectionSlug);
+  }
 }
 
 function replaceVariants(productId: string, variants: ProductVariantInput[], reference: string) {
@@ -380,7 +389,7 @@ export function createProduct(input: ProductInput): Product {
     id,
     slug,
     ...input,
-    collectionSlug: input.collectionSlug,
+    collectionSlugs: input.collectionSlugs,
     inStock: input.inStock ?? true,
     featured: input.featured ?? false,
     isNew: input.isNew ?? false,
@@ -397,7 +406,7 @@ export function updateProduct(id: string, input: Partial<ProductInput>): Product
   const merged: ProductInput = {
     name: input.name ?? existing.name,
     reference: input.reference ?? existing.reference,
-    collectionSlug: input.collectionSlug ?? existing.collection.slug,
+    collectionSlugs: input.collectionSlugs ?? existing.collections.map((c) => c.slug),
     description: input.description ?? existing.description,
     material: input.material ?? existing.material,
     materialSlug: input.materialSlug ?? existing.materialSlug,
@@ -410,14 +419,7 @@ export function updateProduct(id: string, input: Partial<ProductInput>): Product
     images: input.images ?? existing.images,
   };
 
-  insertProductRow(
-    db,
-    {
-      id: existing.id,
-      slug: existing.slug,
-      ...merged,
-    },
-  );
+  insertProductRow(db, {...merged, id: existing.id, slug: existing.slug});
 
   if (input.variants) replaceVariants(id, input.variants, merged.reference);
 
@@ -581,11 +583,11 @@ export function getDashboardData(): DashboardData {
   const totalColorVariants = productStats.reduce((sum, p) => sum + Math.max(p.variants?.length ?? 0, 1), 0);
 
   const byCollection = productStats.reduce<Map<string, {slug: string; name: string; count: number}>>((acc, p) => {
-    const slug = p.collection.slug;
-    const name = p.collection.name.fr;
-    const current = acc.get(slug) ?? {slug, name, count: 0};
-    current.count += 1;
-    acc.set(slug, current);
+    for (const collection of p.collections) {
+      const current = acc.get(collection.slug) ?? {slug: collection.slug, name: collection.name.fr, count: 0};
+      current.count += 1;
+      acc.set(collection.slug, current);
+    }
     return acc;
   }, new Map());
 

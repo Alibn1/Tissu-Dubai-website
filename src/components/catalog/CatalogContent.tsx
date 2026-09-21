@@ -65,13 +65,19 @@ export function CatalogContent({
     let result = [...initialProducts];
 
     if (filters.collections.length > 0) {
-      result = result.filter((p) => filters.collections.includes(p.collection.slug));
+      result = result.filter((p) =>
+        filters.collections.some((slug) => p.collections.some((c) => c.slug === slug))
+      );
     }
     if (filters.materials.length > 0) {
       result = result.filter((p) =>
         filters.materials.some((id) => {
           const model = modelById.get(id);
-          return model && model.slug === p.materialSlug && model.collectionSlugs.includes(p.collection.slug);
+          return (
+            model &&
+            model.slug === p.materialSlug &&
+            model.collectionSlugs.some((slug) => p.collections.some((c) => c.slug === slug))
+          );
         })
       );
     }

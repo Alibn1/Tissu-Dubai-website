@@ -14,11 +14,12 @@ function seededDb(): WorkersDatabase {
   ).run('c1', 'caftan', 'Caftan', 'قفطان', 'Caftan', 'd', 'd', 'd', '/img.png', 0, '2026-01-01T00:00:00.000Z');
 
   db.prepare(
-    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, collection_slug, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
-    'p1', 'soie-royale', 'TD-CAF-0001', 'Soie', 'حرير', 'Silk', '', '', '', 'Soie', 'حرير', 'Silk', 'soie', '150cm', 1000, 1, 1, 0, 'caftan', '[]', '[]', '[]', '["/img.png"]', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'
+    'p1', 'soie-royale', 'TD-CAF-0001', 'Soie', 'حرير', 'Silk', '', '', '', 'Soie', 'حرير', 'Silk', 'soie', '150cm', 1000, 1, 1, 0, '[]', '[]', '[]', '["/img.png"]', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'
   );
+  db.prepare(`INSERT INTO product_collections (product_id, collection_slug) VALUES (?, ?)`).run('p1', 'caftan');
 
   db.prepare(
     `INSERT INTO product_variants (id, product_id, color_fr, color_ar, color_en, color_hex, sku, price, in_stock, sort_order, images)
@@ -44,33 +45,35 @@ describe('WorkersDatabase (in-memory fallback)', () => {
 
   it('serves the collection list with product counts', () => {
     const db = seededDb();
-    const rows = db.prepare(`SELECT *, (SELECT COUNT(*) FROM products p WHERE p.collection_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order`).all() as Array<{slug: string; product_count: number}>;
+    const rows = db.prepare(`SELECT *, (SELECT COUNT(*) FROM product_collections pc WHERE pc.collection_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order`).all() as Array<{slug: string; product_count: number}>;
     expect(rows).toHaveLength(1);
     expect(rows[0].slug).toBe('caftan');
     expect(rows[0].product_count).toBe(1);
   });
 
-  it('serves the joined product list ordered like getAllProducts', () => {
+  it('serves the product list ordered like getAllProducts', () => {
     const db = seededDb();
-    const sql = `SELECT p.*, c.id AS col_id, c.slug AS col_slug, c.name_fr AS col_name_fr, c.name_ar AS col_name_ar, c.name_en AS col_name_en, c.description_fr AS col_desc_fr, c.description_ar AS col_desc_ar, c.description_en AS col_desc_en, c.image AS col_image FROM products p JOIN collections c ON c.slug = p.collection_slug ORDER BY p.created_at DESC, p.slug`;
-    const rows = db.prepare(sql).all() as Array<{slug: string; col_name_fr: string}>;
+    const sql = `SELECT p.* FROM products p ORDER BY p.created_at DESC, p.slug`;
+    const rows = db.prepare(sql).all() as Array<{slug: string}>;
     expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({slug: 'soie-royale', col_name_fr: 'Caftan'});
+    expect(rows[0]).toMatchObject({slug: 'soie-royale'});
   });
 
-  it('finds a product by slug + collection like getProductBySlug', () => {
+  it('finds a product by slug like getProductBySlug', () => {
     const db = seededDb();
-    const sql = `SELECT p.*, c.id AS col_id, c.slug AS col_slug, c.name_fr AS col_name_fr, c.name_ar AS col_name_ar, c.name_en AS col_name_en, c.description_fr AS col_desc_fr, c.description_ar AS col_desc_ar, c.description_en AS col_desc_en, c.image AS col_image FROM products p JOIN collections c ON c.slug = p.collection_slug WHERE p.slug = ? AND p.collection_slug = ?`;
-    const row = db.prepare(sql).get('soie-royale', 'caftan') as {slug: string} | undefined;
+    const sql = `SELECT p.* FROM products p WHERE p.slug = ?`;
+    const row = db.prepare(sql).get('soie-royale') as {slug: string} | undefined;
     expect(row?.slug).toBe('soie-royale');
-    expect(db.prepare(sql).get('nope', 'caftan')).toBeUndefined();
+    expect(db.prepare(sql).get('nope')).toBeUndefined();
   });
 
-  it('dispatches variants and aggregated counts like the store queries', () => {
+  it('dispatches variants, links and aggregated counts like the store queries', () => {
     const db = seededDb();
     const variants = db.prepare('SELECT * FROM product_variants ORDER BY sort_order').all();
     expect(variants).toHaveLength(1);
-    const counts = db.prepare('SELECT collection_slug, COUNT(*) AS n FROM products GROUP BY collection_slug').all();
+    const links = db.prepare('SELECT * FROM product_collections').all();
+    expect(links).toEqual([{product_id: 'p1', collection_slug: 'caftan'}]);
+    const counts = db.prepare('SELECT collection_slug, COUNT(*) AS n FROM product_collections GROUP BY collection_slug').all();
     expect(counts).toEqual([{collection_slug: 'caftan', n: 1}]);
     const inquiryCounts = db.prepare('SELECT reference, n FROM inquiry_counts').all();
     expect(inquiryCounts).toEqual([]);
@@ -125,6 +128,7 @@ describe('WorkersDatabase (in-memory fallback)', () => {
 
     expect(db.prepare('DELETE FROM products WHERE id = ?').run('p1').changes).toBe(1);
     expect(db.prepare('SELECT * FROM product_variants ORDER BY sort_order').all()).toHaveLength(0);
+    expect(db.prepare('SELECT * FROM product_collections').all()).toHaveLength(0);
     expect(db.prepare('SELECT * FROM model_collections').all()).toHaveLength(1);
     expect(db.prepare('DELETE FROM models WHERE id = ?').run('m1').changes).toBe(1);
     expect(db.prepare('SELECT * FROM model_collections').all()).toHaveLength(0);

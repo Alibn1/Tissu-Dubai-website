@@ -36,7 +36,6 @@ CREATE TABLE IF NOT EXISTS products (
   in_stock INTEGER NOT NULL DEFAULT 1,
   featured INTEGER NOT NULL DEFAULT 0,
   is_new INTEGER NOT NULL DEFAULT 0,
-  collection_slug TEXT NOT NULL REFERENCES collections(slug),
   characteristics_fr TEXT NOT NULL DEFAULT '[]',
   characteristics_ar TEXT NOT NULL DEFAULT '[]',
   characteristics_en TEXT NOT NULL DEFAULT '[]',
@@ -45,7 +44,13 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_products_collection ON products(collection_slug);
+-- Many-to-many between products and collections: one product can belong to
+-- several collections without duplicating the product row.
+CREATE TABLE IF NOT EXISTS product_collections (
+  product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  collection_slug TEXT NOT NULL REFERENCES collections(slug) ON DELETE CASCADE,
+  PRIMARY KEY (product_id, collection_slug)
+);
 
 CREATE TABLE IF NOT EXISTS product_variants (
   id TEXT PRIMARY KEY,

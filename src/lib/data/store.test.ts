@@ -32,7 +32,7 @@ describe('DB-backed store', () => {
     expect(settings.contact.whatsappNumber).toBeTruthy();
 
     const first = products[0];
-    expect(first.collection.slug.length).toBeGreaterThan(0);
+    expect(first.collections[0].slug.length).toBeGreaterThan(0);
     expect(first.name.en).toBeTruthy();
     expect(first.variants.length).toBeGreaterThan(0);
     expect(first.images.length).toBeGreaterThan(0);
@@ -44,7 +44,7 @@ describe('DB-backed store', () => {
     const created = store.createProduct({
       name: {fr: 'Test', ar: 'تجربة', en: 'Test'},
       reference: 'TD-TEST-001',
-      collectionSlug: 'caftan',
+      collectionSlugs: ['caftan'],
       price: 100,
       variants: [{color: {fr: 'Rouge', ar: 'أحمر', en: 'Red'}, price: 100, inStock: true}],
     });
@@ -66,7 +66,7 @@ describe('DB-backed store', () => {
     const created = store.createProduct({
       name: {fr: 'Images', ar: 'صور', en: 'Images'},
       reference: 'TD-IMG-001',
-      collectionSlug: 'caftan',
+      collectionSlugs: ['caftan'],
       images: ['/images/products/product-1.svg'],
       variants: [
         {

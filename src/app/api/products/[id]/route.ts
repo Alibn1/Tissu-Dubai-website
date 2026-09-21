@@ -29,7 +29,11 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
     description: body.description ?? product.description,
     material: body.material ?? product.material,
     materialSlug: body.materialSlug ?? product.materialSlug,
-    collectionSlug: typeof body.collection === 'string' ? body.collection : undefined,
+    collectionSlugs: Array.isArray(body.collectionSlugs)
+      ? body.collectionSlugs.map((slug: unknown) => String(slug)).filter((slug: string) => slug !== '')
+      : typeof body.collection === 'string' && body.collection !== ''
+        ? [body.collection]
+        : undefined,
     characteristics: body.characteristics ?? product.characteristics,
     width: body.width !== undefined ? body.width : product.width,
     price: body.price !== undefined ? body.price : product.price,

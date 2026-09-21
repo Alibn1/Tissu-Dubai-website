@@ -20,9 +20,10 @@ export default async function AdminColorsPage({params}: Props) {
   const grouped = products.reduce<
     Record<string, {name: string; products: (typeof products)[number][]}>
   >((acc, p) => {
-    const slug = p.collection.slug;
-    if (!acc[slug]) acc[slug] = {name: p.collection.name.fr, products: []};
-    acc[slug].products.push(p);
+    for (const collection of p.collections) {
+      if (!acc[collection.slug]) acc[collection.slug] = {name: collection.name.fr, products: []};
+      acc[collection.slug].products.push(p);
+    }
     return acc;
   }, {});
 

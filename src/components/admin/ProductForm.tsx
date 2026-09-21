@@ -29,7 +29,7 @@ export interface SeoFieldsForm {
 export type SeoByLanguage = Record<Locale, SeoFieldsForm>;
 
 export interface ProductFormData {
-  collection: string;
+  collectionSlugs: string[];
   modelId: string;
   reference: string;
   mainColor: Record<Locale, string>;
@@ -73,7 +73,7 @@ const uidCounter = 0;
 
 export function createEmptyFormData(): ProductFormData {
   return {
-    collection: '',
+    collectionSlugs: [],
     modelId: '',
     reference: `TD-${Date.now().toString(36).toUpperCase()}${uidCounter}`,
     mainColor: {en: '', fr: '', ar: ''},
@@ -252,10 +252,20 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       seo: {...f.seo, [lang]: {...f.seo[lang], enabled}},
     }));
 
-  const selectCollection = (collection: string) =>
-    setFormData((f) => ({...f, collection, modelId: ''}));
+  const toggleCollection = (slug: string) =>
+    setFormData((f) => {
+      const next = f.collectionSlugs.includes(slug)
+        ? f.collectionSlugs.filter((s) => s !== slug)
+        : [...f.collectionSlugs, slug];
+      const modelStillValid = models.some(
+        (m) => m.id === f.modelId && m.collectionSlugs.some((s) => next.includes(s))
+      );
+      return {...f, collectionSlugs: next, modelId: modelStillValid ? f.modelId : ''};
+    });
 
-  const selectedModels = models.filter((m) => m.collectionSlugs.includes(formData.collection));
+  const selectedModels = models.filter((m) =>
+    m.collectionSlugs.some((slug) => formData.collectionSlugs.includes(slug))
+  );
   const selectedModel = models.find((m) => m.id === formData.modelId) ?? null;
 
   const setBaseImages = (next: string[]) => {
@@ -290,7 +300,7 @@ export function ProductForm({mode, productId, initialData, collections, models}:
   // Build the payload to send — swap with a real API call later.
   const buildPayload = () => {
     const {
-      collection,
+      collectionSlugs,
       modelId,
       reference,
       mainColor,
@@ -397,7 +407,7 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       mainColor,
       material: selectedModel?.name ?? {fr: '', en: '', ar: ''},
       materialSlug: selectedModel?.slug ?? '',
-      collection,
+      collectionSlugs,
       modelId,
       composition: pick('composition'),
       width: pick('width'),
@@ -499,6 +509,11 @@ export function ProductForm({mode, productId, initialData, collections, models}:
           translations={translations}
           onChange={setTranslationValue}
           exclude={['materials']}
+          extraTranslate={{
+            value: (lang) => formData.mainColor[lang],
+            onChange: (lang, value) =>
+              setFormData((f) => ({...f, mainColor: {...f.mainColor, [lang]: value}})),
+          }}
           nameRightSlot={(lang) => (
             <div>
               <label className={labelClass}>Couleur</label>
@@ -530,15 +545,15 @@ export function ProductForm({mode, productId, initialData, collections, models}:
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Collection</label>
+            <label className={labelClass}>Collections</label>
             <div className="flex flex-wrap gap-2">
               {collections.map((col) => {
-                const active = formData.collection === col.slug;
+                const active = formData.collectionSlugs.includes(col.slug);
                 return (
                   <button
                     key={col.slug}
                     type="button"
-                    onClick={() => selectCollection(col.slug)}
+                    onClick={() => toggleCollection(col.slug)}
                     aria-pressed={active}
                     className={cn(
                       'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all',
@@ -562,10 +577,10 @@ export function ProductForm({mode, productId, initialData, collections, models}:
               value={formData.modelId}
               onChange={(id) => setFormData((f) => ({...f, modelId: id}))}
               placeholder={
-                formData.collection
+                formData.collectionSlugs.length > 0
                   ? selectedModels.length > 0
                     ? 'Sélectionner un modèle'
-                    : 'Aucun modèle pour cette collection'
+                    : 'Aucun modèle pour ces collections'
                   : 'Choisir d’abord une collection'
               }
             />

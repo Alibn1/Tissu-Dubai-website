@@ -48,13 +48,17 @@ type ProductsRow = {
   in_stock: number;
   featured: number;
   is_new: number;
-  collection_slug: string;
   characteristics_fr: string;
   characteristics_ar: string;
   characteristics_en: string;
   images: string;
   created_at: string;
   updated_at: string;
+};
+
+type ProductCollectionsRow = {
+  product_id: string;
+  collection_slug: string;
 };
 
 type VariantsRow = {
@@ -107,6 +111,7 @@ interface Tables {
   collections: CollectionsRow[];
   products: ProductsRow[];
   product_variants: VariantsRow[];
+  product_collections: ProductCollectionsRow[];
   models: ModelsRow[];
   model_collections: ModelCollectionsRow[];
   site_settings: SiteSettingsRow[];
@@ -133,7 +138,6 @@ const PRODUCT_COLUMNS = [
   'in_stock',
   'featured',
   'is_new',
-  'collection_slug',
   'characteristics_fr',
   'characteristics_ar',
   'characteristics_en',
@@ -143,23 +147,21 @@ const PRODUCT_COLUMNS = [
 ] as const;
 
 // Base of the PRODUCT_SELECT query in src/lib/data/store.ts.
-const PRODUCT_SELECT_BASE =
-  'select p.*, c.id as col_id, c.slug as col_slug, c.name_fr as col_name_fr, c.name_ar as col_name_ar, c.name_en as col_name_en, c.description_fr as col_desc_fr, c.description_ar as col_desc_ar, c.description_en as col_desc_en, c.image as col_image from products p join collections c on c.slug = p.collection_slug';
+const PRODUCT_SELECT_BASE = 'select p.* from products p';
 
 // Base of the collections query in src/lib/data/store.ts.
 const COLLECTIONS_BASE =
-  'select *, (select count(*) from products p where p.collection_slug = collections.slug) as product_count from collections';
+  'select *, (select count(*) from product_collections pc where pc.collection_slug = collections.slug) as product_count from collections';
 
 const SELECT_PRODUCT_STATEMENTS: Array<{suffix: string; run: (db: WorkersDatabase, params: unknown[]) => unknown}> = [
   {suffix: ' order by p.created_at desc, p.slug', run: (db) => db.selectAllProducts()},
   {suffix: ' where p.id = ?', run: (db, params) => db.selectProductWhere({id: String(params[0])})},
-  {suffix: ' where p.slug = ? and p.collection_slug = ?', run: (db, params) => db.selectProductWhere({slug: String(params[0]), collectionSlug: String(params[1])})},
   {suffix: ' where p.slug = ?', run: (db, params) => db.selectProductWhere({slug: String(params[0])})},
 ];
 
 const SELECT_COLLECTIONS_STATEMENTS: Array<{suffix: string; run: (db: WorkersDatabase, params: unknown[]) => unknown}> = [
   {suffix: ' order by sort_order', run: (db) => db.selectAllCollections()},
-  {suffix: ' order by sort_order where slug = ?', run: (db, params) => db.selectCollectionBySlug(String(params[0]))},
+  {suffix: ' where slug = ?', run: (db, params) => db.selectCollectionBySlug(String(params[0]))},
 ];
 
 function normalize(sql: string): string {
@@ -171,6 +173,7 @@ export class WorkersDatabase {
     collections: [],
     products: [],
     product_variants: [],
+    product_collections: [],
     models: [],
     model_collections: [],
     site_settings: [],
@@ -244,11 +247,15 @@ export class WorkersDatabase {
       };
     }
 
-    if (normalized === 'select collection_slug, count(*) as n from products group by collection_slug') {
+    if (normalized === 'select collection_slug, count(*) as n from product_collections group by collection_slug') {
       const counts = new Map<string, number>();
-      for (const product of this.tables.products) counts.set(product.collection_slug, (counts.get(product.collection_slug) ?? 0) + 1);
+      for (const link of this.tables.product_collections) counts.set(link.collection_slug, (counts.get(link.collection_slug) ?? 0) + 1);
       const rows = Array.from(counts, ([collection_slug, n]) => ({collection_slug, n}));
       return {all: () => rows, get: () => undefined, run: () => ({changes: 0})};
+    }
+
+    if (normalized === 'select * from product_collections') {
+      return {all: () => [...this.tables.product_collections] as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
     }
 
     if (normalized === 'select reference, count(*) as n from inquiries group by reference') {
@@ -346,6 +353,19 @@ export class WorkersDatabase {
       };
     }
 
+    if (normalized === 'delete from product_collections where product_id = ?') {
+      return {
+        all: () => [],
+        get: () => undefined,
+        run: (...params) => {
+          const target = String(params[0]);
+          const before = this.tables.product_collections.length;
+          this.tables.product_collections = this.tables.product_collections.filter((link) => link.product_id !== target);
+          return {changes: before - this.tables.product_collections.length};
+        },
+      };
+    }
+
     if (normalized === 'delete from models where id = ?') {
       return {
         all: () => [],
@@ -382,6 +402,7 @@ export class WorkersDatabase {
           const before = this.tables.products.length;
           this.tables.products = this.tables.products.filter((product) => product.id !== target);
           this.tables.product_variants = this.tables.product_variants.filter((variant) => variant.product_id !== target);
+          this.tables.product_collections = this.tables.product_collections.filter((link) => link.product_id !== target);
           return {changes: before - this.tables.products.length};
         },
       };
@@ -472,6 +493,9 @@ export class WorkersDatabase {
             case 'product_variants':
               this.upsertRow('product_variants', row as VariantsRow);
               break;
+            case 'product_collections':
+              this.upsertLinkRow(row as ProductCollectionsRow);
+              break;
             case 'models':
               this.upsertRow('models', row as ModelsRow);
               break;
@@ -526,11 +550,22 @@ export class WorkersDatabase {
     if (!existing) this.tables.model_collections.push(link);
   }
 
+  upsertLinkRow(link: ProductCollectionsRow): void {
+    const existing = this.tables.product_collections.find(
+      (entry) => entry.product_id === link.product_id && entry.collection_slug === link.collection_slug
+    );
+    if (!existing) this.tables.product_collections.push(link);
+  }
+
+  private countProductsInCollection(slug: string): number {
+    return this.tables.product_collections.filter((link) => link.collection_slug === slug).length;
+  }
+
   selectAllCollections(): WorkersRow[] {
     return [...this.tables.collections]
       .map((collection) => ({
         ...collection,
-        product_count: this.tables.products.filter((product) => product.collection_slug === collection.slug).length,
+        product_count: this.countProductsInCollection(collection.slug),
       }))
       .sort((a, b) => a.sort_order - b.sort_order);
   }
@@ -540,40 +575,23 @@ export class WorkersDatabase {
     if (!collection) return undefined;
     return {
       ...collection,
-      product_count: this.tables.products.filter((product) => product.collection_slug === collection.slug).length,
+      product_count: this.countProductsInCollection(collection.slug),
     };
   }
 
   selectAllProducts(): WorkersRow[] {
-    return this.tables.products
-      .map((product) => this.joinCollection(product))
-      .sort((a, b) => (String(b.created_at).localeCompare(String(a.created_at))) || String(a.slug).localeCompare(String(b.slug)));
+    return [...this.tables.products].sort(
+      (a, b) => (String(b.created_at).localeCompare(String(a.created_at))) || String(a.slug).localeCompare(String(b.slug))
+    ) as WorkersRow[];
   }
 
-  selectProductWhere(where: {id?: string; slug?: string; collectionSlug?: string}): WorkersRow | undefined {
+  selectProductWhere(where: {id?: string; slug?: string}): WorkersRow | undefined {
     const product = this.tables.products.find((entry) => {
       if (where.id !== undefined && entry.id !== where.id) return false;
       if (where.slug !== undefined && entry.slug !== where.slug) return false;
-      if (where.collectionSlug !== undefined && entry.collection_slug !== where.collectionSlug) return false;
       return true;
     });
-    return product ? this.joinCollection(product) : undefined;
-  }
-
-  private joinCollection(product: ProductsRow): WorkersRow {
-    const collection = this.tables.collections.find((entry) => entry.slug === product.collection_slug);
-    return {
-      ...product,
-      col_id: collection?.id ?? '',
-      col_slug: collection?.slug ?? product.collection_slug,
-      col_name_fr: collection?.name_fr ?? '',
-      col_name_ar: collection?.name_ar ?? '',
-      col_name_en: collection?.name_en ?? '',
-      col_desc_fr: collection?.description_fr ?? '',
-      col_desc_ar: collection?.description_ar ?? '',
-      col_desc_en: collection?.description_en ?? '',
-      col_image: collection?.image ?? '',
-    };
+    return product as WorkersRow | undefined;
   }
 }
 

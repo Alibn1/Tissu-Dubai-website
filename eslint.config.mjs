@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Build output / local state that should never be linted:
+    ".open-next/**",
+    ".wrangler/**",
+    "data/**",
   ]),
 ]);
 
