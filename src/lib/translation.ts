@@ -21,7 +21,7 @@ export const FIELD_LABELS: Record<TranslatableFieldKey, string> = {
   materials: 'Modèle',
   description: 'Description',
   composition: 'Composition',
-  width: 'Largeur',
+  width: 'Longueur / Largeur',
   origin: 'Origine',
 };
 
@@ -30,7 +30,7 @@ export const FIELD_PLACEHOLDERS: Record<TranslatableFieldKey, string> = {
   materials: 'Ex. Soie naturelle',
   description: 'Description du produit',
   composition: 'Ex. 100% soie naturelle',
-  width: 'Ex. 140 cm',
+  width: 'Ex. 3 m × 140 cm',
   origin: 'Ex. Maroc',
 };
 

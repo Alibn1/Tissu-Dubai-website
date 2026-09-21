@@ -322,9 +322,9 @@ export function ProductForm({mode, productId, initialData, collections, models}:
 
     const buildCharacteristics = (): Record<Locale, string[]> => {
       const labels: Record<Locale, string[]> = {
-        fr: ['Composition', 'Largeur', 'Origine'],
-        en: ['Composition', 'Width', 'Origin'],
-        ar: ['التركيب', 'العرض', 'المصدر'],
+        fr: ['Composition', 'Longueur / Largeur', 'Origine'],
+        en: ['Composition', 'Length / Width', 'Origin'],
+        ar: ['التركيب', 'الطول / العرض', 'المصدر'],
       };
       const fields: TranslatableFieldKey[] = ['composition', 'width', 'origin'];
       return Object.fromEntries(

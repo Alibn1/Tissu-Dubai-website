@@ -2,6 +2,7 @@
 
 import {useMemo, useState} from 'react';
 import {useTranslations} from 'next-intl';
+import {Link} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
 import {QuantitySelector} from '@/components/ui/QuantitySelector';
 import {Badge} from '@/components/ui/Badge';
@@ -67,11 +68,32 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
   return (
     <div className="flex flex-col gap-6">
       {/* Badges */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {product.isNew && <Badge variant="primary">{t('product.new')}</Badge>}
         {product.featured && <Badge variant="accent">{t('product.featured')}</Badge>}
         {!product.inStock && <Badge variant="error">{t('product.outOfStock')}</Badge>}
       </div>
+
+      {/* Collections stickers */}
+      {product.collections.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {product.collections.map((collection) => (
+            <Link
+              key={collection.id}
+              href={`/collections/${collection.slug}`}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1',
+                'border-brand-primary/40 bg-brand-primary/10',
+                'text-xs font-semibold tracking-wide text-brand-gold-light',
+                'hover:border-brand-primary hover:bg-brand-primary/20',
+                'transition-colors duration-200'
+              )}
+            >
+              {collection.name[locale] || collection.name.fr}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Name */}
       <h1 className="font-heading text-2xl font-bold text-brand-secondary sm:text-3xl">
@@ -96,7 +118,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
         )}
       </div>
 
-      {/* Material & Width */}
+      {/* Material & Dimensions */}
       <div className="flex flex-wrap gap-4 text-sm">
         <div>
           <span className="text-brand-muted">{t('product.material')}: </span>
@@ -104,7 +126,9 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
         </div>
         <div>
           <span className="text-brand-muted">{t('product.width')}: </span>
-          <span className="font-medium text-brand-secondary">{product.width}</span>
+          <span className="font-medium text-brand-secondary">
+            {product.width && !/cm/i.test(product.width) ? `${product.width} cm` : product.width}
+          </span>
         </div>
         {variant && (
           <div>

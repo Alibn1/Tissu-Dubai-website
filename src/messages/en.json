@@ -168,7 +168,7 @@
     "reference": "Reference",
     "material": "Model",
     "name": "Fabric",
-    "width": "Width",
+    "width": "Length / Width",
     "price": "Price",
     "availability": "Availability",
     "color": "Color",

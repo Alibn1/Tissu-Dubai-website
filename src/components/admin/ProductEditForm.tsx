@@ -19,9 +19,9 @@ type Props = {
 };
 
 const CHARACTERISTIC_LABELS: Record<Locale, string[]> = {
-  fr: ['Composition', 'Largeur', 'Origine'],
-  en: ['Composition', 'Width', 'Origin'],
-  ar: ['التركيب', 'العرض', 'المصدر'],
+  fr: ['Composition', 'Longueur / Largeur', 'Origine'],
+  en: ['Composition', 'Length / Width', 'Origin'],
+  ar: ['التركيب', 'الطول / العرض', 'المصدر'],
 };
 
 // Extracts "100% soie naturelle" out of "Composition : 100% soie naturelle".
@@ -43,7 +43,7 @@ function parseCharacteristics(product: Product, lang: Locale): {
   return {
     composition: findCharacteristic(product, lang, ['composition', 'التركيب']),
     width:
-      findCharacteristic(product, lang, ['largeur', 'width', 'العرض']) ||
+      findCharacteristic(product, lang, ['largeur', 'width', 'longueur', 'العرض', 'الطول']) ||
       (product.width ?? ''),
     origin: findCharacteristic(product, lang, ['origine', 'origin', 'المصدر', 'منشأ']),
   };
