@@ -48,7 +48,7 @@ export function Footer({siteSettings}: {siteSettings: SiteSettings}) {
 
   return (
     <footer className="bg-brand-light text-brand-muted">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ps-2 sm:ps-3 lg:ps-4">
         {/* Main Footer */}
         <div className="grid grid-cols-1 gap-8 py-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
 
