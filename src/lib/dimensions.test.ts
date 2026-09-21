@@ -30,4 +30,11 @@ describe('formatDimensions', () => {
     expect(formatDimensions('')).toBe('');
     expect(formatDimensions('   ')).toBe('');
   });
+
+  it('uses سم for Arabic, same layout as other languages', () => {
+    expect(formatDimensions('300 cm × 140 cm', 'ar')).toBe('300 سم × 140 سم');
+    expect(formatDimensions('300', 'ar')).toBe('300 سم');
+    expect(formatDimensions('140x250', 'ar')).toBe('140 سم × 250 سم');
+    expect(formatDimensions('140 سم × 250 سم', 'ar')).toBe('140 سم × 250 سم');
+  });
 });

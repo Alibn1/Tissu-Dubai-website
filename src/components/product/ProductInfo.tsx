@@ -127,7 +127,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
         </div>
         <div>
           <span className="text-brand-muted">{t('product.width')}: </span>
-          <span className="font-medium text-brand-secondary">{formatDimensions(product.width)}</span>
+          <span className="font-medium text-brand-secondary">{formatDimensions(product.width, locale)}</span>
         </div>
         {variant && (
           <div>

@@ -43,8 +43,8 @@ export function ProductDetails({product, locale}: ProductDetailsProps) {
   const characteristics = mergeCharacteristics(product, locale).map((char) => {
     if (!DIMENSION_LABEL_RE.test(char)) return char;
     const sep = char.indexOf(':');
-    if (sep === -1) return formatDimensions(char);
-    return `${char.slice(0, sep + 1)} ${formatDimensions(char.slice(sep + 1))}`;
+    if (sep === -1) return formatDimensions(char, locale);
+    return `${char.slice(0, sep + 1)} ${formatDimensions(char.slice(sep + 1), locale)}`;
   });
 
   return (
