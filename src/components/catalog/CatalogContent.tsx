@@ -1,7 +1,6 @@
 'use client';
 
 import {useTranslations, useLocale} from 'next-intl';
-import {useRouter, usePathname} from '@/i18n/navigation';
 import {useState, useMemo, useCallback} from 'react';
 import {Search, SlidersHorizontal, X, ChevronDown, ArrowUpDown} from 'lucide-react';
 import {cn} from '@/lib/utils';
@@ -129,9 +128,26 @@ export function CatalogContent({
     filters.materials.length +
     (filters.inStockOnly ? 1 : 0);
 
+  const selectedCollections = useMemo(
+    () => collections.filter((c) => filters.collections.includes(c.slug)),
+    [collections, filters.collections]
+  );
+
+  const itemSeparator = loc === 'ar' ? '، ' : ', ';
+  const conjunction = t('catalog.and');
+  const titleParts = selectedCollections.map((c) => c.name[loc] || c.name.fr);
+  const titleText =
+    titleParts.length > 1
+      ? `${titleParts.slice(0, -1).join(itemSeparator)} ${conjunction} ${titleParts[titleParts.length - 1]}`
+      : titleParts[0] ?? t('catalog.title');
+  const descriptionText =
+    selectedCollections.length === 1
+      ? selectedCollections[0].description[loc] || selectedCollections[0].description.fr
+      : null;
+
   const clearAllFilters = () => {
     setFilters({
-      collections: activeCollection ? [activeCollection] : [],
+      collections: [],
       materials: [],
       inStockOnly: false,
       search: '',
@@ -141,6 +157,18 @@ export function CatalogContent({
 
   return (
     <>
+      {/* Dynamic title */}
+      <div className="mb-8 text-center">
+        <h1 className="font-heading text-2xl font-bold text-brand-secondary sm:text-3xl md:text-4xl">
+          {titleText}
+        </h1>
+        {descriptionText && (
+          <p className="mt-2 text-base text-brand-muted sm:text-lg">
+            {descriptionText}
+          </p>
+        )}
+      </div>
+
       {/* Search & Sort Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         {/* Search */}
@@ -229,7 +257,7 @@ export function CatalogContent({
         {/* Product Grid */}
         <div className="flex-1">
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 sm:gap-6 xl:gap-7">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

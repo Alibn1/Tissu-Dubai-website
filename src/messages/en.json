@@ -148,6 +148,7 @@
     "resultsCount": "{count} fabric found | {count} fabrics found",
     "noResults": "No fabric matches your search.",
     "clearFilters": "Clear filters",
+    "and": "and",
     "filters": {
       "collections": "Collections",
       "materials": "Models",

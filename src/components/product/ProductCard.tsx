@@ -57,21 +57,21 @@ export function ProductCard({product, className}: ProductCardProps) {
 
         {/* Info */}
         <div className="p-3 sm:p-4">
-          <h3 className="font-heading text-sm font-semibold text-brand-secondary line-clamp-1 group-hover:text-brand-primary transition-colors">
+          <h3 className="font-heading text-base font-semibold text-brand-secondary line-clamp-1 group-hover:text-brand-primary transition-colors sm:text-lg">
             {name}
           </h3>
-          <p className="mt-1 text-xs text-brand-muted line-clamp-1">
+          <p className="mt-1 text-sm text-brand-muted line-clamp-1">
             {material}
           </p>
 
           {/* Price */}
           <div className="mt-2">
             {product.price !== null ? (
-              <span className="text-sm font-semibold text-brand-primary">
+              <span className="text-base font-semibold text-brand-primary sm:text-lg">
                 {product.price} {t('common.currency')}
               </span>
             ) : (
-              <span className="text-sm font-medium text-brand-muted italic">
+              <span className="text-sm font-medium text-brand-muted italic sm:text-base">
                 {t('common.surDevis')}
               </span>
             )}
