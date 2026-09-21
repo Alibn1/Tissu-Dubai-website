@@ -2,6 +2,7 @@
 
 import {useTranslations} from 'next-intl';
 import {cn} from '@/lib/utils';
+import {formatDimensions, DIMENSION_LABEL_RE} from '@/lib/dimensions';
 import {type Product, type Locale} from '@/types';
 
 type ProductDetailsProps = {
@@ -13,7 +14,12 @@ export function ProductDetails({product, locale}: ProductDetailsProps) {
   const t = useTranslations();
 
   const description = product.description[locale] || product.description.fr;
-  const characteristics = product.characteristics[locale] || product.characteristics.fr;
+  const characteristics = (product.characteristics[locale] || product.characteristics.fr).map((char) => {
+    if (!DIMENSION_LABEL_RE.test(char)) return char;
+    const sep = char.indexOf(':');
+    if (sep === -1) return formatDimensions(char);
+    return `${char.slice(0, sep + 1)} ${formatDimensions(char.slice(sep + 1))}`;
+  });
 
   return (
     <div className="mt-12 space-y-8 border-t border-brand-border pt-8">

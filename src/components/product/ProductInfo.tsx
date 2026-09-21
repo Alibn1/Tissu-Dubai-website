@@ -10,6 +10,7 @@ import {WhatsAppConfirmationFlow} from '@/components/forms/WhatsAppConfirmationF
 import {generateWhatsAppMessage} from '@/lib/whatsapp';
 import {trackInquiry} from '@/actions/inquiry';
 import {MessageCircle, Share2} from 'lucide-react';
+import {formatDimensions} from '@/lib/dimensions';
 import {type Product, type Locale} from '@/types';
 
 type ProductInfoProps = {
@@ -126,9 +127,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
         </div>
         <div>
           <span className="text-brand-muted">{t('product.width')}: </span>
-          <span className="font-medium text-brand-secondary">
-            {product.width && !/cm/i.test(product.width) ? `${product.width} cm` : product.width}
-          </span>
+          <span className="font-medium text-brand-secondary">{formatDimensions(product.width)}</span>
         </div>
         {variant && (
           <div>
