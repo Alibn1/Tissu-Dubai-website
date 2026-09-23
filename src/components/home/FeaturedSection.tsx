@@ -14,10 +14,10 @@ export async function FeaturedSection() {
 
   return (
     <section className="py-16 sm:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[88rem] px-4 sm:px-6 lg:px-8">
         <SectionHeading title={t('title')} subtitle={t('subtitle')} />
 
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 xl:gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

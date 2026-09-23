@@ -38,7 +38,7 @@ export function ProductCard({product, className}: ProductCardProps) {
           />
 
           {/* Badges */}
-          <div className="absolute top-2 start-2 flex flex-col gap-1">
+          <div className="absolute top-2.5 start-2.5 flex flex-col gap-1.5">
             {product.isNew && (
               <Badge variant="primary">{t('product.new')}</Badge>
             )}
@@ -56,11 +56,11 @@ export function ProductCard({product, className}: ProductCardProps) {
         </div>
 
         {/* Info */}
-        <div className="p-3 sm:p-4">
+        <div className="p-3.5 sm:p-4">
           <h3 className="font-heading text-base font-semibold text-brand-secondary line-clamp-1 group-hover:text-brand-primary transition-colors sm:text-lg">
             {name}
           </h3>
-          <p className="mt-1 text-sm text-brand-muted line-clamp-1">
+          <p className="mt-1 text-xs text-brand-muted line-clamp-1 sm:text-sm">
             {material}
           </p>
 
@@ -71,7 +71,7 @@ export function ProductCard({product, className}: ProductCardProps) {
                 {product.price} {t('common.currency')}
               </span>
             ) : (
-              <span className="text-sm font-medium text-brand-muted italic sm:text-base">
+              <span className="text-sm font-medium text-brand-muted italic">
                 {t('common.surDevis')}
               </span>
             )}
