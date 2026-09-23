@@ -2,7 +2,34 @@
 
 import {useTranslations} from 'next-intl';
 import {cn} from '@/lib/utils';
+import {formatDimensions, DIMENSION_LABEL_RE} from '@/lib/dimensions';
 import {type Product, type Locale} from '@/types';
+
+// Groups a characteristic line by its label so equivalent lines match across
+// languages despite sparse arrays (e.g. "Composition" == "Composition",
+// "Longueur / Largeur" == "Length / Width" == "الطول / العرض").
+function characteristicKey(line: string): string {
+  const label = line.split(':')[0].trim().toLowerCase();
+  if (/composition|التركيب/.test(label)) return 'composition';
+  if (/longueur|largeur|length|width|الطول|العرض/.test(label)) return 'dimensions';
+  if (/origine|origin|المصدر|منشأ/.test(label)) return 'origin';
+  return label.replace(/[^a-z0-9]/g, '');
+}
+
+// Per-line merge: for each characteristic shown in the richest language, use
+// the current locale's line when present, otherwise fall back to French.
+function mergeCharacteristics(product: Product, locale: Locale): string[] {
+  const fr = product.characteristics.fr ?? [];
+  const target = product.characteristics[locale] ?? [];
+  const frMap = new Map(fr.map((l) => [characteristicKey(l), l]));
+  const targetMap = new Map(target.map((l) => [characteristicKey(l), l]));
+
+  const keys = [...fr.map(characteristicKey)];
+  for (const key of targetMap.keys()) if (!keys.includes(key)) keys.push(key);
+  return keys
+    .map((key) => targetMap.get(key) ?? frMap.get(key))
+    .filter((l): l is string => l !== undefined);
+}
 
 type ProductDetailsProps = {
   product: Product;
@@ -13,7 +40,12 @@ export function ProductDetails({product, locale}: ProductDetailsProps) {
   const t = useTranslations();
 
   const description = product.description[locale] || product.description.fr;
-  const characteristics = product.characteristics[locale] || product.characteristics.fr;
+  const characteristics = mergeCharacteristics(product, locale).map((char) => {
+    if (!DIMENSION_LABEL_RE.test(char)) return char;
+    const sep = char.indexOf(':');
+    if (sep === -1) return formatDimensions(char, locale);
+    return `${char.slice(0, sep + 1)} ${formatDimensions(char.slice(sep + 1), locale)}`;
+  });
 
   return (
     <div className="mt-12 space-y-8 border-t border-brand-border pt-8">

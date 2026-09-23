@@ -148,6 +148,7 @@
     "resultsCount": "{count} قماش واحد | {count} أقمشة",
     "noResults": "لا يوجد قماش يطابق بحثكم.",
     "clearFilters": "مسح التصفية",
+    "and": "و",
     "filters": {
       "collections": "المجموعات",
       "materials": "الموديلات",
@@ -168,7 +169,7 @@
     "reference": "المرجع",
     "material": "الموديل",
     "name": "القماش",
-    "width": "العرض",
+    "width": "الطول / العرض",
     "price": "السعر",
     "availability": "التوفر",
     "color": "اللون",

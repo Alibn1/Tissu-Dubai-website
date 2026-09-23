@@ -35,20 +35,18 @@ export default async function CollectionPage({params}: Props) {
   if (!cat) notFound();
 
   const [products, collections] = await Promise.all([
-    getProducts({collection}),
+    getProducts(),
     getCollections()
   ]);
   const models = getModels();
 
-  const t = await getTranslations('catalog');
-  const tCat = await getTranslations('nav.fabrics');
   const tCommon = await getTranslations('common');
 
   const catName = cat.name[locale as keyof typeof cat.name] || cat.name.fr;
 
   return (
     <section className="py-8 sm:py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[88rem] px-4 sm:px-6 lg:px-8">
         <Breadcrumbs
           items={[
             {label: tCommon('home'), href: '/'},
@@ -56,15 +54,6 @@ export default async function CollectionPage({params}: Props) {
             {label: catName}
           ]}
         />
-
-        <div className="mb-8 text-center">
-          <h1 className="font-heading text-2xl font-bold text-brand-secondary sm:text-3xl md:text-4xl">
-            {catName}
-          </h1>
-          <p className="mt-2 text-base text-brand-muted sm:text-lg">
-            {cat.description[locale as keyof typeof cat.description] || cat.description.fr}
-          </p>
-        </div>
 
         <CatalogContent
           initialProducts={products}

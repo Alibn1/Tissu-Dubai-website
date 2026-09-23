@@ -16,7 +16,7 @@ import {
 
 const FIELD_ORDER: TranslatableFieldKey[] = ['name', 'materials', 'description', 'composition', 'width', 'origin'];
 
-// Composition / Largeur / Origine: rendered side by side to save vertical space.
+// Composition / Longueur & Largeur / Origine: rendered side by side.
 const INLINE_FIELDS: TranslatableFieldKey[] = ['composition', 'width', 'origin'];
 
 // Priority used to pick the source language for a field: French, then English,
@@ -36,6 +36,29 @@ type FieldErrors = Record<TranslatableFieldKey, string | null>;
 function createEmptyErrors(): FieldErrors {
   return {name: null, materials: null, description: null, composition: null, width: null, origin: null};
 }
+
+// ── Longueur / Largeur composite input ──
+// The width field stores ONE combined string ("3 cm × 140 cm"); the UI splits
+// it into two numeric inputs joined by "×", and rejoins on change.
+
+function splitDimensions(raw: string): {longueur: string; largeur: string} {
+  const nums = raw.replace(',', '.').match(/\d+(\.\d+)?/g) ?? [];
+  if (nums.length === 1) return {longueur: '', largeur: nums[0] ?? ''};
+  if (nums.length >= 2) return {longueur: nums[0] ?? '', largeur: nums[1] ?? ''};
+  return {longueur: '', largeur: ''};
+}
+
+function joinDimensions(longueur: string, largeur: string): string {
+  const l = longueur.trim();
+  const w = largeur.trim();
+  if (l && w) return `${l} cm × ${w} cm`;
+  if (w) return `${w} cm`;
+  if (l) return `${l} cm`;
+  return '';
+}
+
+// Keep the field numeric-only (digits + decimal separator).
+const toNumeric = (v: string) => v.replace(/[^\d.,]/g, '').replace(/,/g, '.');
 
 type Props = {
   translations: ProductTranslations;
@@ -229,21 +252,30 @@ export function MultilingualFields({translations, onChange, exclude = [], rightS
               )
             ))}
 
-          {/* Composition / Largeur / Origine on one line */}
+          {/* Composition / Longueur & Largeur / Origine on one line */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {visibleFields
               .filter((field) => INLINE_FIELDS.includes(field))
               .map((field) => (
                 <div key={field}>
-                  <FieldContent
-                    label={FIELD_LABELS[field]}
-                    placeholder={FIELD_PLACEHOLDERS[field]}
-                    dir={activeLang.dir}
-                    value={translations[active][field]}
-                    textarea={TEXTAREAS.includes(field)}
-                    error={errors[active][field]}
-                    onChange={(v) => onChange(active, field, v)}
-                  />
+                  {field === 'width' ? (
+                    <DimensionsField
+                      dir={activeLang.dir}
+                      value={translations[active][field]}
+                      error={errors[active][field]}
+                      onChange={(v) => onChange(active, field, v)}
+                    />
+                  ) : (
+                    <FieldContent
+                      label={FIELD_LABELS[field]}
+                      placeholder={FIELD_PLACEHOLDERS[field]}
+                      dir={activeLang.dir}
+                      value={translations[active][field]}
+                      textarea={TEXTAREAS.includes(field)}
+                      error={errors[active][field]}
+                      onChange={(v) => onChange(active, field, v)}
+                    />
+                  )}
                 </div>
               ))}
           </div>
@@ -292,6 +324,55 @@ function FieldContent({
         />
       )}
       {error && <p className="mt-1 text-xs text-brand-error">{error}</p>}
+    </div>
+  );
+}
+
+function DimensionsField({
+  dir,
+  value,
+  error,
+  onChange,
+}: {
+  dir: 'ltr' | 'rtl';
+  value: string;
+  error: string | null;
+  onChange: (value: string) => void;
+}) {
+  const {longueur, largeur} = splitDimensions(value);
+
+  const update = (nextLongueur: string, nextLargeur: string) =>
+    onChange(joinDimensions(toNumeric(nextLongueur), toNumeric(nextLargeur)));
+
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-medium text-brand-muted">Longueur / Largeur (cm)</label>
+      <div className="flex items-center gap-2" dir={dir}>
+        <input
+          dir="ltr"
+          inputMode="decimal"
+          value={longueur}
+          onChange={(e) => update(e.target.value, largeur)}
+          placeholder="Longueur"
+          className={inputClass}
+          title="Longueur (cm)"
+        />
+        <span className="shrink-0 text-sm text-brand-muted">×</span>
+        <input
+          dir="ltr"
+          inputMode="decimal"
+          value={largeur}
+          onChange={(e) => update(longueur, e.target.value)}
+          placeholder="Largeur"
+          className={inputClass}
+          title="Largeur (cm)"
+        />
+      </div>
+      {error ? (
+        <p className="mt-1 text-xs text-brand-error">{error}</p>
+      ) : (
+        <p className="mt-1 text-xs text-brand-muted/80">Valeurs en cm — ex. 300 × 140</p>
+      )}
     </div>
   );
 }

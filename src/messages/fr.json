@@ -148,6 +148,7 @@
     "resultsCount": "{count} tissu trouvé | {count} tissus trouvés",
     "noResults": "Aucun tissu ne correspond à votre recherche.",
     "clearFilters": "Effacer les filtres",
+    "and": "et",
     "filters": {
       "collections": "Collections",
       "materials": "Modèles",
@@ -168,7 +169,7 @@
     "reference": "Référence",
     "material": "Modèle",
     "name": "Tissu",
-    "width": "Largeur",
+    "width": "Longueur / Largeur",
     "price": "Prix",
     "availability": "Disponibilité",
     "color": "Couleur",
