@@ -37,65 +37,77 @@ export async function StoreLocationSection() {
           </div>
 
           {/* Info */}
-          <div className="flex flex-col justify-center space-y-6">
-            <div className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-primary" />
-              <div>
+          <div className="flex flex-col gap-6">
+            {/* Address */}
+            <div className="rounded-md border border-brand-border bg-brand-surface p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-primary/10">
+                  <MapPin className="h-5 w-5 text-brand-primary" />
+                </div>
                 <h3 className="font-heading text-base font-semibold text-brand-secondary">
                   {tLocation('address.title')}
                 </h3>
-                <p className="mt-1 text-sm text-brand-muted">
-                  {address}
-                </p>
               </div>
+              <p className="text-sm text-brand-muted">
+                {address}
+              </p>
             </div>
 
-            <div className="flex items-start gap-3">
-              <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-primary" />
-              <div>
+            {/* Hours */}
+            <div className="rounded-md border border-brand-border bg-brand-surface p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-primary/10">
+                  <Clock className="h-5 w-5 text-brand-primary" />
+                </div>
                 <h3 className="font-heading text-base font-semibold text-brand-secondary">
                   {tHours('title')}
                 </h3>
-                <div className="mt-1 space-y-1 text-sm text-brand-muted">
-                  {hours.map((entry) => (
-                    <p key={entry.day} className="capitalize">
-                      <span className="font-medium">{entry.label}</span>
-                      {' — '}
-                      {entry.value}
-                    </p>
-                  ))}
-                </div>
+              </div>
+              <div className="space-y-2 text-sm text-brand-muted">
+                {hours.map((entry) => (
+                  <div key={entry.day} className="flex justify-between gap-4">
+                    <span className="capitalize">{entry.label}</span>
+                    <span className="font-medium text-brand-secondary">{entry.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <Phone className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-primary" />
-              <div>
+            {/* Contact */}
+            <div className="rounded-md border border-brand-border bg-brand-surface p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-primary/10">
+                  <Phone className="h-5 w-5 text-brand-primary" />
+                </div>
                 <h3 className="font-heading text-base font-semibold text-brand-secondary">
                   {t('title')}
                 </h3>
+              </div>
+              <div className="flex flex-col gap-3">
                 <a
                   href={`tel:${phone}`}
-                  className="mt-1 inline-flex items-center gap-1 text-sm text-brand-primary hover:text-brand-secondary transition-colors"
+                  className={cn(
+                    'flex items-center gap-2 rounded-md border border-brand-border px-4 py-3',
+                    'text-sm font-medium text-brand-secondary hover:bg-brand-light transition-colors'
+                  )}
                 >
+                  <Phone className="h-4 w-4 text-brand-primary" />
                   {phone}
+                </a>
+                <a
+                  href={GOOGLE_MAPS_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'flex items-center gap-2 rounded-md border border-brand-border px-4 py-3',
+                    'text-sm font-medium text-brand-secondary hover:bg-brand-light transition-colors'
+                  )}
+                >
+                  <ExternalLink className="h-4 w-4 text-brand-primary" />
+                  {tLocation('contact.directions')}
                 </a>
               </div>
             </div>
-
-            <a
-              href={GOOGLE_MAPS_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                'inline-flex items-center gap-2',
-                'text-sm font-semibold text-brand-primary hover:text-brand-secondary',
-                'transition-colors duration-200'
-              )}
-            >
-              <ExternalLink className="h-4 w-4" />
-              {tLocation('contact.directions')}
-            </a>
           </div>
         </div>
       </div>

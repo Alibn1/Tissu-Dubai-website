@@ -38,7 +38,7 @@ export function ProductCard({product, className}: ProductCardProps) {
           />
 
           {/* Badges */}
-          <div className="absolute top-2.5 start-2.5 flex flex-col gap-1.5">
+          <div className="absolute top-2.5 start-2.5 flex flex-col items-start gap-1.5">
             {product.isNew && (
               <Badge variant="primary">{t('product.new')}</Badge>
             )}
