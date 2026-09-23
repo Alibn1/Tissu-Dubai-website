@@ -75,39 +75,6 @@ describe('WorkersDatabase (in-memory fallback)', () => {
     expect(links).toEqual([{product_id: 'p1', collection_slug: 'caftan'}]);
     const counts = db.prepare('SELECT collection_slug, COUNT(*) AS n FROM product_collections GROUP BY collection_slug').all();
     expect(counts).toEqual([{collection_slug: 'caftan', n: 1}]);
-    const inquiryCounts = db.prepare('SELECT reference, n FROM inquiry_counts').all();
-    expect(inquiryCounts).toEqual([]);
-  });
-
-  it('upserts inquiry counters and prunes raw rows like the store paths', () => {
-    const db = seededDb();
-    db.prepare(`INSERT INTO inquiries (id, product_name, reference, color, quantity, locale, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run('i1', 'Soie', 'TD-CAF-0001', 'Rouge', 2, 'fr', 0, '2026-01-01T00:00:00.000Z');
-    db.prepare(`INSERT INTO inquiry_counts (reference, n, updated_at) VALUES (?, 1, ?) ON CONFLICT(reference) DO UPDATE SET n = n + 1, updated_at = excluded.updated_at`).run('TD-CAF-0001', '2026-01-01T00:00:00.000Z');
-    db.prepare(`INSERT INTO inquiry_counts (reference, n, updated_at) VALUES (?, 1, ?) ON CONFLICT(reference) DO UPDATE SET n = n + 1, updated_at = excluded.updated_at`).run('TD-CAF-0001', '2026-01-02T00:00:00.000Z');
-    db.prepare(`INSERT INTO inquiry_counts (reference, n, updated_at) VALUES (?, 1, ?) ON CONFLICT(reference) DO UPDATE SET n = n + 1, updated_at = excluded.updated_at`).run('TD-CAF-0002', '2026-01-03T00:00:00.000Z');
-    expect(db.prepare('SELECT reference, n FROM inquiry_counts').all()).toEqual([
-      {reference: 'TD-CAF-0001', n: 2, updated_at: '2026-01-02T00:00:00.000Z'},
-      {reference: 'TD-CAF-0002', n: 1, updated_at: '2026-01-03T00:00:00.000Z'},
-    ]);
-
-    db.prepare(`INSERT INTO inquiries (id, product_name, reference, color, quantity, locale, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run('i2', 'Caftan', 'TD-CAF-0001', 'Bleu', 1, 'fr', 0, '2026-01-04T00:00:00.000Z');
-    db.prepare(`INSERT INTO inquiries (id, product_name, reference, color, quantity, locale, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run('i3', 'Caftan', 'TD-CAF-0001', 'Vert', 1, 'fr', 0, '2026-01-05T00:00:00.000Z');
-    db.prepare(`INSERT INTO inquiries (id, product_name, reference, color, quantity, locale, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run('i4', 'Caftan', 'TD-CAF-0001', 'Noir', 1, 'fr', 0, '2026-01-06T00:00:00.000Z');
-    db.prepare(`INSERT INTO inquiries (id, product_name, reference, color, quantity, locale, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run('i5', 'Caftan', 'TD-CAF-0001', 'Blanc', 1, 'fr', 0, '2026-01-07T00:00:00.000Z');
-
-    const prune = db.prepare(`DELETE FROM inquiries WHERE id NOT IN (SELECT id FROM inquiries ORDER BY created_at DESC LIMIT ?)`);
-    expect(prune.run(2).changes).toBe(3);
-    expect(db.prepare('SELECT * FROM inquiries ORDER BY created_at DESC').all()).toHaveLength(2);
-
-    const pruneOld = db.prepare(`DELETE FROM inquiries WHERE julianday(created_at) < julianday('now', ?)`);
-    pruneOld.run('-10 days');
-    expect(db.prepare('SELECT * FROM inquiries ORDER BY created_at DESC').all()).toHaveLength(0);
-
-    // The aggregate counter is NOT pruned.
-    expect(db.prepare('SELECT reference, n FROM inquiry_counts').all()).toEqual([
-      {reference: 'TD-CAF-0001', n: 2, updated_at: '2026-01-02T00:00:00.000Z'},
-      {reference: 'TD-CAF-0002', n: 1, updated_at: '2026-01-03T00:00:00.000Z'},
-    ]);
   });
 
   it('reads, upserts and deletes rows like the write paths', () => {
@@ -117,11 +84,6 @@ describe('WorkersDatabase (in-memory fallback)', () => {
     expect(settings).toEqual({value: JSON.stringify({whatsapp: '+212 6 00 00 00 00'})});
     db.prepare('INSERT INTO site_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run('site', JSON.stringify({whatsapp: '+212 9 99 99 99 99'}));
     expect(db.prepare('SELECT value FROM site_settings WHERE key = ?').get('site')).toEqual({value: JSON.stringify({whatsapp: '+212 9 99 99 99 99'})});
-
-    db.prepare(`INSERT INTO inquiries (id, product_name, reference, color, quantity, locale, read, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run('i1', 'Soie', 'TD-CAF-0001', 'Rouge', 2, 'fr', 0, '2026-01-01T00:00:00.000Z');
-    expect(db.prepare('SELECT * FROM inquiries ORDER BY created_at DESC').all()).toHaveLength(1);
-    expect(db.prepare('UPDATE inquiries SET read = 1 WHERE id = ?').run('i1').changes).toBe(1);
-    expect(db.prepare('SELECT * FROM inquiries ORDER BY created_at DESC').all()[0].read).toBe(1);
 
     db.prepare('INSERT INTO models (id, slug, name_fr, name_ar, name_en) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET slug = excluded.slug, name_fr = excluded.name_fr, name_ar = excluded.name_ar, name_en = excluded.name_en').run('m1', 'soie-2', 'Soie 2', 'حرير', 'Silk 2');
     expect(db.prepare('SELECT * FROM models ORDER BY name_fr').all().find((m) => m.id === 'm1')).toMatchObject({slug: 'soie-2'});

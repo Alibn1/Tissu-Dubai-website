@@ -31,7 +31,6 @@ export function getDb(): DbHandle {
       migrateSchema(database);
       database.exec(SCHEMA_SQL);
       seedIfEmpty(database);
-      backfillInquiryCounts(database);
       database.exec('COMMIT;');
     } catch (error) {
       try {
@@ -57,7 +56,6 @@ export function getDb(): DbHandle {
       migrateSchema(database);
       database.exec(SCHEMA_SQL);
       seedIfEmpty(database);
-      backfillInquiryCounts(database);
     } catch (seedError) {
       console.error('[db] failed to initialise in-memory database:', seedError instanceof Error ? seedError.message : seedError);
     }
@@ -225,23 +223,6 @@ function seedIfEmpty(database: DbHandle) {
   const {count} = database.prepare('SELECT COUNT(*) AS count FROM collections').get() as {count: number};
   if (count > 0) return;
   seedDatabase(database);
-}
-
-/**
- * One-time migration: materialise `inquiry_counts` from the raw rows that
- * existed before the counter table was introduced. Idempotent — after the
- * first successful run, `inquiry_counts` is non-empty and the `WHERE`
- * guard skips it entirely (new rows keep the counter authoritative).
- */
-function backfillInquiryCounts(database: DbHandle) {
-  const {count} = database.prepare('SELECT COUNT(*) AS count FROM inquiry_counts').get() as {count: number};
-  if (count > 0) return;
-  database
-    .prepare(
-      `INSERT INTO inquiry_counts (reference, n, updated_at)
-       SELECT reference, COUNT(*) AS n, MAX(created_at) FROM inquiries GROUP BY reference`
-    )
-    .run();
 }
 
 function seedDatabase(database: DbHandle) {

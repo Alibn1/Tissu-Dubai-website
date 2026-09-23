@@ -1,9 +1,7 @@
-import Image from 'next/image';
 import {setRequestLocale} from 'next-intl/server';
-import {getDashboardData, getInquiries} from '@/lib/data/store';
-import {Package, ChevronRight, TrendingUp, MessageCircle} from 'lucide-react';
+import {getDashboardData} from '@/lib/data/store';
+import {Package, ChevronRight} from 'lucide-react';
 import {Link} from '@/i18n/navigation';
-import {cn} from '@/lib/utils';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -13,18 +11,7 @@ export default async function AdminDashboardPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const {totalProducts, totalColorVariants, collectionBreakdown, topRequested} = getDashboardData();
-  const inquiries = getInquiries();
-  const recentInquiries = inquiries.slice(0, 10);
-  const maxClicks = Math.max(...topRequested.map((p) => p.whatsappClicks), 1);
-
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const {totalProducts, totalColorVariants, collectionBreakdown} = getDashboardData();
 
   return (
     <div className="min-h-full">
@@ -37,8 +24,7 @@ export default async function AdminDashboardPage({params}: Props) {
         </p>
       </div>
 
-      {/* Key metric cards */}
-      <div className="mb-8 space-y-4">
+      <div className="space-y-4">
         {/* Product cards, centered */}
         <div className="flex flex-wrap items-stretch justify-center gap-4">
           <div className="w-full max-w-xs rounded-md border border-brand-border bg-brand-surface p-5 shadow-sm">
@@ -94,107 +80,6 @@ export default async function AdminDashboardPage({params}: Props) {
           ))}
         </div>
       </div>
-
-      {/* Two main sections */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Most Requested Products */}
-        <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
-          <div className="flex items-center gap-2 border-b border-brand-border px-5 py-3">
-            <TrendingUp className="h-4 w-4 text-brand-primary" />
-            <h2 className="font-heading text-base font-semibold text-brand-secondary">
-              Produits les plus demandés
-            </h2>
-          </div>
-
-          <ul className="divide-y divide-brand-border">
-            {topRequested.length === 0 ? (
-              <li className="p-8 text-center text-sm text-brand-muted">
-                Aucun clic WhatsApp pour le moment. Les produits seront classés ici dès les
-                premières demandes.
-              </li>
-            ) : (
-              topRequested.map((product, index) => (
-              <li key={product.id} className="flex items-center gap-3 px-5 py-3.5">
-                <span className="w-5 shrink-0 text-sm font-bold text-brand-muted">
-                  {index + 1}
-                </span>
-                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-brand-light">
-                  {product.images[0] ? (
-                    <Image
-                      src={product.images[0]}
-                      alt={product.name.fr}
-                      fill
-                      sizes="40px"
-                      unoptimized
-                      className="object-cover"
-                    />
-                  ) : (
-                    <Package className="h-5 w-5 text-brand-muted" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-brand-secondary">
-                    {product.name.fr}
-                  </p>
-                  <p className="text-xs text-brand-muted">{product.reference}</p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end">
-                  <span className="text-sm font-semibold text-brand-primary">
-                    {product.whatsappClicks}
-                  </span>
-                  <span className="text-xs text-brand-muted">clics</span>
-                </div>
-                <div className="hidden h-6 w-20 shrink-0 items-end sm:flex">
-                  <div
-                    className={cn(
-                      'w-full rounded-t-sm',
-                      index === 0 ? 'bg-brand-primary' : 'bg-brand-primary/40'
-                    )}
-                    style={{height: `${Math.max((product.whatsappClicks / maxClicks) * 100, 8)}%`}}
-                  />
-                </div>
-              </li>
-                ))
-            )}
-          </ul>
-        </section>
-
-        {/* Demandes récentes */}
-        <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
-          <div className="flex items-center gap-2 border-b border-brand-border px-5 py-3">
-            <MessageCircle className="h-4 w-4 text-[#25D366]" />
-            <h2 className="font-heading text-base font-semibold text-brand-secondary">
-              Demandes récentes
-            </h2>
-          </div>
-
-          {recentInquiries.length === 0 ? (
-            <div className="p-8 text-center text-sm text-brand-muted">
-              Aucune demande pour le moment.
-            </div>
-          ) : (
-            <ul className="divide-y divide-brand-border">
-              {recentInquiries.map((inquiry) => (
-                <li key={inquiry.id} className="flex items-start gap-3 px-5 py-3.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-brand-secondary">
-                      {inquiry.productName}
-                    </p>
-                    <p className="text-xs text-brand-muted">
-                      {inquiry.reference}
-                      {inquiry.color ? ` • ${inquiry.color}` : ''}
-                      {inquiry.quantity > 0 ? ` • Qté ${inquiry.quantity}` : ''}
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-xs text-brand-muted">
-                    {formatDate(inquiry.createdAt)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-        </div>
     </div>
   );
 }

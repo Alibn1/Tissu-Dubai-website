@@ -19,14 +19,13 @@ afterAll(async () => {
 
 describe('DB-backed store', () => {
   it('seeds the catalog from mock data', async () => {
-    const {getAllProducts, getCollections, getModels, getSiteSettings, getInquiries} =
+    const {getAllProducts, getCollections, getModels, getSiteSettings} =
       await import('@/lib/data/store');
 
     const products = getAllProducts();
     expect(products.length).toBe(16);
     expect(getCollections().length).toBe(3);
     expect(getModels().length).toBeGreaterThan(0);
-    expect(getInquiries()).toEqual([]);
 
     const settings = getSiteSettings();
     expect(settings.contact.whatsappNumber).toBeTruthy();
@@ -105,49 +104,6 @@ describe('DB-backed store', () => {
     expect(store.removeModel('new-model')).toBe(true);
     expect(store.getModels().find((m) => m.id === 'new-model')).toBeUndefined();
     expect(store.getModelsByCollection('tekchita').some((m) => m.id === 'new-model')).toBe(false);
-  });
-
-  it('tracks inquiries and reports real dashboard stats', async () => {
-    const store = await import('@/lib/data/store');
-
-    store.addInquiry({productName: 'Soie Royale Dubai', reference: 'TD-CAF-0001', color: 'Doré', quantity: 2, locale: 'fr'});
-
-    const inquiries = store.getInquiries();
-    expect(inquiries).toHaveLength(1);
-    expect(inquiries[0].reference).toBe('TD-CAF-0001');
-
-    const data = store.getDashboardData();
-    expect(data.totalProducts).toBe(16);
-    const top = data.topRequested.find((p) => p.reference === 'TD-CAF-0001');
-    expect(top?.whatsappClicks).toBe(1);
-  });
-
-  it('prunes raw inquiries but keeps the all-time "most requested" counter', async () => {
-    const store = await import('@/lib/data/store');
-
-    // Backfill simulates history that predates the counter table.
-    store.addInquiry({productName: 'Soie Royale Dubai', reference: 'TD-CAF-0001', color: 'Doré', quantity: 1, locale: 'fr'});
-
-    // Override retention for this test only: keep at most 3 raw rows.
-    const previousRows = process.env.INQUIRY_MAX_ROWS;
-    process.env.INQUIRY_MAX_ROWS = '3';
-
-    try {
-      for (let i = 0; i < 5; i += 1) {
-        store.addInquiry({productName: 'Soie Royale Dubai', reference: 'TD-CAF-0001', color: `C${i}`, quantity: 1, locale: 'fr'});
-      }
-
-      // The raw log stays bounded…
-      expect(store.getInquiries().length).toBeLessThanOrEqual(3);
-
-      // …but the "Produits les plus demandés" count reflects ALL inquiries (2 + 5).
-      const data = store.getDashboardData();
-      const top = data.topRequested.find((p) => p.reference === 'TD-CAF-0001');
-      expect(top?.whatsappClicks).toBe(7);
-    } finally {
-      if (previousRows === undefined) delete process.env.INQUIRY_MAX_ROWS;
-      else process.env.INQUIRY_MAX_ROWS = previousRows;
-    }
   });
 
   it('persists site settings', async () => {

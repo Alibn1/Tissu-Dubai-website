@@ -452,98 +452,6 @@ export function saveSiteSettings(settings: SiteSettings): void {
   ).run(SITE_SETTINGS_KEY, JSON.stringify(settings));
 }
 
-// ── Inquiries (WhatsApp order clicks) ──
-
-export type InquiryEntry = {
-  id: string;
-  productName: string;
-  reference: string;
-  color: string;
-  quantity: number;
-  locale: string;
-  createdAt: string;
-  read: boolean;
-};
-
-export function getInquiries(): InquiryEntry[] {
-  const db = getDb();
-  const rows = db.prepare('SELECT * FROM inquiries ORDER BY created_at DESC').all() as Row[];
-  return rows.map((row) => ({
-    id: String(row.id),
-    productName: String(row.product_name),
-    reference: String(row.reference),
-    color: String(row.color),
-    quantity: Number(row.quantity),
-    locale: String(row.locale),
-    createdAt: String(row.created_at),
-    read: Boolean(row.read),
-  }));
-}
-
-// Retention policy for the raw `inquiries` log. The aggregate
-// `inquiry_counts` table is never pruned, so "Produits les plus demandés"
-// stays accurate even after old rows are deleted. Tune via env vars
-// (unit=days / rows); defaults keep the table tiny.
-function readRetentionPolicy(): {maxDays: number; maxRows: number} {
-  const maxDays = Number(process.env.INQUIRY_MAX_DAYS ?? 90);
-  const maxRows = Number(process.env.INQUIRY_MAX_ROWS ?? 500);
-  return {
-    maxDays: Number.isFinite(maxDays) && maxDays > 0 ? maxDays : 0,
-    maxRows: Number.isFinite(maxRows) && maxRows > 0 ? maxRows : 0,
-  };
-}
-
-function pruneInquiries(db: ReturnType<typeof getDb>): void {
-  const {maxDays, maxRows} = readRetentionPolicy();
-  if (maxDays > 0) {
-    db.prepare(`DELETE FROM inquiries WHERE julianday(created_at) < julianday('now', ?)`).run(
-      `-${maxDays} days`
-    );
-  }
-  if (maxRows > 0) {
-    db.prepare(
-      `DELETE FROM inquiries WHERE id NOT IN (
-         SELECT id FROM inquiries ORDER BY created_at DESC LIMIT ?
-       )`
-    ).run(maxRows);
-  }
-}
-
-export function addInquiry(entry: Omit<InquiryEntry, 'id' | 'createdAt' | 'read'>): InquiryEntry {
-  const db = getDb();
-  const newEntry: InquiryEntry = {
-    ...entry,
-    id: nowId('i'),
-    createdAt: new Date().toISOString(),
-    read: false,
-  };
-  db.prepare(
-    `INSERT INTO inquiries (id, product_name, reference, color, quantity, locale, read, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    newEntry.id,
-    newEntry.productName,
-    newEntry.reference,
-    newEntry.color,
-    newEntry.quantity,
-    newEntry.locale,
-    0,
-    newEntry.createdAt
-  );
-  db.prepare(
-    `INSERT INTO inquiry_counts (reference, n, updated_at) VALUES (?, 1, ?)
-     ON CONFLICT(reference) DO UPDATE SET n = n + 1, updated_at = excluded.updated_at`
-  ).run(newEntry.reference, newEntry.createdAt);
-  pruneInquiries(db);
-  return newEntry;
-}
-
-export function markInquiryRead(id: string): boolean {
-  const db = getDb();
-  const result = db.prepare('UPDATE inquiries SET read = 1 WHERE id = ?').run(id);
-  return result.changes > 0;
-}
-
 // ── Dashboard stats ──
 
 export type CollectionBreakdown = {
@@ -553,36 +461,18 @@ export type CollectionBreakdown = {
   percentage: number;
 };
 
-export type ProductStat = Product & {whatsappClicks: number};
-
 export type DashboardData = {
   totalProducts: number;
   totalColorVariants: number;
   collectionBreakdown: CollectionBreakdown[];
-  topRequested: ProductStat[];
-  products: ProductStat[];
 };
-
-function getInquiryCountByReference(): Map<string, number> {
-  const db = getDb();
-  const map = new Map<string, number>();
-  const rows = db.prepare('SELECT reference, n FROM inquiry_counts').all() as Row[];
-  for (const row of rows) map.set(String(row.reference), Number(row.n));
-  return map;
-}
 
 export function getDashboardData(): DashboardData {
   const products = getAllProducts();
-  const clicks = getInquiryCountByReference();
 
-  const productStats: ProductStat[] = products.map((p) => ({
-    ...p,
-    whatsappClicks: clicks.get(p.reference) ?? 0,
-  }));
+  const totalColorVariants = products.reduce((sum, p) => sum + Math.max(p.variants?.length ?? 0, 1), 0);
 
-  const totalColorVariants = productStats.reduce((sum, p) => sum + Math.max(p.variants?.length ?? 0, 1), 0);
-
-  const byCollection = productStats.reduce<Map<string, {slug: string; name: string; count: number}>>((acc, p) => {
+  const byCollection = products.reduce<Map<string, {slug: string; name: string; count: number}>>((acc, p) => {
     for (const collection of p.collections) {
       const current = acc.get(collection.slug) ?? {slug: collection.slug, name: collection.name.fr, count: 0};
       current.count += 1;
@@ -595,13 +485,8 @@ export function getDashboardData(): DashboardData {
     slug,
     name,
     count,
-    percentage: productStats.length > 0 ? Math.round((count / productStats.length) * 100) : 0,
+    percentage: products.length > 0 ? Math.round((count / products.length) * 100) : 0,
   }));
 
-  const topRequested = [...productStats]
-    .filter((p) => p.whatsappClicks > 0)
-    .sort((a, b) => b.whatsappClicks - a.whatsappClicks)
-    .slice(0, 5);
-
-  return {totalProducts: productStats.length, totalColorVariants, collectionBreakdown, topRequested, products: productStats};
+  return {totalProducts: products.length, totalColorVariants, collectionBreakdown};
 }
