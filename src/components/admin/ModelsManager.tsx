@@ -82,9 +82,7 @@ export function ModelsManager({
   initialModels: Model[];
 }) {
   const [models, setModels] = useState<Model[]>(initialModels);
-  const [selectedCollections, setSelectedCollections] = useState<string[]>(() =>
-    collections[0] ? [collections[0].slug] : []
-  );
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [names, setNames] = useState<{fr: string; en: string; ar: string}>({
     fr: '',
     en: '',
