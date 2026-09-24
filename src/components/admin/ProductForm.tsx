@@ -13,6 +13,7 @@ import {
   type TranslatableFieldKey,
 } from '@/lib/translation';
 import {missingVariantImageMessage} from '@/lib/variantValidation';
+import {toggleCollectionSlugs} from '@/lib/collections';
 import {Package, Palette, Search as SearchIcon, Check, Loader2, Trash2} from 'lucide-react';
 
 // ── Types ──
@@ -254,9 +255,7 @@ export function ProductForm({mode, productId, initialData, collections, models}:
 
   const toggleCollection = (slug: string) =>
     setFormData((f) => {
-      const next = f.collectionSlugs.includes(slug)
-        ? f.collectionSlugs.filter((s) => s !== slug)
-        : [...f.collectionSlugs, slug];
+      const next = toggleCollectionSlugs(f.collectionSlugs, slug);
       const modelStillValid = models.some(
         (m) => m.id === f.modelId && m.collectionSlugs.some((s) => next.includes(s))
       );

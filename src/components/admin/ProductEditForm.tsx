@@ -10,6 +10,7 @@ import {ColorVariantsEditor, type ColorVariantForm} from '@/components/admin/Col
 import type {Collection, Locale, Product, Model} from '@/types';
 import type {ProductTranslations, TranslatableFieldKey} from '@/lib/translation';
 import {missingVariantImageMessage} from '@/lib/variantValidation';
+import {toggleCollectionSlugs} from '@/lib/collections';
 
 type Props = {
   product: Product;
@@ -65,9 +66,7 @@ export function ProductEditForm({product, models, collections}: Props) {
   });
 
   const toggleCollection = (slug: string) => {
-    const next = collectionSlugs.includes(slug)
-      ? collectionSlugs.filter((s) => s !== slug)
-      : [...collectionSlugs, slug];
+    const next = toggleCollectionSlugs(collectionSlugs, slug);
     const modelStillValid = models.some(
       (m) => m.id === modelId && m.collectionSlugs.some((s) => next.includes(s))
     );

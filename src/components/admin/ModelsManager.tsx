@@ -5,6 +5,7 @@ import {cn} from '@/lib/utils';
 import {Shirt, Plus, Trash2, Check, Languages, Loader2} from 'lucide-react';
 import type {Collection, Locale, Model} from '@/types';
 import {clientTranslate, DEEPL_TARGET_CODE} from '@/lib/translation';
+import {toggleCollectionSlugs} from '@/lib/collections';
 
 const NAME_LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
   {key: 'fr', label: 'Français', dir: 'ltr'},
@@ -103,9 +104,7 @@ export function ModelsManager({
   const canAdd = selectedCollections.length > 0 && autoSlug !== '';
 
   const toggleCollection = (value: string) =>
-    setSelectedCollections((prev) =>
-      prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
-    );
+    setSelectedCollections((prev) => toggleCollectionSlugs(prev, value));
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
