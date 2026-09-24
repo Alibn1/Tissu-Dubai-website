@@ -134,13 +134,13 @@ export default async function AdminColorsPage({params}: Props) {
                               <span
                                 className={cn(
                                   'inline-flex items-center gap-1',
-                                  v.inStock ? 'text-green-600' : 'text-brand-muted'
+                                  v.inStock ? 'text-green-600' : 'text-red-600'
                                 )}
                               >
                                 <span
                                   className={cn(
                                     'h-1.5 w-1.5 rounded-full',
-                                    v.inStock ? 'bg-green-500' : 'bg-brand-muted/40'
+                                    v.inStock ? 'bg-green-500' : 'bg-red-500'
                                   )}
                                 />
                                 {v.inStock ? 'En stock' : 'Épuisé'}
