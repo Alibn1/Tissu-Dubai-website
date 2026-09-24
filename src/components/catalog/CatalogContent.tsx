@@ -14,6 +14,7 @@ type CatalogContentProps = {
   models: Model[];
   locale: string;
   activeCollection?: string;
+  hideCollectionsFilter?: boolean;
 };
 
 const SORT_OPTIONS = [
@@ -29,7 +30,8 @@ export function CatalogContent({
   collections,
   models,
   locale,
-  activeCollection
+  activeCollection,
+  hideCollectionsFilter = false
 }: CatalogContentProps) {
   const t = useTranslations();
   const loc = locale as Locale;
@@ -43,7 +45,7 @@ export function CatalogContent({
   });
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [activeFilterTab, setActiveFilterTab] = useState<string>('collections');
+  const [activeFilterTab, setActiveFilterTab] = useState<string>(hideCollectionsFilter ? 'materials' : 'collections');
 
   const modelById = useMemo(() => {
     const map = new Map<string, Model>();
@@ -124,7 +126,7 @@ export function CatalogContent({
   }, []);
 
   const activeFilterCount =
-    filters.collections.length +
+    (hideCollectionsFilter ? 0 : filters.collections.length) +
     filters.materials.length +
     (filters.inStockOnly ? 1 : 0);
 
@@ -147,7 +149,7 @@ export function CatalogContent({
 
   const clearAllFilters = () => {
     setFilters({
-      collections: [],
+      collections: hideCollectionsFilter && activeCollection ? [activeCollection] : [],
       materials: [],
       inStockOnly: false,
       search: '',
@@ -251,6 +253,7 @@ export function CatalogContent({
             locale={loc}
             onClear={clearAllFilters}
             activeFilterCount={activeFilterCount}
+            hideCollectionsFilter={hideCollectionsFilter}
           />
         </aside>
 
@@ -315,6 +318,7 @@ export function CatalogContent({
                 locale={loc}
                 activeTab={activeFilterTab}
                 setActiveTab={setActiveFilterTab}
+                hideCollectionsFilter={hideCollectionsFilter}
               />
             </div>
 
@@ -355,7 +359,8 @@ function FilterSidebar({
   models,
   locale,
   onClear,
-  activeFilterCount
+  activeFilterCount,
+  hideCollectionsFilter
 }: {
   filters: FilterState;
   toggleFilter: (type: keyof FilterState, value: string) => void;
@@ -365,6 +370,7 @@ function FilterSidebar({
   locale: Locale;
   onClear: () => void;
   activeFilterCount: number;
+  hideCollectionsFilter?: boolean;
 }) {
   const t = useTranslations('catalog.filters');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -389,30 +395,34 @@ function FilterSidebar({
       )}
 
       {/* Collections */}
-      <FilterSection title={t('collections')} expanded={expandedSections.collections} onToggle={() => toggleSection('collections')}>
-        {collections.map((cat) => (
-          <Checkbox
-            key={cat.id}
-            checked={filters.collections.includes(cat.slug)}
-            onChange={() => toggleFilter('collections', cat.slug)}
-          >
-            {cat.name[locale] || cat.name.fr}
-          </Checkbox>
-        ))}
-      </FilterSection>
+      {!hideCollectionsFilter && (
+        <FilterSection title={t('collections')} expanded={expandedSections.collections} onToggle={() => toggleSection('collections')}>
+          {collections.map((cat) => (
+            <Checkbox
+              key={cat.id}
+              checked={filters.collections.includes(cat.slug)}
+              onChange={() => toggleFilter('collections', cat.slug)}
+            >
+              {cat.name[locale] || cat.name.fr}
+            </Checkbox>
+          ))}
+        </FilterSection>
+      )}
 
       {/* Materials */}
-      <FilterSection title={t('materials')} expanded={expandedSections.materials} onToggle={() => toggleSection('materials')}>
-        {models.map((model) => (
-          <Checkbox
-            key={model.id}
-            checked={filters.materials.includes(model.id)}
-            onChange={() => toggleFilter('materials', model.id)}
-          >
-            {model.name[locale] || model.name.fr}
-          </Checkbox>
-        ))}
-      </FilterSection>
+      {models.length > 0 && (
+        <FilterSection title={t('materials')} expanded={expandedSections.materials} onToggle={() => toggleSection('materials')}>
+          {models.map((model) => (
+            <Checkbox
+              key={model.id}
+              checked={filters.materials.includes(model.id)}
+              onChange={() => toggleFilter('materials', model.id)}
+            >
+              {model.name[locale] || model.name.fr}
+            </Checkbox>
+          ))}
+        </FilterSection>
+      )}
 
       {/* Availability */}
       <FilterSection title={t('availability')} expanded={expandedSections.availability} onToggle={() => toggleSection('availability')}>
@@ -469,7 +479,8 @@ function FilterContent({
   models,
   locale,
   activeTab,
-  setActiveTab
+  setActiveTab,
+  hideCollectionsFilter
 }: {
   filters: FilterState;
   toggleFilter: (type: keyof FilterState, value: string) => void;
@@ -479,14 +490,17 @@ function FilterContent({
   locale: Locale;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  hideCollectionsFilter?: boolean;
 }) {
   const t = useTranslations('catalog.filters');
 
   const tabs = [
-    {id: 'collections', label: t('collections')},
-    {id: 'materials', label: t('materials')},
+    ...(hideCollectionsFilter ? [] : [{id: 'collections', label: t('collections')}]),
+    ...(models.length > 0 ? [{id: 'materials', label: t('materials')}] : []),
     {id: 'availability', label: t('availability')}
   ];
+
+  const currentTab = tabs.some((tab) => tab.id === activeTab) ? activeTab : (tabs[0]?.id ?? '');
 
   return (
     <div>
@@ -498,7 +512,7 @@ function FilterContent({
             onClick={() => setActiveTab(tab.id)}
             className={cn(
               'flex-shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors',
-              activeTab === tab.id
+              currentTab === tab.id
                 ? 'border-brand-primary text-brand-primary'
                 : 'border-transparent text-brand-muted hover:text-brand-secondary'
             )}
@@ -510,7 +524,7 @@ function FilterContent({
 
       {/* Tab content */}
       <div>
-        {activeTab === 'collections' && (
+        {currentTab === 'collections' && (
           <div className="space-y-1">
             {collections.map((cat) => (
               <Checkbox
@@ -525,7 +539,7 @@ function FilterContent({
           </div>
         )}
 
-        {activeTab === 'materials' && (
+        {currentTab === 'materials' && (
           <div className="space-y-1">
             {models.map((model) => (
               <Checkbox
@@ -540,7 +554,7 @@ function FilterContent({
           </div>
         )}
 
-        {activeTab === 'availability' && (
+        {currentTab === 'availability' && (
           <div className="py-2">
             <Checkbox
               checked={filters.inStockOnly}

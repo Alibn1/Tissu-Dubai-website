@@ -61,6 +61,7 @@ export default async function CollectionPage({params}: Props) {
           models={models}
           locale={locale}
           activeCollection={collection}
+          hideCollectionsFilter={collection === 'homme'}
         />
       </div>
     </section>

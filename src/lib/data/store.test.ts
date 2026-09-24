@@ -24,7 +24,7 @@ describe('DB-backed store', () => {
 
     const products = getAllProducts();
     expect(products.length).toBe(16);
-    expect(getCollections().length).toBe(3);
+    expect(getCollections().length).toBe(4);
     expect(getModels().length).toBeGreaterThan(0);
 
     const settings = getSiteSettings();

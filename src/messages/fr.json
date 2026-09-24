@@ -43,7 +43,9 @@
       "tekchita": "Tissus Takchita",
       "caftanShort": "Caftan",
       "jellabaShort": "Djellaba",
-      "tekchitaShort": "Takchita"
+      "tekchitaShort": "Takchita",
+      "hommeShort": "Homme",
+      "femmeShort": "Femme"
     }
   },
   "home": {
@@ -334,7 +336,11 @@
   },
   "collections": {
     "title": "Nos Collections",
-    "subtitle": "Découvrez notre sélection de tissus premium"
+    "subtitle": "Découvrez notre sélection de tissus premium",
+    "homme": "Homme",
+    "femme": "Femme",
+    "hommeSubtitle": "Tissus et créations pour homme",
+    "femmeSubtitle": "Caftans, djellabas et takchitas"
   },
   "confirmation": {
     "title": "Confirmer vos informations",

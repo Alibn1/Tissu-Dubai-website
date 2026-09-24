@@ -41,6 +41,9 @@ export const COLLECTION_CARDS: ReadonlyArray<{id: CollectionCardId; label: strin
   {id: 'tekchita', label: 'Takchita'},
 ];
 
+/** The women's sub-collections grouped under the "Femme" entry point. */
+export const WOMEN_COLLECTION_SLUGS: readonly string[] = ['caftan', 'jellaba', 'tekchita'];
+
 export interface CollectionCard {
   id: CollectionCardId;
   image: string;

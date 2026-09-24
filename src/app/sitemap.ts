@@ -10,6 +10,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/collections/caftan',
     '/collections/jellaba',
     '/collections/tekchita',
+    '/collections/homme',
+    '/collections/femme',
     '/collections',
     '/a-propos',
     '/contact',
