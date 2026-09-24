@@ -148,7 +148,7 @@ export function ProductsTable({
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    {product.inStock ? (
+                    {product.variants.some((v) => v.inStock) ? (
                       <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
                         En stock
                       </span>
