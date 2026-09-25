@@ -130,19 +130,26 @@ export function ProductForm({mode, productId, initialData, collections, models}:
   const [referenceError, setReferenceError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [variantError, setVariantError] = useState<{ids: string[]; message: string} | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const [translations, setTranslations] = useState<ProductTranslations>(createEmptyTranslations);
 
-  const setTranslationValue = (lang: Locale, field: TranslatableFieldKey, value: string) =>
+  const setTranslationValue = (lang: Locale, field: TranslatableFieldKey, value: string) => {
+    setSubmitError(null);
     setTranslations((prev) => ({
       ...prev,
       [lang]: {...prev[lang], [field]: value},
     }));
+  };
 
   const setField = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) =>
-    setFormData((f) => ({...f, [key]: value}));
+    setFormData((f) => {
+      // Any edit means the admin is addressing the last failure.
+      setSubmitError(null);
+      return {...f, [key]: value};
+    });
 
   const setSeoField = (lang: Locale, field: SeoFieldKey, value: string) =>
     setFormData((f) => {
@@ -337,7 +344,21 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       }
     );
 
-    return res.ok;
+    if (res.ok) {
+      setSubmitError(null);
+      return true;
+    }
+
+    // The API explains what is missing; surface it instead of failing silently.
+    let message = `Enregistrement impossible (HTTP ${res.status}).`;
+    try {
+      const data = await res.json();
+      if (typeof data?.error === 'string' && data.error.trim()) message = data.error;
+    } catch {
+      // Non-JSON error body: keep the generic message.
+    }
+    setSubmitError(message);
+    return false;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -646,6 +667,11 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       {/* ── Submit ── */}
       {variantError && (
         <p className="text-sm font-medium text-brand-error">{variantError.message}</p>
+      )}
+      {submitError && (
+        <p role="alert" className="rounded-md border border-brand-error bg-brand-error/10 px-3 py-2 text-sm font-medium text-brand-error">
+          {submitError}
+        </p>
       )}
       <div className="flex items-center gap-4">
         <button

@@ -81,6 +81,17 @@ describe('product SEO helpers', () => {
     expect(generateSeoTitle('en', 'Caftan')).toBe('for Caftan');
   });
 
+  it('generates nothing for a nameless product instead of stray punctuation', () => {
+    // The admin form renders these while the name field is still empty; a bare
+    // ". Nouveau." would look like a bug.
+    for (const lang of ['fr', 'en', 'ar'] as const) {
+      expect(generateSeoValue(lang, 'metaDescription', '')).toBe('');
+      expect(generateSeoValue(lang, 'metaDescription', '   ')).toBe('');
+      expect(generateSeoValue(lang, 'title', '')).toBe('');
+      expect(generateSeoValue(lang, 'altImage', '')).toBe('');
+    }
+  });
+
   it('pre-fills the admin field with exactly what the page publishes', () => {
     const name = 'Caftan Soie';
     const desc = 'Un caftan en soie double.';

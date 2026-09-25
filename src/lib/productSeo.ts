@@ -15,22 +15,28 @@ export function createEmptySeo(): ProductSeoByLanguage {
 }
 
 /**
- * The generated text for one field. Titles deliberately stop before the brand:
- * the locale layout applies a `%s | Tissu Dubai` template, so appending it here
- * too would render the brand twice.
+ * The generated text for one field, used only as a last resort when the product
+ * has no content of its own. Titles deliberately stop before the brand: the
+ * locale layout applies a `%s | Tissu Dubai` template, so appending it here too
+ * would render the brand twice.
+ *
+ * With no product name there is nothing to describe, so the result is empty
+ * rather than a stray leading ". Nouveau.".
  */
 export function generateSeoValue(lang: Locale, field: SeoFieldKey, name: string): string {
+  const clean = name.trim();
+  if (!clean) return '';
   if (field === 'title') {
-    if (lang === 'ar') return `لـ ${name}`;
-    if (lang === 'fr') return `pour ${name}`;
-    return `for ${name}`;
+    if (lang === 'ar') return `لـ ${clean}`;
+    if (lang === 'fr') return `pour ${clean}`;
+    return `for ${clean}`;
   }
   if (field === 'metaDescription') {
-    if (lang === 'ar') return `${name}. جديد. تواصل مع تيسو دبي للحصول على عرض سعر، توصيل لجميع أنحاء المغرب.`;
-    if (lang === 'fr') return `${name}. Nouveau. Contactez Tissu Dubai pour un devis, livraison partout au Maroc.`;
-    return `${name}. New. Contact Tissu Dubai for a quote, delivery across Morocco.`;
+    if (lang === 'ar') return `${clean}. جديد. تواصل مع تيسو دبي للحصول على عرض سعر، توصيل لجميع أنحاء المغرب.`;
+    if (lang === 'fr') return `${clean}. Nouveau. Contactez Tissu Dubai pour un devis, livraison partout au Maroc.`;
+    return `${clean}. New. Contact Tissu Dubai for a quote, delivery across Morocco.`;
   }
-  return name;
+  return clean;
 }
 
 export function generateSeoTitle(lang: Locale, name: string): string {

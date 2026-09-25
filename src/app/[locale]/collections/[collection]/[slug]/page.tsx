@@ -65,6 +65,13 @@ export default async function ProductDetailPage({params}: Props) {
   const productCollection =
     product.collections.find((c) => c.slug === collection) ?? product.collections[0] ?? null;
 
+  // Structured data must agree with the meta tags, otherwise Google can show a
+  // title in search results that differs from the one the admin typed.
+  const name = product.name[loc] || product.name.fr;
+  const desc = product.description[loc] || product.description.fr;
+  const seoName = resolveSeoValue(product.seo, loc, 'title', name);
+  const seoDesc = resolveSeoValue(product.seo, loc, 'metaDescription', name, desc);
+
   const breadcrumbs = [
     {name: t('home'), url: '/'},
     {name: t('collections'), url: '/collections'},
@@ -72,7 +79,7 @@ export default async function ProductDetailPage({params}: Props) {
       name: productCollection?.name[loc] || productCollection?.name.fr || collection,
       url: `/collections/${collection}`,
     },
-    {name: product.name[loc] || product.name.fr, url: `/collections/${collection}/${product.slug}`}
+    {name: seoName, url: `/collections/${collection}/${product.slug}`}
   ];
 
   return (
@@ -93,8 +100,8 @@ export default async function ProductDetailPage({params}: Props) {
         locale={loc}
         type="Product"
         data={{
-          name: product.name[loc] || product.name.fr,
-          description: product.description[loc] || product.description.fr,
+          name: seoName,
+          description: seoDesc,
           image: product.images.map((img) => `${baseUrl}${img}`),
           sku: product.reference,
           brand: {name: 'Tissu Dubai'},
