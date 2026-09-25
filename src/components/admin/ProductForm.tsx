@@ -608,9 +608,12 @@ export function ProductForm({mode, productId, initialData, collections, models}:
           <div>
             <label className={labelClass}>Prix (MAD)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               value={formData.price}
-              onChange={(e) => setField('price', e.target.value === '' ? '' : e.target.value)}
+              onChange={(e) =>
+                setField('price', e.target.value.replace(/[^0-9.]/g, '').replace(/\.(?=.*\.)/g, ''))
+              }
               className={inputClass}
               placeholder="Laisser vide pour prix sur demande"
             />

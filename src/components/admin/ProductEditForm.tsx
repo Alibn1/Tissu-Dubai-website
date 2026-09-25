@@ -321,9 +321,15 @@ export function ProductEditForm({product, models, collections}: Props) {
           <div className="w-full sm:w-64 lg:w-60">
             <label className={labelClass}>Prix de base (MAD)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               value={formData.price}
-              onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : Number(e.target.value)})}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  price: e.target.value.replace(/[^0-9.]/g, '').replace(/\.(?=.*\.)/g, ''),
+                })
+              }
               className={inputClass}
               placeholder="Laisser vide pour un prix sur demande"
             />
