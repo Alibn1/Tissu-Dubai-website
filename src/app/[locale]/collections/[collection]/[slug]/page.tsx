@@ -5,6 +5,7 @@ import {notFound} from 'next/navigation';
 import {getProductBySlug, getRelatedProducts, getProducts} from '@/lib/api';
 import {JsonLd} from '@/lib/seo/JsonLd';
 import {resolveSeoValue} from '@/lib/productSeo';
+import {productAlternates} from '@/lib/seo/productUrls';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 import {ProductGallery} from '@/components/product/ProductGallery';
 import {ProductView} from '@/components/product/ProductView';
@@ -38,9 +39,18 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const description = resolveSeoValue(product.seo, loc, 'metaDescription', name, desc);
   const altImage = resolveSeoValue(product.seo, loc, 'altImage', name);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+  // A product in several collections is reachable at several URLs, so point
+  // Google at one canonical collection instead of the layout's bare "/en" etc.
+  const alternates = productAlternates(
+    product.collections.map((c) => c.slug),
+    product.slug
+  );
+
   return {
     title,
     description,
+    ...(alternates ? {alternates} : {}),
     openGraph: {
       title,
       description,
