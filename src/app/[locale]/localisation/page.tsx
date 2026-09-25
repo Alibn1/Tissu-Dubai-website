@@ -6,6 +6,7 @@ import {cn} from '@/lib/utils';
 import {GOOGLE_MAPS_EMBED_URL, GOOGLE_MAPS_LINK} from '@/lib/site';
 import {getSiteSettings} from '@/lib/data/store';
 import {formatBusinessHours, resolveContact} from '@/lib/siteSettings';
+import {staticAlternates} from '@/lib/seo/productUrls';
 import type {Locale} from '@/types';
 
 type Props = {
@@ -15,7 +16,11 @@ type Props = {
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: 'seo.location'});
-  return {title: t('title'), description: t('description')};
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: staticAlternates('/localisation', locale as Locale)
+  };
 }
 
 export default async function LocationPage({params}: Props) {

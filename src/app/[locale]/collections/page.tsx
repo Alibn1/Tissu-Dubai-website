@@ -4,6 +4,7 @@ import {Link} from '@/i18n/navigation';
 import Image from 'next/image';
 import {getSiteSettings} from '@/lib/data/store';
 import {GENDER_CARDS, type GenderCardId} from '@/lib/siteSettings';
+import {staticAlternates} from '@/lib/seo/productUrls';
 import {type Locale} from '@/types';
 
 type Props = {
@@ -15,7 +16,8 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const t = await getTranslations({locale, namespace: 'common'});
   return {
     title: t('collections'),
-    description: t('collections')
+    description: t('collections'),
+    alternates: staticAlternates('/collections', locale as Locale)
   };
 }
 

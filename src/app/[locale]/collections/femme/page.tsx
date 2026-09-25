@@ -2,6 +2,8 @@ import {setRequestLocale, getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {CollectionCards} from '@/components/collection/CollectionCards';
 import {WOMEN_COLLECTION_SLUGS} from '@/lib/siteSettings';
+import {staticAlternates} from '@/lib/seo/productUrls';
+import type {Locale} from '@/types';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -12,7 +14,8 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const t = await getTranslations({locale, namespace: 'collections'});
   return {
     title: t('femme'),
-    description: t('subtitle')
+    description: t('subtitle'),
+    alternates: staticAlternates('/collections/femme', locale as Locale)
   };
 }
 

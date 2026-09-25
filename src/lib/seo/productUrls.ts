@@ -58,7 +58,22 @@ export function productAlternates(
 }
 
 /**
- * Canonical URL plus one alternate per language for a collection page. The
+ * Canonical URL plus one alternate per language for a static page.
+ * The canonical is self-referential, for the same reason as `productAlternates`.
+ */
+export function staticAlternates(
+  path: string,
+  currentLocale: Locale
+): {canonical: string; languages: Record<string, string>} {
+  const clean = path === '/' ? '' : path.replace(/\/+$/, '');
+  const languages: Record<string, string> = {};
+  for (const locale of LOCALES) {
+    languages[locale] = `${siteBaseUrl()}/${locale}${clean}`;
+  }
+  return {canonical: languages[currentLocale] ?? languages.fr, languages};
+}
+
+/** Canonical URL plus one alternate per language for a collection page. The
  * canonical is self-referential, for the same reason as `productAlternates`.
  */
 export function collectionAlternates(
