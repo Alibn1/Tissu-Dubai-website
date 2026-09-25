@@ -2,8 +2,10 @@ import {describe, expect, it} from 'vitest';
 import {
   createEmptySeo,
   generateSeoTitle,
+  generateSeoValue,
   normalizeSeo,
   resolveSeoValue,
+  seoFieldDisplayValue,
   seoOverride,
 } from '@/lib/productSeo';
 
@@ -46,24 +48,86 @@ describe('product SEO helpers', () => {
     expect(seoOverride(seo, 'en', 'title')).toBe('');
   });
 
-  it('falls back to the generated text when there is no override', () => {
+  it('falls back to the product content when there is no override', () => {
     const name = 'Caftan Soie';
+    const desc = 'Un caftan en soie double.';
     const auto = normalizeSeo(undefined);
 
     expect(seoOverride(auto, 'fr', 'title')).toBe('');
-    expect(resolveSeoValue(auto, 'fr', 'title', name)).toBe(generateSeoTitle('fr', name));
-    expect(resolveSeoValue(auto, 'ar', 'title', name)).toBe(generateSeoTitle('ar', name));
-    expect(resolveSeoValue(auto, 'en', 'metaDescription', name)).toContain(name);
-    expect(resolveSeoValue(auto, 'en', 'altImage', name)).toBe(name);
+    expect(resolveSeoValue(auto, 'fr', 'title', name)).toBe(name);
+    expect(resolveSeoValue(auto, 'fr', 'altImage', name)).toBe(name);
+    // The product's own description is preferred over generated filler.
+    expect(resolveSeoValue(auto, 'fr', 'metaDescription', name, desc)).toBe(desc);
   });
 
-  it('prefers the stored override over the generated text', () => {
-    const seo = normalizeSeo({
-      ar: {title: 'عنوان مخصص', metaDescription: 'وصف مخصص', altImage: 'نص بديل', enabled: true},
+  it('generates a last-resort description only when the product has none', () => {
+    const name = 'Caftan Soie';
+    const auto = normalizeSeo(undefined);
+    const generated = generateSeoValue('fr', 'metaDescription', name);
+
+    expect(resolveSeoValue(auto, 'fr', 'metaDescription', name, '   ')).toBe(generated);
+    expect(resolveSeoValue(auto, 'ar', 'metaDescription', name, '')).toBe(
+      generateSeoValue('ar', 'metaDescription', name)
+    );
+  });
+
+  it('keeps the layout brand out of generated titles', () => {
+    // The locale layout appends "%s | Tissu Dubai" to every page title, so the
+    // generated title must not repeat it.
+    for (const lang of ['fr', 'en', 'ar'] as const) {
+      expect(generateSeoTitle(lang, 'Caftan')).not.toMatch(/Tissu Dubai|تيسو دبي/);
+    }
+    expect(generateSeoTitle('fr', 'Caftan')).toBe('pour Caftan');
+    expect(generateSeoTitle('en', 'Caftan')).toBe('for Caftan');
+  });
+
+  it('pre-fills the admin field with exactly what the page publishes', () => {
+    const name = 'Caftan Soie';
+    const desc = 'Un caftan en soie double.';
+    const auto = normalizeSeo(undefined);
+
+    expect(seoFieldDisplayValue(auto, 'fr', 'title', name, desc)).toBe(name);
+    expect(seoFieldDisplayValue(auto, 'fr', 'metaDescription', name, desc)).toBe(desc);
+    expect(seoFieldDisplayValue(auto, 'fr', 'altImage', name, desc)).toBe(name);
+  });
+
+  it('pre-fills with content that tracks the product name', () => {
+    const auto = normalizeSeo(undefined);
+    expect(seoFieldDisplayValue(auto, 'fr', 'title', 'Ancien nom')).toBe('Ancien nom');
+    expect(seoFieldDisplayValue(auto, 'fr', 'title', 'Nouveau nom')).toBe('Nouveau nom');
+  });
+
+  it('shows the custom draft on Personnalisé, even while it is empty', () => {
+    const custom = normalizeSeo({
+      fr: {title: 'Mon titre', metaDescription: '', altImage: '', enabled: true},
     });
 
-    expect(resolveSeoValue(seo, 'ar', 'title', 'قفطان')).toBe('عنوان مخصص');
-    expect(resolveSeoValue(seo, 'ar', 'metaDescription', 'قفطان')).toBe('وصف مخصص');
-    expect(resolveSeoValue(seo, 'ar', 'altImage', 'قفطان')).toBe('نص بديل');
+    expect(seoFieldDisplayValue(custom, 'fr', 'title', 'Caftan')).toBe('Mon titre');
+    // An empty custom field stays empty in the form; the page still publishes
+    // the product content because seoOverride() falls back.
+    expect(seoFieldDisplayValue(custom, 'fr', 'metaDescription', 'Caftan', 'Desc')).toBe('');
+    expect(resolveSeoValue(custom, 'fr', 'metaDescription', 'Caftan', 'Desc')).toBe('Desc');
+  });
+
+  it('shows the admin the same value the page will publish', () => {
+    const name = 'Caftan Soie';
+    const desc = 'Un caftan en soie double.';
+    const cases: unknown[] = [
+      undefined,
+      {fr: {title: 'Perso', metaDescription: 'Perso desc', altImage: 'Perso alt', enabled: true}},
+      {fr: {title: '', metaDescription: '', altImage: '', enabled: true}},
+    ];
+
+    for (const input of cases) {
+      const seo = normalizeSeo(input);
+      for (const field of ['title', 'metaDescription', 'altImage'] as const) {
+        const shown = seoFieldDisplayValue(seo, 'fr', field, name, desc);
+        const published = resolveSeoValue(seo, 'fr', field, name, desc);
+        if (shown.trim()) {
+          // What the admin reads in the form is what Google will read.
+          expect(shown).toBe(published);
+        }
+      }
+    }
   });
 });

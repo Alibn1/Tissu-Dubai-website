@@ -4,7 +4,7 @@ import {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 import {getProductBySlug, getRelatedProducts, getProducts} from '@/lib/api';
 import {JsonLd} from '@/lib/seo/JsonLd';
-import {seoOverride} from '@/lib/productSeo';
+import {resolveSeoValue} from '@/lib/productSeo';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 import {ProductGallery} from '@/components/product/ProductGallery';
 import {ProductView} from '@/components/product/ProductView';
@@ -34,9 +34,9 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const loc = locale as Locale;
   const name = product.name[loc] || product.name.fr;
   const desc = product.description[loc] || product.description.fr;
-  const title = seoOverride(product.seo, loc, 'title') || name;
-  const description = seoOverride(product.seo, loc, 'metaDescription') || desc;
-  const altImage = seoOverride(product.seo, loc, 'altImage') || name;
+  const title = resolveSeoValue(product.seo, loc, 'title', name);
+  const description = resolveSeoValue(product.seo, loc, 'metaDescription', name, desc);
+  const altImage = resolveSeoValue(product.seo, loc, 'altImage', name);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   return {
     title,

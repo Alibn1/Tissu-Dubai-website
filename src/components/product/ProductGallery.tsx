@@ -5,7 +5,7 @@ import {useTranslations} from 'next-intl';
 import {cn} from '@/lib/utils';
 import {type Product, type Locale, type ProductVariant} from '@/types';
 import {Expand} from 'lucide-react';
-import {seoOverride} from '@/lib/productSeo';
+import {resolveSeoValue} from '@/lib/productSeo';
 
 type ProductGalleryProps = {
   product: Product;
@@ -27,7 +27,12 @@ export function ProductGallery({
 
   // The admin can override the accessible description of the product photo;
   // without one we keep the localized product name.
-  const productAlt = seoOverride(product.seo, locale, 'altImage') || product.name[locale] || product.name.fr;
+  const productAlt = resolveSeoValue(
+    product.seo,
+    locale,
+    'altImage',
+    product.name[locale] || product.name.fr
+  );
 
   return (
     <div className="space-y-3">

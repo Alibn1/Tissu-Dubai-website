@@ -113,8 +113,16 @@ export function ProductEditForm({product, models, collections}: Props) {
 
   const [seo, setSeo] = useState<ProductSeoByLanguage>(() => normalizeSeo(product.seo));
 
-  const setSeoField = (lang: Locale, field: SeoFieldKey, value: string) =>
-    setSeo((prev) => ({...prev, [lang]: {...prev[lang], [field]: value}}));
+  // Typing over auto-filled text means the admin takes control of that
+  // language; the value and the toggle move together so no keystroke is lost.
+  const editSeoField = (lang: Locale, field: SeoFieldKey, value: string) =>
+    setSeo((prev) => {
+      const current = prev[lang];
+      const next = current.enabled
+        ? {...current, [field]: value}
+        : {...current, [field]: value, enabled: true};
+      return {...prev, [lang]: next};
+    });
 
   const setSeoEnabled = (lang: Locale, enabled: boolean) =>
     setSeo((prev) => ({...prev, [lang]: {...prev[lang], enabled}}));
@@ -394,8 +402,12 @@ export function ProductEditForm({product, models, collections}: Props) {
       {/* SEO */}
       <ProductSeoFields
         seo={seo}
-        names={{en: translations.en.name, fr: translations.fr.name, ar: translations.ar.name}}
-        onFieldChange={setSeoField}
+        content={{
+          en: {name: translations.en.name, description: translations.en.description},
+          fr: {name: translations.fr.name, description: translations.fr.description},
+          ar: {name: translations.ar.name, description: translations.ar.description},
+        }}
+        onFieldEdit={editSeoField}
         onEnabledChange={setSeoEnabled}
       />
 

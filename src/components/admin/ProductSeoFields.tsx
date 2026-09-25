@@ -2,13 +2,7 @@
 
 import {cn} from '@/lib/utils';
 import type {Locale} from '@/types';
-import {
-  generateSeoAltImage,
-  generateSeoDescription,
-  generateSeoTitle,
-  type ProductSeoByLanguage,
-  type SeoFieldKey,
-} from '@/lib/productSeo';
+import {resolveSeoValue, seoFieldDisplayValue, type ProductSeoByLanguage, type SeoFieldKey} from '@/lib/productSeo';
 import {Search as SearchIcon} from 'lucide-react';
 
 const LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
@@ -16,6 +10,19 @@ const LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
   {key: 'en', label: 'English', dir: 'ltr'},
   {key: 'ar', label: 'العربية', dir: 'rtl'},
 ];
+
+/** Rough search-engine budgets. Over the limit is a warning, never a block. */
+const FIELD_LIMITS: Record<SeoFieldKey, number> = {
+  title: 60,
+  metaDescription: 160,
+  altImage: 125,
+};
+
+const FIELD_LABELS: Record<SeoFieldKey, string> = {
+  title: 'Titre',
+  metaDescription: 'Meta description',
+  altImage: 'Alt image',
+};
 
 const inputClass = cn(
   'w-full rounded-md border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-secondary',
@@ -47,44 +54,79 @@ function Toggle({checked, onChange}: {checked: boolean; onChange: (v: boolean) =
 }
 
 function SeoField({
-  label,
+  field,
   value,
-  placeholder,
-  final,
-  textarea,
+  fallback,
+  enabled,
   onChange,
 }: {
-  label: string;
+  field: SeoFieldKey;
+  /** What the field shows: the custom draft on Personnalisé, the published text on Auto. */
   value: string;
-  placeholder: string;
-  final: string;
-  textarea?: boolean;
+  /** The text the page publishes when this field is empty. */
+  fallback: string;
+  enabled: boolean;
   onChange: (value: string) => void;
 }) {
+  const limit = FIELD_LIMITS[field];
+  const over = value.length > limit;
+  const isTextarea = field === 'metaDescription';
+
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-brand-muted">
-        {label}
-      </label>
-      {textarea ? (
+      <div className="mb-1.5 flex items-baseline justify-between gap-2">
+        <label className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
+          {FIELD_LABELS[field]}
+        </label>
+        <span
+          className={cn(
+            'text-[11px] tabular-nums',
+            over ? 'font-semibold text-brand-error' : 'text-brand-muted/80'
+          )}
+        >
+          {value.length}/{limit}
+        </span>
+      </div>
+
+      {isTextarea ? (
         <textarea
           rows={3}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
+          // On Auto the text is pre-filled; selecting it on focus means the
+          // admin's first keystroke replaces it instead of appending.
+          onFocus={(e) => {
+            if (!enabled && value) e.currentTarget.select();
+          }}
+          placeholder={fallback}
           className={cn(inputClass, 'resize-none')}
         />
       ) : (
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
+          onFocus={(e) => {
+            if (!enabled && value) e.currentTarget.select();
+          }}
+          placeholder={fallback}
           className={inputClass}
         />
       )}
+
       <p className="mt-1 text-xs text-brand-muted">
-        Final:{' '}
-        <span className="font-medium text-brand-primary">{final || '—'}</span>
+        {enabled ? (
+          value.trim() ? (
+            <>Publié tel quel.</>
+          ) : (
+            <>
+              Vide → publie : <span className="font-medium text-brand-primary">{fallback}</span>
+            </>
+          )
+        ) : (
+          <>
+            Repris automatiquement du produit. Modifiez-le pour passer en « Personnalisé ».
+          </>
+        )}
       </p>
     </div>
   );
@@ -92,34 +134,36 @@ function SeoField({
 
 type Props = {
   seo: ProductSeoByLanguage;
-  /** Localized product name, used to build the auto-generated previews. */
-  names: Record<Locale, string>;
-  onFieldChange: (lang: Locale, field: SeoFieldKey, value: string) => void;
+  /** Per-language product content the auto values are derived from. */
+  content: Record<Locale, {name: string; description: string}>;
+  /**
+   * Called on every keystroke. Implementations must set the field value and,
+   * when the language was on Auto, flip it to Personnalisé in the *same* state
+   * update — doing it in two steps would drop the keystroke that triggered it.
+   */
+  onFieldEdit: (lang: Locale, field: SeoFieldKey, value: string) => void;
   onEnabledChange: (lang: Locale, enabled: boolean) => void;
 };
 
 /**
- * Per-language SEO overrides with a live preview of the value that will be
- * published. Shared by the create and edit product forms so both stay in sync.
+ * Per-language SEO overrides. On "Auto" each field is pre-filled with the exact
+ * text that will be published; editing it flips the language to
+ * "Personnalisé". Shared by the create and edit product forms so both stay in
+ * sync.
  */
-export function ProductSeoFields({seo, names, onFieldChange, onEnabledChange}: Props) {
-  const resolveFinal = (lang: Locale, field: SeoFieldKey, auto: string) => {
-    const override = seo[lang][field]?.trim();
-    return seo[lang].enabled && override ? override : auto;
-  };
-
+export function ProductSeoFields({seo, content, onFieldEdit, onEnabledChange}: Props) {
   return (
     <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
       <div className="flex items-start gap-3 border-b border-brand-border px-5 py-4">
         <SearchIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand-primary" />
         <div>
           <h2 className="font-heading text-base font-semibold text-brand-secondary">
-            SEO (aperçu par langue)
+            SEO (par langue)
           </h2>
           <p className="mt-0.5 text-sm text-brand-muted">
-            Aperçu en direct du titre et de la description pour chaque langue ; laissez un champ
-            vide pour utiliser la valeur générée automatiquement, ou saisissez du texte pour la
-            remplacer
+            Les champs sont pré-remplis avec le texte exact qui sera publié. Modifiez-en un pour
+            basculer la langue en « Personnalisé » ; repassez en « Auto » pour revenir au texte du
+            produit.
           </p>
         </div>
       </div>
@@ -127,10 +171,7 @@ export function ProductSeoFields({seo, names, onFieldChange, onEnabledChange}: P
         <div className="grid grid-cols-1 gap-0 divide-y divide-brand-border md:grid-cols-3 md:divide-x md:divide-y-0">
           {LANGUAGES.map((lang) => {
             const fields = seo[lang.key];
-            const name = names[lang.key];
-            const autoTitle = generateSeoTitle(lang.key, name);
-            const autoDescription = generateSeoDescription(lang.key, name);
-            const autoAltImage = generateSeoAltImage(lang.key, name);
+            const {name, description} = content[lang.key] ?? {name: '', description: ''};
 
             return (
               <div key={lang.key} dir={lang.dir} className="p-5">
@@ -150,28 +191,22 @@ export function ProductSeoFields({seo, names, onFieldChange, onEnabledChange}: P
                 </div>
 
                 <div className="space-y-5">
-                  <SeoField
-                    label="Titre"
-                    value={fields.title}
-                    onChange={(v) => onFieldChange(lang.key, 'title', v)}
-                    placeholder={autoTitle || '…'}
-                    final={resolveFinal(lang.key, 'title', autoTitle)}
-                  />
-                  <SeoField
-                    label="Meta description"
-                    textarea
-                    value={fields.metaDescription}
-                    onChange={(v) => onFieldChange(lang.key, 'metaDescription', v)}
-                    placeholder={autoDescription || '…'}
-                    final={resolveFinal(lang.key, 'metaDescription', autoDescription)}
-                  />
-                  <SeoField
-                    label="Alt image"
-                    value={fields.altImage}
-                    onChange={(v) => onFieldChange(lang.key, 'altImage', v)}
-                    placeholder={autoAltImage || '…'}
-                    final={resolveFinal(lang.key, 'altImage', autoAltImage)}
-                  />
+                  {(['title', 'metaDescription', 'altImage'] as SeoFieldKey[]).map((field) => {
+                    // Exactly what the public page will publish for this field.
+                    const published = resolveSeoValue(seo, lang.key, field, name, description);
+                    return (
+                      <SeoField
+                        key={field}
+                        field={field}
+                        fallback={published}
+                        enabled={fields.enabled}
+                        // On Auto the field shows the published text; the stored
+                        // value stays empty so nothing is overridden.
+                        value={seoFieldDisplayValue(seo, lang.key, field, name, description)}
+                        onChange={(v) => onFieldEdit(lang.key, field, v)}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             );

@@ -145,10 +145,15 @@ export function ProductForm({mode, productId, initialData, collections, models}:
     setFormData((f) => ({...f, [key]: value}));
 
   const setSeoField = (lang: Locale, field: SeoFieldKey, value: string) =>
-    setFormData((f) => ({
-      ...f,
-      seo: {...f.seo, [lang]: {...f.seo[lang], [field]: value}},
-    }));
+    setFormData((f) => {
+      const current = f.seo[lang];
+      // Typing over auto-filled text means the admin takes control of that
+      // language; value and toggle move together so no keystroke is lost.
+      const next = current.enabled
+        ? {...current, [field]: value}
+        : {...current, [field]: value, enabled: true};
+      return {...f, seo: {...f.seo, [lang]: next}};
+    });
 
   const setSeoEnabled = (lang: Locale, enabled: boolean) =>
     setFormData((f) => ({
@@ -629,8 +634,12 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       {/* ── 3. SEO Management ── */}
       <ProductSeoFields
         seo={formData.seo}
-        names={{en: translations.en.name, fr: translations.fr.name, ar: translations.ar.name}}
-        onFieldChange={setSeoField}
+        content={{
+          en: {name: translations.en.name, description: translations.en.description},
+          fr: {name: translations.fr.name, description: translations.fr.description},
+          ar: {name: translations.ar.name, description: translations.ar.description},
+        }}
+        onFieldEdit={setSeoField}
         onEnabledChange={setSeoEnabled}
       />
 

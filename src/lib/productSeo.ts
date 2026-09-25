@@ -14,20 +14,35 @@ export function createEmptySeo(): ProductSeoByLanguage {
   };
 }
 
+/**
+ * The generated text for one field. Titles deliberately stop before the brand:
+ * the locale layout applies a `%s | Tissu Dubai` template, so appending it here
+ * too would render the brand twice.
+ */
+export function generateSeoValue(lang: Locale, field: SeoFieldKey, name: string): string {
+  if (field === 'title') {
+    if (lang === 'ar') return `لـ ${name}`;
+    if (lang === 'fr') return `pour ${name}`;
+    return `for ${name}`;
+  }
+  if (field === 'metaDescription') {
+    if (lang === 'ar') return `${name}. جديد. تواصل مع تيسو دبي للحصول على عرض سعر، توصيل لجميع أنحاء المغرب.`;
+    if (lang === 'fr') return `${name}. Nouveau. Contactez Tissu Dubai pour un devis, livraison partout au Maroc.`;
+    return `${name}. New. Contact Tissu Dubai for a quote, delivery across Morocco.`;
+  }
+  return name;
+}
+
 export function generateSeoTitle(lang: Locale, name: string): string {
-  if (lang === 'ar') return `لـ ${name} | تيسو دبي`;
-  if (lang === 'fr') return `pour ${name} | Tissu Dubai`;
-  return `for ${name} | Tissu Dubai`;
+  return generateSeoValue(lang, 'title', name);
 }
 
 export function generateSeoDescription(lang: Locale, name: string): string {
-  if (lang === 'ar') return `${name}. جديد. تواصل مع تيسو دبي للحصول على عرض سعر، توصيل لجميع أنحاء المغرب.`;
-  if (lang === 'fr') return `${name}. Nouveau. Contactez Tissu Dubai pour un devis, livraison partout au Maroc.`;
-  return `${name}. New. Contact Tissu Dubai for a quote, delivery across Morocco.`;
+  return generateSeoValue(lang, 'metaDescription', name);
 }
 
 export function generateSeoAltImage(_lang: Locale, name: string): string {
-  return name;
+  return generateSeoValue(_lang, 'altImage', name);
 }
 
 function asString(value: unknown): string {
@@ -86,16 +101,42 @@ export function seoOverride(
   return seo[lang][field]?.trim() ?? '';
 }
 
-/** The value a page should actually render: the override when enabled, else the generated text. */
+/**
+ * The value a page should actually render, in order of preference:
+ *   1. the admin's custom text (only while the language is enabled),
+ *   2. the product's own content (name / description),
+ *   3. a generated last resort when that content is empty.
+ *
+ * The admin form renders `seoFieldDisplayValue`, so what an admin sees on
+ * "Auto" is exactly what gets published.
+ */
 export function resolveSeoValue(
   seo: ProductSeoByLanguage | undefined,
   lang: Locale,
   field: SeoFieldKey,
-  name: string
+  name: string,
+  description = ''
 ): string {
   const override = seoOverride(seo, lang, field);
   if (override) return override;
-  if (field === 'title') return generateSeoTitle(lang, name);
-  if (field === 'metaDescription') return generateSeoDescription(lang, name);
-  return generateSeoAltImage(lang, name);
+  if (field === 'metaDescription') {
+    return description.trim() || generateSeoValue(lang, field, name);
+  }
+  return name;
+}
+
+/**
+ * What an admin form field should display. On "Auto" the field is pre-filled
+ * with the exact text that will be published; on "Personnalisé" it shows the
+ * custom draft, which may legitimately be empty.
+ */
+export function seoFieldDisplayValue(
+  seo: ProductSeoByLanguage | undefined,
+  lang: Locale,
+  field: SeoFieldKey,
+  name: string,
+  description = ''
+): string {
+  if (seo?.[lang]?.enabled) return seo[lang][field] ?? '';
+  return resolveSeoValue(seo, lang, field, name, description);
 }
