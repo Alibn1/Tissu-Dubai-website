@@ -2,6 +2,9 @@ import {setRequestLocale, getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {Link} from '@/i18n/navigation';
 import Image from 'next/image';
+import {getSiteSettings} from '@/lib/data/store';
+import {GENDER_CARDS, type GenderCardId} from '@/lib/siteSettings';
+import {type Locale} from '@/types';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -29,23 +32,21 @@ export default async function CollectionsPage({params}: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('collections');
+  const genderCards = getSiteSettings().homepage.genderCards;
 
-  const cards: CategoryCard[] = [
-    {
-      slug: 'homme',
-      href: '/collections/homme',
-      image: '/images/categories/homme.svg',
-      title: t('homme'),
-      subtitle: t('hommeSubtitle')
-    },
-    {
-      slug: 'femme',
-      href: '/collections/femme',
-      image: '/images/categories/femme.svg',
-      title: t('femme'),
-      subtitle: t('femmeSubtitle')
-    }
-  ];
+  const cardFor = (id: GenderCardId): CategoryCard => {
+    const card = genderCards.find((c) => c.id === id);
+    const fallback = GENDER_CARDS.find((c) => c.id === id)?.fallbackImage ?? '';
+    return {
+      slug: id,
+      href: `/collections/${id}`,
+      image: card?.image || fallback,
+      title: card?.title[locale as Locale] || t(id),
+      subtitle: card?.description[locale as Locale] || t(`${id}Subtitle`),
+    };
+  };
+
+  const cards: CategoryCard[] = [cardFor('homme'), cardFor('femme')];
 
   return (
     <section className="py-10 sm:py-16">

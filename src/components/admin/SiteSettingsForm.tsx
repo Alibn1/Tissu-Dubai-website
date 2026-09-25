@@ -6,6 +6,7 @@ import type {Locale} from '@/types';
 import {
   createEmptyText,
   COLLECTION_CARDS,
+  GENDER_CARDS,
   DAY_LABELS,
   getDefaultSiteSettings,
   SOCIAL_LABELS,
@@ -13,6 +14,8 @@ import {
   type CollectionCard,
   type CollectionCardId,
   type ContactInfo,
+  type GenderCard,
+  type GenderCardId,
   type SiteSettings,
 } from '@/lib/siteSettings';
 import {TranslatableTextFields, type LocalizedField} from '@/components/admin/TranslatableTextFields';
@@ -268,6 +271,49 @@ export function SiteSettingsForm({initialData}: Props) {
 
   const handleCardChange = (card: CollectionCard, fieldId: string, lang: Locale, value: string) =>
     updateCardField(card.id, fieldId.startsWith('title-') ? 'title' : 'description', lang, value);
+
+  const setGenderCardImage = (id: GenderCardId, url: string) =>
+    setSettings((prev) => ({
+      ...prev,
+      homepage: {
+        ...prev.homepage,
+        genderCards: prev.homepage.genderCards.map((c) => (c.id === id ? {...c, image: url} : c)),
+      },
+    }));
+
+  const updateGenderCardField = (
+    id: GenderCardId,
+    key: 'title' | 'description',
+    lang: Locale,
+    value: string
+  ) =>
+    setSettings((prev) => ({
+      ...prev,
+      homepage: {
+        ...prev.homepage,
+        genderCards: prev.homepage.genderCards.map((c) =>
+          c.id === id ? {...c, [key]: {...c[key], [lang]: value}} : c
+        ),
+      },
+    }));
+
+  const genderCardFieldsFor = (card: GenderCard): LocalizedField[] => [
+    {id: `g-title-${card.id}`, label: 'Titre', value: card.title},
+    {id: `g-desc-${card.id}`, label: 'Description', value: card.description, textarea: true},
+  ];
+
+  const handleGenderCardChange = (
+    card: GenderCard,
+    fieldId: string,
+    lang: Locale,
+    value: string
+  ) =>
+    updateGenderCardField(
+      card.id,
+      fieldId.startsWith('g-title-') ? 'title' : 'description',
+      lang,
+      value
+    );
 
   // ── Save (mock, swap for a real GET/PUT /api/site-settings later) ──
 
@@ -567,6 +613,46 @@ export function SiteSettingsForm({initialData}: Props) {
                       fields={cardFieldsFor(card)}
                       onChange={(fieldId, lang, value) => handleCardChange(card, fieldId, lang, value)}
                       ariaLabel={`Langues de la carte ${cardLabel}`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="rounded-md border border-brand-border bg-brand-surface shadow-sm">
+            <SectionHeader
+              title="Cartes Homme et Femme"
+              subtitle="Les deux grandes cartes de la page « Collections » : image, titre et description de chacune"
+            />
+            <div className="space-y-6 p-5">
+              {GENDER_CARDS.map(({id, label, fallbackImage}) => {
+                const card = settings.homepage.genderCards.find((c) => c.id === id);
+                if (!card) return null;
+                return (
+                  <div key={card.id} className="space-y-4 rounded-md border border-brand-border p-4">
+                    <h3 className="font-heading text-sm font-semibold text-brand-secondary">
+                      Carte {label}
+                    </h3>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <ImagePreview
+                        src={card.image || fallbackImage}
+                        alt={`Image de la carte ${label}`}
+                      />
+                      <div className="flex flex-col gap-1">
+                        <FileUploadButton
+                          onUpload={(url) => setGenderCardImage(card.id, url)}
+                          label={card.image ? 'Changer l’image' : 'Ajouter une image'}
+                        />
+                        <p className="text-xs text-brand-muted">
+                          Format portrait — ratio 3:4 recommandé (ex. 900×1200)
+                        </p>
+                      </div>
+                    </div>
+                    <TranslatableTextFields
+                      fields={genderCardFieldsFor(card)}
+                      onChange={(fieldId, lang, value) => handleGenderCardChange(card, fieldId, lang, value)}
+                      ariaLabel={`Langues de la carte ${label}`}
                     />
                   </div>
                 );
