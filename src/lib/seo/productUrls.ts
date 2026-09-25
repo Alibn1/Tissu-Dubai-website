@@ -36,10 +36,16 @@ export function productUrl(collectionSlug: string, productSlug: string, locale: 
  * Canonical URL plus one alternate per language, for a product reachable at
  * several collection URLs. Every language points at the same canonical
  * collection so the alternates agree with the canonical.
+ *
+ * The canonical is the page's own URL in the current language. Pinning it to a
+ * single language (say "fr") would tell Google to drop the English and Arabic
+ * pages from the index, which is the opposite of what a translated catalogue
+ * wants.
  */
 export function productAlternates(
   collectionSlugs: string[],
-  productSlug: string
+  productSlug: string,
+  currentLocale: Locale
 ): {canonical: string; languages: Record<string, string>} | null {
   const canonicalSlug = canonicalCollectionSlug(collectionSlugs);
   if (!canonicalSlug) return null;
@@ -48,17 +54,20 @@ export function productAlternates(
   for (const locale of LOCALES) {
     languages[locale] = productUrl(canonicalSlug, productSlug, locale);
   }
-  return {canonical: languages.fr, languages};
+  return {canonical: languages[currentLocale] ?? languages.fr, languages};
 }
 
-/** Canonical URL plus one alternate per language for a collection page. */
-export function collectionAlternates(collectionSlug: string): {
-  canonical: string;
-  languages: Record<string, string>;
-} {
+/**
+ * Canonical URL plus one alternate per language for a collection page. The
+ * canonical is self-referential, for the same reason as `productAlternates`.
+ */
+export function collectionAlternates(
+  collectionSlug: string,
+  currentLocale: Locale
+): {canonical: string; languages: Record<string, string>} {
   const languages: Record<string, string> = {};
   for (const locale of LOCALES) {
     languages[locale] = `${siteBaseUrl()}/${locale}/collections/${collectionSlug}`;
   }
-  return {canonical: languages.fr, languages};
+  return {canonical: languages[currentLocale] ?? languages.fr, languages};
 }

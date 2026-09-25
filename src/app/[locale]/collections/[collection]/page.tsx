@@ -7,6 +7,7 @@ import {getModels} from '@/lib/data/store';
 import {CatalogContent} from '@/components/catalog/CatalogContent';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 import {collectionAlternates} from '@/lib/seo/productUrls';
+import type {Locale} from '@/types';
 
 type Props = {
   params: Promise<{locale: string; collection: string}>;
@@ -22,7 +23,7 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const cat = await getCollectionBySlug(collection);
   if (!cat) return {};
   const name = cat.name[locale as keyof typeof cat.name] || cat.name.fr;
-  const alternates = collectionAlternates(cat.slug);
+  const alternates = collectionAlternates(cat.slug, locale as Locale);
   return {
     title: `${name}`,
     description: cat.description[locale as keyof typeof cat.description] || cat.description.fr,

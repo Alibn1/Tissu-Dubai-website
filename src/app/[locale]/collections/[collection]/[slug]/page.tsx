@@ -44,7 +44,8 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   // Google at one canonical collection instead of the layout's bare "/en" etc.
   const alternates = productAlternates(
     product.collections.map((c) => c.slug),
-    product.slug
+    product.slug,
+    loc
   );
 
   return {
