@@ -128,9 +128,6 @@ export default async function AdminColorsPage({params}: Props) {
                               className="inline-flex items-center gap-2 rounded-full border border-brand-border px-3 py-1.5 text-xs text-brand-secondary"
                             >
                               {v.color.fr}
-                              {v.price != null && (
-                                <span className="text-brand-muted">{v.price} MAD</span>
-                              )}
                               <span
                                 className={cn(
                                   'inline-flex items-center gap-1',

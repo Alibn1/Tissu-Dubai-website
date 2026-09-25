@@ -30,7 +30,7 @@ export function ProductInfo({product, locale, selectedVariant}: ProductInfoProps
   const material = product.material[locale] || product.material.fr;
   const variantColor = variant ? variant.color[locale] || variant.color.fr : '';
 
-  const displayPrice = variant?.price ?? product.price;
+  const displayPrice = product.price;
 
   const buildMessage = (values: Record<string, string>) =>
     generateWhatsAppMessage({
