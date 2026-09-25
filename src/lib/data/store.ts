@@ -1,5 +1,13 @@
 import {getDb} from '@/db';
-import type {Collection, Locale, Model, Product, ProductVariant} from '@/types';
+import type {
+  Collection,
+  Locale,
+  Model,
+  Product,
+  ProductSeoByLanguage,
+  ProductVariant,
+} from '@/types';
+import {normalizeSeo, parseSeoFields} from '@/lib/productSeo';
 import {getDefaultSiteSettings, migrateSiteSettings, type SiteSettings} from '@/lib/siteSettings';
 
 type Row = Record<string, unknown>;
@@ -98,6 +106,11 @@ function mapProductRow(row: Row, variants: ProductVariant[], collectionSlugs: st
       fr: parseJSON<string[]>(row.characteristics_fr, []),
       ar: parseJSON<string[]>(row.characteristics_ar, []),
       en: parseJSON<string[]>(row.characteristics_en, []),
+    },
+    seo: {
+      fr: parseSeoFields(parseJSON<unknown>(row.seo_fr, {})),
+      ar: parseSeoFields(parseJSON<unknown>(row.seo_ar, {})),
+      en: parseSeoFields(parseJSON<unknown>(row.seo_en, {})),
     },
   };
 }
@@ -276,6 +289,7 @@ export type ProductInput = {
   characteristics?: Record<Locale, string[]>;
   images?: string[];
   variants?: ProductVariantInput[];
+  seo?: ProductSeoByLanguage;
 };
 
 type ProductRow = {
@@ -294,12 +308,14 @@ type ProductRow = {
   isNew?: boolean;
   characteristics?: Record<Locale, string[]>;
   images?: string[];
+  seo?: ProductSeoByLanguage;
 };
 
 function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
+  const seo = normalizeSeo(product.seo);
   db.prepare(
-    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, characteristics_fr, characteristics_ar, characteristics_en, images, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, characteristics_fr, characteristics_ar, characteristics_en, seo_fr, seo_ar, seo_en, images, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        slug = excluded.slug,
        reference = excluded.reference,
@@ -321,6 +337,9 @@ function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
        characteristics_fr = excluded.characteristics_fr,
        characteristics_ar = excluded.characteristics_ar,
        characteristics_en = excluded.characteristics_en,
+       seo_fr = excluded.seo_fr,
+       seo_ar = excluded.seo_ar,
+       seo_en = excluded.seo_en,
        images = excluded.images,
        updated_at = excluded.updated_at`
   ).run(
@@ -345,6 +364,9 @@ function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
     JSON.stringify(product.characteristics?.fr ?? []),
     JSON.stringify(product.characteristics?.ar ?? []),
     JSON.stringify(product.characteristics?.en ?? []),
+    JSON.stringify(seo.fr),
+    JSON.stringify(seo.ar),
+    JSON.stringify(seo.en),
     JSON.stringify(product.images ?? []),
     new Date().toISOString(),
     new Date().toISOString()
@@ -417,6 +439,7 @@ export function updateProduct(id: string, input: Partial<ProductInput>): Product
     isNew: input.isNew ?? existing.isNew,
     characteristics: input.characteristics ?? existing.characteristics,
     images: input.images ?? existing.images,
+    seo: input.seo ?? existing.seo,
   };
 
   insertProductRow(db, {...merged, id: existing.id, slug: existing.slug});

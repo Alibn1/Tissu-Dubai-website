@@ -106,4 +106,23 @@ describe('products-to-collections junction migration', () => {
     expect(collections.find((c) => c.slug === 'caftan')?.productCount).toBe(1);
     expect(collections.find((c) => c.slug === 'tekchita')?.productCount).toBe(1);
   });
+
+  it('adds the SEO columns to a pre-SEO products table', async () => {
+    const {getDb} = await import('@/db');
+    const columns = (getDb().prepare('PRAGMA table_info(products)').all() as {name: string}[]).map(
+      (column) => column.name
+    );
+    expect(columns).toEqual(expect.arrayContaining(['seo_fr', 'seo_ar', 'seo_en']));
+  });
+
+  it('defaults pre-existing rows to auto SEO without data loss', async () => {
+    const {getProductById} = await import('@/lib/data/store');
+    const soie = getProductById('p1');
+    expect(soie?.name.fr).toBe('Soie Double');
+    expect(soie?.seo).toEqual({
+      fr: {title: '', metaDescription: '', altImage: '', enabled: false},
+      en: {title: '', metaDescription: '', altImage: '', enabled: false},
+      ar: {title: '', metaDescription: '', altImage: '', enabled: false},
+    });
+  });
 });

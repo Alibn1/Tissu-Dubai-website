@@ -7,10 +7,12 @@ import {Save, Loader2, Check} from 'lucide-react';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
 import {ModelSelect} from '@/components/admin/ModelSelect';
 import {ColorVariantsEditor, type ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
+import {ProductSeoFields} from '@/components/admin/ProductSeoFields';
 import type {Collection, Locale, Product, Model} from '@/types';
 import type {ProductTranslations, TranslatableFieldKey} from '@/lib/translation';
 import {missingVariantImageMessage} from '@/lib/variantValidation';
 import {toggleCollectionSlugs} from '@/lib/collections';
+import {normalizeSeo, type ProductSeoByLanguage, type SeoFieldKey} from '@/lib/productSeo';
 
 type Props = {
   product: Product;
@@ -108,6 +110,14 @@ export function ProductEditForm({product, models, collections}: Props) {
     featured: product.featured,
     isNew: product.isNew,
   });
+
+  const [seo, setSeo] = useState<ProductSeoByLanguage>(() => normalizeSeo(product.seo));
+
+  const setSeoField = (lang: Locale, field: SeoFieldKey, value: string) =>
+    setSeo((prev) => ({...prev, [lang]: {...prev[lang], [field]: value}}));
+
+  const setSeoEnabled = (lang: Locale, enabled: boolean) =>
+    setSeo((prev) => ({...prev, [lang]: {...prev[lang], enabled}}));
 
   const [colorVariants, setColorVariants] = useState<ColorVariantForm[]>(() =>
     (product.variants ?? []).map((v, idx) => ({
@@ -229,6 +239,7 @@ export function ProductEditForm({product, models, collections}: Props) {
           featured: formData.featured,
           isNew: formData.isNew,
           variants: buildVariants(),
+          seo,
         }),
       });
 
@@ -379,6 +390,14 @@ export function ProductEditForm({product, models, collections}: Props) {
           invalidIds={variantError?.ids ?? []}
         />
       </section>
+
+      {/* SEO */}
+      <ProductSeoFields
+        seo={seo}
+        names={{en: translations.en.name, fr: translations.fr.name, ar: translations.ar.name}}
+        onFieldChange={setSeoField}
+        onEnabledChange={setSeoEnabled}
+      />
 
       {/* Save */}
       {variantError && (

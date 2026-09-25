@@ -2,6 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {getAllProducts, createProduct, type ProductInput} from '@/lib/data/store';
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 import {hasImage, missingVariantImageMessage, variantsMissingImage} from '@/lib/variantValidation';
+import {normalizeSeo} from '@/lib/productSeo';
 
 export async function GET() {
   const summary = getAllProducts().map((p) => ({
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
     isNew: Boolean(body.isNew),
     characteristics: body.characteristics,
     images: Array.isArray(body.baseImages) ? body.baseImages : [],
+    seo: normalizeSeo(body.seo),
     variants: Array.isArray(body.colorVariants)
       ? body.colorVariants.map((v: Record<string, unknown>) => ({
           color: v.colorLabel,

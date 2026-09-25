@@ -2,6 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {getProductById, updateProduct, deleteProduct, type ProductInput} from '@/lib/data/store';
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 import {missingVariantImageMessage, variantsMissingImage} from '@/lib/variantValidation';
+import {normalizeSeo} from '@/lib/productSeo';
 
 type Params = Promise<{id: string}>;
 
@@ -41,6 +42,7 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
     featured: body.featured ?? product.featured,
     isNew: body.isNew ?? product.isNew,
     images: Array.isArray(body.images) ? body.images : undefined,
+    seo: body.seo !== undefined ? normalizeSeo(body.seo) : undefined,
     variants: Array.isArray(body.variants)
       ? body.variants.map((v: Record<string, unknown>) => ({
           id: typeof v.id === 'string' ? v.id : undefined,

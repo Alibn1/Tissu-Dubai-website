@@ -112,4 +112,93 @@ describe('DB-backed store', () => {
     store.saveSiteSettings({...before, contact: {...before.contact, address: 'Test Address'}});
     expect(store.getSiteSettings().contact.address).toBe('Test Address');
   });
+
+  it('round-trips per-language SEO overrides', async () => {
+    const store = await import('@/lib/data/store');
+
+    const created = store.createProduct({
+      name: {fr: 'SEO', ar: 'SEO', en: 'SEO'},
+      reference: 'TD-SEO-001',
+      collectionSlugs: ['caftan'],
+      seo: {
+        fr: {title: 'Titre FR', metaDescription: 'Desc FR', altImage: 'Alt FR', enabled: true},
+        en: {title: '', metaDescription: '', altImage: '', enabled: false},
+        ar: {title: 'عنوان', metaDescription: 'وصف', altImage: 'نص', enabled: true},
+      },
+    });
+
+    expect(created.seo?.fr).toEqual({
+      title: 'Titre FR',
+      metaDescription: 'Desc FR',
+      altImage: 'Alt FR',
+      enabled: true,
+    });
+    expect(created.seo?.en).toEqual({title: '', metaDescription: '', altImage: '', enabled: false});
+    expect(created.seo?.ar.enabled).toBe(true);
+
+    // Reading back from the database must return the same values.
+    const reloaded = store.getProductById(created.id);
+    expect(reloaded?.seo?.fr.title).toBe('Titre FR');
+    expect(reloaded?.seo?.ar.title).toBe('عنوان');
+
+    const updated = store.updateProduct(created.id, {
+      seo: {
+        fr: {title: 'Titre FR 2', metaDescription: '', altImage: '', enabled: true},
+        en: {title: 'English title', metaDescription: '', altImage: '', enabled: true},
+        ar: {title: '', metaDescription: '', altImage: '', enabled: false},
+      },
+    });
+    expect(updated?.seo?.fr.title).toBe('Titre FR 2');
+    expect(updated?.seo?.en.title).toBe('English title');
+    expect(updated?.seo?.ar.enabled).toBe(false);
+
+    store.deleteProduct(created.id);
+  });
+
+  it('drops stored overrides for a language switched back to auto', async () => {
+    const store = await import('@/lib/data/store');
+
+    const created = store.createProduct({
+      name: {fr: 'SEO auto', ar: 'SEO auto', en: 'SEO auto'},
+      reference: 'TD-SEO-002',
+      collectionSlugs: ['caftan'],
+      seo: {
+        fr: {title: 'Titre', metaDescription: 'Desc', altImage: 'Alt', enabled: true},
+        en: {title: '', metaDescription: '', altImage: '', enabled: false},
+        ar: {title: '', metaDescription: '', altImage: '', enabled: false},
+      },
+    });
+
+    // Disabling the language keeps the text in the form state but must not
+    // reach the database, so a later auto-generated value can never be shadowed.
+    const updated = store.updateProduct(created.id, {
+      seo: {
+        fr: {title: '', metaDescription: '', altImage: '', enabled: false},
+        en: {title: '', metaDescription: '', altImage: '', enabled: false},
+        ar: {title: '', metaDescription: '', altImage: '', enabled: false},
+      },
+    });
+
+    expect(updated?.seo?.fr).toEqual({title: '', metaDescription: '', altImage: '', enabled: false});
+
+    store.deleteProduct(created.id);
+  });
+
+  it('defaults missing SEO columns to auto for every language', async () => {
+    const store = await import('@/lib/data/store');
+
+    const created = store.createProduct({
+      name: {fr: 'No SEO', ar: 'No SEO', en: 'No SEO'},
+      reference: 'TD-SEO-003',
+      collectionSlugs: ['caftan'],
+    });
+
+    expect(created.seo).toEqual({
+      fr: {title: '', metaDescription: '', altImage: '', enabled: false},
+      en: {title: '', metaDescription: '', altImage: '', enabled: false},
+      ar: {title: '', metaDescription: '', altImage: '', enabled: false},
+    });
+
+    store.deleteProduct(created.id);
+  });
 });

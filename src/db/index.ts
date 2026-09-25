@@ -111,8 +111,31 @@ function migrateSchema(database: DbHandle) {
   // reshaping is a no-op there.
   if (database instanceof WorkersDatabase) return;
 
+  // A fresh database has no `products` table yet (SCHEMA_SQL creates it right
+  // after this), so only widen tables that already exist.
+  if (names.size > 0) addMissingProductColumns(database, names);
+
   migrateModelsToJunction(database);
   migrateProductsToJunction(database);
+}
+
+/** Columns added to `products` after the table was first shipped. */
+const ADDED_PRODUCT_COLUMNS: Record<string, string> = {
+  width: "ALTER TABLE products ADD COLUMN width TEXT NOT NULL DEFAULT ''",
+  is_new: 'ALTER TABLE products ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0',
+  seo_fr: "ALTER TABLE products ADD COLUMN seo_fr TEXT NOT NULL DEFAULT '{}'",
+  seo_ar: "ALTER TABLE products ADD COLUMN seo_ar TEXT NOT NULL DEFAULT '{}'",
+  seo_en: "ALTER TABLE products ADD COLUMN seo_en TEXT NOT NULL DEFAULT '{}'",
+};
+
+function addMissingProductColumns(
+  database: Exclude<DbHandle, WorkersDatabase>,
+  existing: Set<string>
+) {
+  for (const [column, statement] of Object.entries(ADDED_PRODUCT_COLUMNS)) {
+    if (existing.has(column)) continue;
+    database.exec(statement);
+  }
 }
 
 type ProductRowForMigration = {

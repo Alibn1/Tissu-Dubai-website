@@ -39,6 +39,9 @@ CREATE TABLE IF NOT EXISTS products (
   characteristics_fr TEXT NOT NULL DEFAULT '[]',
   characteristics_ar TEXT NOT NULL DEFAULT '[]',
   characteristics_en TEXT NOT NULL DEFAULT '[]',
+  seo_fr TEXT NOT NULL DEFAULT '{}',
+  seo_ar TEXT NOT NULL DEFAULT '{}',
+  seo_en TEXT NOT NULL DEFAULT '{}',
   images TEXT NOT NULL DEFAULT '[]',
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))

@@ -51,6 +51,9 @@ type ProductsRow = {
   characteristics_fr: string;
   characteristics_ar: string;
   characteristics_en: string;
+  seo_fr: string;
+  seo_ar: string;
+  seo_en: string;
   images: string;
   created_at: string;
   updated_at: string;
@@ -122,6 +125,9 @@ const PRODUCT_COLUMNS = [
   'characteristics_fr',
   'characteristics_ar',
   'characteristics_en',
+  'seo_fr',
+  'seo_ar',
+  'seo_en',
   'images',
   'created_at',
   'updated_at',
