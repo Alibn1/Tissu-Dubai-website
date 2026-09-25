@@ -57,15 +57,15 @@ export default async function AdminDashboardPage({params}: Props) {
         </div>
 
         {/* Collection cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {collectionBreakdown.map((cat) => (
             <div
               key={cat.slug}
-              className="rounded-md border border-brand-border bg-brand-surface p-5 shadow-sm"
+              className="rounded-md border border-brand-border bg-brand-surface p-4 shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-brand-muted">{cat.name}</span>
-                <span className="text-sm font-semibold text-brand-secondary">{cat.count}</span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-sm text-brand-muted">{cat.name}</span>
+                <span className="shrink-0 text-sm font-semibold text-brand-secondary">{cat.count}</span>
               </div>
               <div className="mt-3">
                 <div className="h-1.5 w-full rounded-full bg-brand-light">
