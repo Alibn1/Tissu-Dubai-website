@@ -1,4 +1,6 @@
-import {NextResponse} from 'next/server';
+import {NextResponse, NextRequest} from 'next/server';
+import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
+import {isThrottled, recordFailure} from '@/lib/rateLimit';
 
 // DeepL plan is detected from the key: free-plan keys end with ":fx".
 const FREE_ENDPOINT = 'https://api-free.deepl.com/v2/translate';
@@ -12,7 +14,23 @@ const SUPPORTED_TARGETS = new Set(['EN', 'FR', 'AR']);
 const SOURCE_LANGS = new Set(['EN', 'FR', 'AR']);
 const DEFAULT_SOURCE_LANG = 'FR';
 
-export async function POST(request: Request) {
+// This route spends paid DeepL quota, so it is admin-only plus throttled.
+const MAX_TEXTS_PER_MINUTE = 30;
+const WINDOW_MS = 60 * 1000;
+const MAX_TEXT_LENGTH = 5000;
+
+export async function POST(request: NextRequest) {
+  if (!isAdminRequest(request)) return unauthorizedResponse();
+
+  const throttleKey = `translate:${request.headers.get('cf-connecting-ip') ?? 'unknown'}`;
+  const throttle = isThrottled(throttleKey, MAX_TEXTS_PER_MINUTE);
+  if (throttle.limited) {
+    return NextResponse.json(
+      {error: 'Trop de traductions envoyées. Réessayez dans un instant.'},
+      {status: 429, headers: {'Retry-After': String(throttle.retryAfterSeconds)}}
+    );
+  }
+
   const apiKey = process.env.DEEPL_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
@@ -42,6 +60,15 @@ export async function POST(request: Request) {
 
   const rawSource = typeof body?.sourceLang === 'string' ? body.sourceLang : '';
   const sourceCode = SOURCE_LANGS.has(rawSource.toUpperCase()) ? rawSource.toUpperCase() : DEFAULT_SOURCE_LANG;
+
+  if (text.length > MAX_TEXT_LENGTH) {
+    return NextResponse.json(
+      {error: `Le texte dépasse ${MAX_TEXT_LENGTH} caractères.`},
+      {status: 400}
+    );
+  }
+
+  recordFailure(throttleKey, WINDOW_MS);
 
   try {
     return await translateWithDeepL(text, code, apiKey, sourceCode);

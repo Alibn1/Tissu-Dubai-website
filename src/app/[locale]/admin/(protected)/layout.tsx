@@ -2,6 +2,7 @@ import {cookies} from 'next/headers';
 import {redirect} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
 import {AdminSidebar} from '@/components/admin/AdminSidebar';
+import {verifySessionToken} from '@/lib/adminAuth';
 
 type Props = {
   children: React.ReactNode;
@@ -13,9 +14,9 @@ export default async function AdminProtectedLayout({children, params}: Props) {
   setRequestLocale(locale);
 
   const cookieStore = await cookies();
-  const session = cookieStore.get('admin-session');
+  const session = cookieStore.get('admin-session')?.value;
 
-  if (!session) {
+  if (!verifySessionToken(session)) {
     redirect(`/${locale}/admin/login`);
   }
 
