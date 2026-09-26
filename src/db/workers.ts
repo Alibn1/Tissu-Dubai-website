@@ -51,6 +51,9 @@ type ProductsRow = {
   characteristics_fr: string;
   characteristics_ar: string;
   characteristics_en: string;
+  seo_fr: string;
+  seo_ar: string;
+  seo_en: string;
   images: string;
   created_at: string;
   updated_at: string;
@@ -90,23 +93,6 @@ type ModelCollectionsRow = {
 
 type SiteSettingsRow = {key: string; value: string};
 
-type InquiriesRow = {
-  id: string;
-  product_name: string;
-  reference: string;
-  color: string;
-  quantity: number;
-  locale: string;
-  read: number;
-  created_at: string;
-};
-
-type InquiryCountsRow = {
-  reference: string;
-  n: number;
-  updated_at: string | null;
-};
-
 interface Tables {
   collections: CollectionsRow[];
   products: ProductsRow[];
@@ -115,8 +101,6 @@ interface Tables {
   models: ModelsRow[];
   model_collections: ModelCollectionsRow[];
   site_settings: SiteSettingsRow[];
-  inquiries: InquiriesRow[];
-  inquiry_counts: InquiryCountsRow[];
 }
 
 const PRODUCT_COLUMNS = [
@@ -141,6 +125,9 @@ const PRODUCT_COLUMNS = [
   'characteristics_fr',
   'characteristics_ar',
   'characteristics_en',
+  'seo_fr',
+  'seo_ar',
+  'seo_en',
   'images',
   'created_at',
   'updated_at',
@@ -177,8 +164,6 @@ export class WorkersDatabase {
     models: [],
     model_collections: [],
     site_settings: [],
-    inquiries: [],
-    inquiry_counts: [],
   };
 
   exec(sql: string): void {
@@ -231,14 +216,6 @@ export class WorkersDatabase {
       };
     }
 
-    if (normalized === 'select count(*) as count from inquiry_counts') {
-      return {
-        all: () => [],
-        get: () => ({count: this.tables.inquiry_counts.length}),
-        run: () => ({changes: 0}),
-      };
-    }
-
     if (normalized === 'select * from product_variants order by sort_order') {
       return {
         all: () => [...this.tables.product_variants] as WorkersRow[],
@@ -258,13 +235,6 @@ export class WorkersDatabase {
       return {all: () => [...this.tables.product_collections] as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
     }
 
-    if (normalized === 'select reference, count(*) as n from inquiries group by reference') {
-      const counts = new Map<string, number>();
-      for (const inquiry of this.tables.inquiries) counts.set(inquiry.reference, (counts.get(inquiry.reference) ?? 0) + 1);
-      const rows = Array.from(counts, ([reference, n]) => ({reference, n}));
-      return {all: () => rows, get: () => undefined, run: () => ({changes: 0})};
-    }
-
     if (normalized === 'select * from models order by name_fr') {
       const rows = [...this.tables.models].sort((a, b) => a.name_fr.localeCompare(b.name_fr));
       return {all: () => rows as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
@@ -272,38 +242,6 @@ export class WorkersDatabase {
 
     if (normalized === 'select * from model_collections') {
       return {all: () => [...this.tables.model_collections] as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
-    }
-
-    if (normalized === 'insert into inquiry_counts (reference, n, updated_at) select reference, count(*) as n, max(created_at) from inquiries group by reference') {
-      return {
-        all: () => [],
-        get: () => undefined,
-        run: () => {
-          const counts = new Map<string, {n: number; updatedAt: string | null}>();
-          for (const inquiry of this.tables.inquiries) {
-            const current = counts.get(inquiry.reference) ?? {n: 0, updatedAt: null};
-            current.n += 1;
-            if (!current.updatedAt || inquiry.created_at > current.updatedAt) current.updatedAt = inquiry.created_at;
-            counts.set(inquiry.reference, current);
-          }
-          for (const [reference, {n, updatedAt}] of counts) {
-            const existing = this.tables.inquiry_counts.find((entry) => entry.reference === reference);
-            if (existing) existing.n = n;
-            else this.tables.inquiry_counts.push({reference, n, updated_at: updatedAt});
-          }
-          return {changes: counts.size};
-        },
-      };
-    }
-
-    if (normalized === 'select * from inquiries order by created_at desc') {
-      const rows = [...this.tables.inquiries].sort((a, b) => b.created_at.localeCompare(a.created_at));
-      return {all: () => rows as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
-    }
-
-    if (normalized === 'select reference, n from inquiry_counts') {
-      const rows = [...this.tables.inquiry_counts];
-      return {all: () => rows as WorkersRow[], get: () => undefined, run: () => ({changes: 0})};
     }
 
     if (normalized === 'select value from site_settings where key = ?') {
@@ -408,69 +346,6 @@ export class WorkersDatabase {
       };
     }
 
-    if (normalized === 'update inquiries set read = 1 where id = ?') {
-      return {
-        all: () => [],
-        get: () => undefined,
-        run: (...params) => {
-          const target = String(params[0]);
-          const row = this.tables.inquiries.find((inquiry) => inquiry.id === target);
-          if (row) row.read = 1;
-          return {changes: row ? 1 : 0};
-        },
-      };
-    }
-
-    if (normalized === 'insert into inquiry_counts (reference, n, updated_at) values (?, 1, ?) on conflict(reference) do update set n = n + 1, updated_at = excluded.updated_at') {
-      return {
-        all: () => [],
-        get: () => undefined,
-        run: (...params) => {
-          const reference = String(params[0]);
-          const updatedAt = String(params[1] ?? null);
-          const row = this.tables.inquiry_counts.find((entry) => entry.reference === reference);
-          if (row) {
-            row.n += 1;
-            row.updated_at = updatedAt;
-          } else {
-            this.tables.inquiry_counts.push({reference, n: 1, updated_at: updatedAt});
-          }
-          return {changes: 1};
-        },
-      };
-    }
-
-    if (normalized === 'delete from inquiries where julianday(created_at) < julianday(\'now\', ?)') {
-      return {
-        all: () => [],
-        get: () => undefined,
-        run: (...params) => {
-          const modifier = String(params[0] ?? '');
-          const match = /-(\d+)\s*days?/.exec(modifier);
-          const days = match ? Number(match[1]) : 0;
-          const cutoff = days > 0 ? Date.now() - days * 86_400_000 : 0;
-          const before = this.tables.inquiries.length;
-          this.tables.inquiries = this.tables.inquiries.filter((inquiry) => new Date(inquiry.created_at).getTime() >= cutoff);
-          return {changes: before - this.tables.inquiries.length};
-        },
-      };
-    }
-
-    if (normalized === 'delete from inquiries where id not in (select id from inquiries order by created_at desc limit ?)') {
-      return {
-        all: () => [],
-        get: () => undefined,
-        run: (...params) => {
-          const maxRows = Math.max(0, Number(params[0] ?? 0));
-          const sorted = [...this.tables.inquiries].sort((a, b) => b.created_at.localeCompare(a.created_at));
-          const keep = new Set(sorted.slice(0, maxRows).map((inquiry) => inquiry.id));
-          const before = this.tables.inquiries.length;
-          this.tables.inquiries = this.tables.inquiries.filter((inquiry) => keep.has(inquiry.id));
-          return {changes: before - this.tables.inquiries.length};
-        },
-      };
-    }
-
     const insert = /^insert into ([a-z_]+) \(([^)]+)\) values \((.+)\)/.exec(normalized);
     if (insert) {
       const [, table, columnsSql] = insert;
@@ -504,9 +379,6 @@ export class WorkersDatabase {
               break;
             case 'site_settings':
               this.upsertRow('site_settings', row as SiteSettingsRow);
-              break;
-            case 'inquiries':
-              this.upsertRow('inquiries', row as InquiriesRow);
               break;
             default:
               throw new Error(`[workers-db] unsupported insert table: ${table}`);

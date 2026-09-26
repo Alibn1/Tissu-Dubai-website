@@ -3,6 +3,7 @@ import {getTranslations} from 'next-intl/server';
 import {Metadata} from 'next';
 import {FaqAccordion} from '@/components/FaqAccordion';
 import {getSiteSettings} from '@/lib/data/store';
+import {staticAlternates} from '@/lib/seo/productUrls';
 import type {Locale} from '@/types';
 
 type Props = {
@@ -12,7 +13,11 @@ type Props = {
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: 'seo.faq'});
-  return {title: t('title'), description: t('description')};
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: staticAlternates('/faq', locale as Locale)
+  };
 }
 
 export default async function FaqPage({params}: Props) {

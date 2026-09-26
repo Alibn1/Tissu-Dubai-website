@@ -1,5 +1,6 @@
 import {SectionHeading} from '@/components/ui/SectionHeading';
 import {CollectionCards} from '@/components/collection/CollectionCards';
+import {WOMEN_COLLECTION_SLUGS} from '@/lib/siteSettings';
 
 export async function CollectionsSection() {
   const t = await (await import('next-intl/server')).getTranslations('home.collections');
@@ -9,7 +10,7 @@ export async function CollectionsSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading title={t('title')} subtitle={t('subtitle')} />
 
-        <CollectionCards />
+        <CollectionCards slugs={[...WOMEN_COLLECTION_SLUGS]} />
       </div>
     </section>
   );

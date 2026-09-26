@@ -4,6 +4,8 @@ import {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 import {getProductBySlug, getRelatedProducts, getProducts} from '@/lib/api';
 import {JsonLd} from '@/lib/seo/JsonLd';
+import {resolveSeoValue} from '@/lib/productSeo';
+import {productAlternates} from '@/lib/seo/productUrls';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 import {ProductGallery} from '@/components/product/ProductGallery';
 import {ProductView} from '@/components/product/ProductView';
@@ -30,17 +32,31 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale, slug} = await params;
   const product = await getProductBySlug(slug);
   if (!product) return {};
-  const name = product.name[locale as keyof typeof product.name] || product.name.fr;
-  const desc = product.description[locale as keyof typeof product.description] || product.description.fr;
+  const loc = locale as Locale;
+  const name = product.name[loc] || product.name.fr;
+  const desc = product.description[loc] || product.description.fr;
+  const title = resolveSeoValue(product.seo, loc, 'title', name);
+  const description = resolveSeoValue(product.seo, loc, 'metaDescription', name, desc);
+  const altImage = resolveSeoValue(product.seo, loc, 'altImage', name);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+  // A product in several collections is reachable at several URLs, so point
+  // Google at one canonical collection instead of the layout's bare "/en" etc.
+  const alternates = productAlternates(
+    product.collections.map((c) => c.slug),
+    product.slug,
+    loc
+  );
+
   return {
-    title: name,
-    description: desc,
+    title,
+    description,
+    ...(alternates ? {alternates} : {}),
     openGraph: {
-      title: name,
-      description: desc,
+      title,
+      description,
       type: 'website',
-      images: [{url: `${baseUrl}${product.images[0]}`, width: 600, height: 800}]
+      images: [{url: `${baseUrl}${product.images[0]}`, width: 600, height: 800, alt: altImage}]
     }
   };
 }
@@ -60,6 +76,13 @@ export default async function ProductDetailPage({params}: Props) {
   const productCollection =
     product.collections.find((c) => c.slug === collection) ?? product.collections[0] ?? null;
 
+  // Structured data must agree with the meta tags, otherwise Google can show a
+  // title in search results that differs from the one the admin typed.
+  const name = product.name[loc] || product.name.fr;
+  const desc = product.description[loc] || product.description.fr;
+  const seoName = resolveSeoValue(product.seo, loc, 'title', name);
+  const seoDesc = resolveSeoValue(product.seo, loc, 'metaDescription', name, desc);
+
   const breadcrumbs = [
     {name: t('home'), url: '/'},
     {name: t('collections'), url: '/collections'},
@@ -67,7 +90,7 @@ export default async function ProductDetailPage({params}: Props) {
       name: productCollection?.name[loc] || productCollection?.name.fr || collection,
       url: `/collections/${collection}`,
     },
-    {name: product.name[loc] || product.name.fr, url: `/collections/${collection}/${product.slug}`}
+    {name: seoName, url: `/collections/${collection}/${product.slug}`}
   ];
 
   return (
@@ -88,8 +111,8 @@ export default async function ProductDetailPage({params}: Props) {
         locale={loc}
         type="Product"
         data={{
-          name: product.name[loc] || product.name.fr,
-          description: product.description[loc] || product.description.fr,
+          name: seoName,
+          description: seoDesc,
           image: product.images.map((img) => `${baseUrl}${img}`),
           sku: product.reference,
           brand: {name: 'Tissu Dubai'},

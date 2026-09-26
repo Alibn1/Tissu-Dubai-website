@@ -41,8 +41,26 @@ export const COLLECTION_CARDS: ReadonlyArray<{id: CollectionCardId; label: strin
   {id: 'tekchita', label: 'Takchita'},
 ];
 
+/** The women's sub-collections grouped under the "Femme" entry point. */
+export const WOMEN_COLLECTION_SLUGS: readonly string[] = ['caftan', 'jellaba', 'tekchita'];
+
 export interface CollectionCard {
   id: CollectionCardId;
+  image: string;
+  title: TranslatableText;
+  description: TranslatableText;
+}
+
+export type GenderCardId = 'homme' | 'femme';
+
+export const GENDER_CARDS: ReadonlyArray<{id: GenderCardId; label: string; fallbackImage: string}> = [
+  {id: 'homme', label: 'Homme', fallbackImage: '/images/categories/homme.svg'},
+  {id: 'femme', label: 'Femme', fallbackImage: '/images/categories/femme.svg'},
+];
+
+/** The two "Homme" / "Femme" entry-point cards on the /collections page. */
+export interface GenderCard {
+  id: GenderCardId;
   image: string;
   title: TranslatableText;
   description: TranslatableText;
@@ -57,6 +75,7 @@ export interface HeroSettings {
 export interface HomepageContent {
   hero: HeroSettings;
   collectionCards: CollectionCard[];
+  genderCards: GenderCard[];
 }
 
 export interface SiteSettings {
@@ -266,8 +285,30 @@ export function getDefaultSiteSettings(): SiteSettings {
           title: text('Takchita', 'Takchita', 'التكشيطة'),
           description: text(
             'Tissus riches et soyeux pour une tekchita rayonnante',
-            'Rich and silky fabrics for a radiant tekchita',
+            'Rich and silky fabrics for a radiant takchita',
             'أقمشة غنية وحريرية لتكشيطة متألقة'
+          ),
+        },
+      ],
+      genderCards: [
+        {
+          id: 'homme',
+          image: '',
+          title: text('Homme', 'Men', 'رجال'),
+          description: text(
+            'Tissus et créations pour homme',
+            'Fabrics and creations for men',
+            'أقمشة وإبداعات للرجال'
+          ),
+        },
+        {
+          id: 'femme',
+          image: '',
+          title: text('Femme', 'Women', 'نساء'),
+          description: text(
+            'Caftans, djellabas et takchitas',
+            'Caftans, djellabas and takchitas',
+            'قفاطين، جلابات وتكاشيط'
           ),
         },
       ],
@@ -294,8 +335,27 @@ export function migrateSiteSettings(input: unknown): SiteSettings {
       hero: homepage.hero ?? defaults.homepage.hero,
       collectionCards:
         homepage.collectionCards ?? homepage.categoryCards ?? defaults.homepage.collectionCards,
+      genderCards: mergeGenderCards(homepage.genderCards, defaults.homepage.genderCards),
     },
   };
+}
+
+/** Keeps admin-saved values for known cards and backfills any missing one. */
+function mergeGenderCards(
+  saved: GenderCard[] | undefined,
+  defaults: GenderCard[]
+): GenderCard[] {
+  if (!Array.isArray(saved) || saved.length === 0) return defaults;
+  return defaults.map((fallback) => {
+    const found = saved.find((card) => card?.id === fallback.id);
+    if (!found) return fallback;
+    return {
+      id: fallback.id,
+      image: found.image ?? fallback.image,
+      title: {...fallback.title, ...(found.title ?? {})},
+      description: {...fallback.description, ...(found.description ?? {})},
+    };
+  });
 }
 
 // ── Resolution helpers ──

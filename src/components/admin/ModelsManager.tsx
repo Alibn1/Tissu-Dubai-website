@@ -5,6 +5,7 @@ import {cn} from '@/lib/utils';
 import {Shirt, Plus, Trash2, Check, Languages, Loader2} from 'lucide-react';
 import type {Collection, Locale, Model} from '@/types';
 import {clientTranslate, DEEPL_TARGET_CODE} from '@/lib/translation';
+import {toggleCollectionSlugs} from '@/lib/collections';
 
 const NAME_LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
   {key: 'fr', label: 'Français', dir: 'ltr'},
@@ -81,9 +82,7 @@ export function ModelsManager({
   initialModels: Model[];
 }) {
   const [models, setModels] = useState<Model[]>(initialModels);
-  const [selectedCollections, setSelectedCollections] = useState<string[]>(() =>
-    collections[0] ? [collections[0].slug] : []
-  );
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [names, setNames] = useState<{fr: string; en: string; ar: string}>({
     fr: '',
     en: '',
@@ -103,9 +102,7 @@ export function ModelsManager({
   const canAdd = selectedCollections.length > 0 && autoSlug !== '';
 
   const toggleCollection = (value: string) =>
-    setSelectedCollections((prev) =>
-      prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
-    );
+    setSelectedCollections((prev) => toggleCollectionSlugs(prev, value));
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,7 +239,7 @@ export function ModelsManager({
       </section>
 
       {/* Lists grouped by collection */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {collections.map((col) => {
           const list = models
             .filter((m) => m.collectionSlugs.includes(col.slug))

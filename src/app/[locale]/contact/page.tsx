@@ -5,6 +5,8 @@ import {ContactForm} from '@/components/forms/ContactForm';
 import {MapPin, Phone, MessageCircle} from 'lucide-react';
 import {getSiteSettings} from '@/lib/data/store';
 import {resolveContact} from '@/lib/siteSettings';
+import {staticAlternates} from '@/lib/seo/productUrls';
+import type {Locale} from '@/types';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -13,7 +15,11 @@ type Props = {
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: 'seo.contact'});
-  return {title: t('title'), description: t('description')};
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: staticAlternates('/contact', locale as Locale)
+  };
 }
 
 export default async function ContactPage({params}: Props) {

@@ -39,6 +39,9 @@ CREATE TABLE IF NOT EXISTS products (
   characteristics_fr TEXT NOT NULL DEFAULT '[]',
   characteristics_ar TEXT NOT NULL DEFAULT '[]',
   characteristics_en TEXT NOT NULL DEFAULT '[]',
+  seo_fr TEXT NOT NULL DEFAULT '{}',
+  seo_ar TEXT NOT NULL DEFAULT '{}',
+  seo_en TEXT NOT NULL DEFAULT '{}',
   images TEXT NOT NULL DEFAULT '[]',
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -89,26 +92,5 @@ CREATE INDEX IF NOT EXISTS idx_model_collections_collection ON model_collections
 CREATE TABLE IF NOT EXISTS site_settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS inquiries (
-  id TEXT PRIMARY KEY,
-  product_name TEXT NOT NULL,
-  reference TEXT NOT NULL,
-  color TEXT NOT NULL,
-  quantity INTEGER NOT NULL DEFAULT 1,
-  locale TEXT NOT NULL DEFAULT 'fr',
-  read INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_inquiries_reference ON inquiries(reference);
-
--- Running per-reference counter so "Produits les plus demandés" stays
--- accurate forever even after old raw inquiry rows are pruned.
-CREATE TABLE IF NOT EXISTS inquiry_counts (
-  reference TEXT PRIMARY KEY,
-  n INTEGER NOT NULL DEFAULT 0,
-  updated_at TEXT
 );
 `;

@@ -43,7 +43,9 @@
       "tekchita": "أقمشة التكشيطة",
       "caftanShort": "الكفتان",
       "jellabaShort": "الجلابة",
-      "tekchitaShort": "التكشيطة"
+      "tekchitaShort": "التكشيطة",
+      "hommeShort": "رجال",
+      "femmeShort": "نساء"
     }
   },
   "home": {
@@ -334,7 +336,11 @@
   },
   "collections": {
     "title": "مجموعاتنا",
-    "subtitle": "اكتشفوا مجموعتنا من الأقمشة الفاخرة"
+    "subtitle": "اكتشفوا مجموعتنا من الأقمشة الفاخرة",
+    "homme": "رجال",
+    "femme": "نساء",
+    "hommeSubtitle": "أقمشة وإبداعات للرجال",
+    "femmeSubtitle": "قفاطين، جلابات وتكاشيط"
   },
   "confirmation": {
     "title": "تأكيد معلوماتك",

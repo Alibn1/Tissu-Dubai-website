@@ -31,7 +31,7 @@ export function getDb(): DbHandle {
       migrateSchema(database);
       database.exec(SCHEMA_SQL);
       seedIfEmpty(database);
-      backfillInquiryCounts(database);
+      ensureDefaultCollections(database);
       database.exec('COMMIT;');
     } catch (error) {
       try {
@@ -57,7 +57,7 @@ export function getDb(): DbHandle {
       migrateSchema(database);
       database.exec(SCHEMA_SQL);
       seedIfEmpty(database);
-      backfillInquiryCounts(database);
+      ensureDefaultCollections(database);
     } catch (seedError) {
       console.error('[db] failed to initialise in-memory database:', seedError instanceof Error ? seedError.message : seedError);
     }
@@ -111,8 +111,31 @@ function migrateSchema(database: DbHandle) {
   // reshaping is a no-op there.
   if (database instanceof WorkersDatabase) return;
 
+  // A fresh database has no `products` table yet (SCHEMA_SQL creates it right
+  // after this), so only widen tables that already exist.
+  if (names.size > 0) addMissingProductColumns(database, names);
+
   migrateModelsToJunction(database);
   migrateProductsToJunction(database);
+}
+
+/** Columns added to `products` after the table was first shipped. */
+const ADDED_PRODUCT_COLUMNS: Record<string, string> = {
+  width: "ALTER TABLE products ADD COLUMN width TEXT NOT NULL DEFAULT ''",
+  is_new: 'ALTER TABLE products ADD COLUMN is_new INTEGER NOT NULL DEFAULT 0',
+  seo_fr: "ALTER TABLE products ADD COLUMN seo_fr TEXT NOT NULL DEFAULT '{}'",
+  seo_ar: "ALTER TABLE products ADD COLUMN seo_ar TEXT NOT NULL DEFAULT '{}'",
+  seo_en: "ALTER TABLE products ADD COLUMN seo_en TEXT NOT NULL DEFAULT '{}'",
+};
+
+function addMissingProductColumns(
+  database: Exclude<DbHandle, WorkersDatabase>,
+  existing: Set<string>
+) {
+  for (const [column, statement] of Object.entries(ADDED_PRODUCT_COLUMNS)) {
+    if (existing.has(column)) continue;
+    database.exec(statement);
+  }
 }
 
 type ProductRowForMigration = {
@@ -227,21 +250,54 @@ function seedIfEmpty(database: DbHandle) {
   seedDatabase(database);
 }
 
+type CollectionSeedRow = {
+  slug: string;
+};
+
 /**
- * One-time migration: materialise `inquiry_counts` from the raw rows that
- * existed before the counter table was introduced. Idempotent — after the
- * first successful run, `inquiry_counts` is non-empty and the `WHERE`
- * guard skips it entirely (new rows keep the counter authoritative).
+ * Idempotently adds any default collection missing from an existing database
+ * (e.g. `homme` created after the initial seed). Uses an upsert on the file
+ * database so names/descriptions stay aligned with the mocks, and the plain
+ * INSERT upsert-by-id on the in-memory Workers fallback, which only supports
+ * the closed statement set.
  */
-function backfillInquiryCounts(database: DbHandle) {
-  const {count} = database.prepare('SELECT COUNT(*) AS count FROM inquiry_counts').get() as {count: number};
-  if (count > 0) return;
-  database
-    .prepare(
-      `INSERT INTO inquiry_counts (reference, n, updated_at)
-       SELECT reference, COUNT(*) AS n, MAX(created_at) FROM inquiries GROUP BY reference`
-    )
-    .run();
+function ensureDefaultCollections(database: DbHandle) {
+  // The in-memory Workers fallback boots from mock data every time, so it is
+  // always fully seeded; only the file database can predate newer collections.
+  if (database instanceof WorkersDatabase) return;
+
+  const rows = database.prepare('SELECT slug FROM collections').all() as CollectionSeedRow[];
+  const existing = new Set(rows.map((row) => row.slug));
+
+  const insertCollection = database.prepare(
+    `INSERT INTO collections (id, slug, name_fr, name_ar, name_en, description_fr, description_ar, description_en, image, sort_order, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(slug) DO UPDATE SET
+       name_fr = excluded.name_fr,
+       name_ar = excluded.name_ar,
+       name_en = excluded.name_en,
+       description_fr = excluded.description_fr,
+       description_ar = excluded.description_ar,
+       description_en = excluded.description_en,
+       image = excluded.image`
+  );
+
+  mockCollections.forEach((cat, index) => {
+    if (existing.has(cat.slug)) return;
+    insertCollection.run(
+      cat.id,
+      cat.slug,
+      cat.name.fr,
+      cat.name.ar,
+      cat.name.en,
+      cat.description.fr,
+      cat.description.ar,
+      cat.description.en,
+      cat.image,
+      index,
+      new Date().toISOString()
+    );
+  });
 }
 
 function seedDatabase(database: DbHandle) {

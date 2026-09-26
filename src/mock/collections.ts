@@ -36,5 +36,17 @@ export const collections: Collection[] = [
     },
     image: '/images/categories/tekchita.svg',
     productCount: 4
+  },
+  {
+    id: 'cat-4',
+    slug: 'homme',
+    name: {fr: 'Homme', ar: 'رجال', en: 'Men'},
+    description: {
+      fr: 'Tissus et créations pour homme',
+      ar: 'أقمشة وأزياء الرجال',
+      en: 'Fabrics and creations for men'
+    },
+    image: '/images/categories/homme.svg',
+    productCount: 0
   }
 ];

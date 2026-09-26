@@ -1,6 +1,6 @@
 'use client';
 
-import {Fragment, useEffect, useState} from 'react';
+import {Fragment, useState} from 'react';
 import {useTranslations} from 'next-intl';
 import {MessageCircle} from 'lucide-react';
 import {Modal} from '@/components/ui/Modal';
@@ -77,7 +77,12 @@ export function WhatsAppConfirmationFlow({
   const [errors, setErrors] = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevFields, setPrevFields] = useState(fields);
+
+  if (open !== prevOpen || fields !== prevFields) {
+    setPrevOpen(open);
+    setPrevFields(fields);
     if (open) {
       setStep(1);
       setTouched({});
@@ -86,7 +91,7 @@ export function WhatsAppConfirmationFlow({
         Object.fromEntries(fields.map((f) => [f.name, f.value ?? '']))
       );
     }
-  }, [open, fields]);
+  }
 
   if (!open) return null;
 

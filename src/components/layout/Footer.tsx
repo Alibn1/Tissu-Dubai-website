@@ -41,9 +41,8 @@ export function Footer({siteSettings}: {siteSettings: SiteSettings}) {
   const tiktok = contact.social.tiktok;
 
   const collections = [
-    {label: t('nav.fabrics.caftanShort'), href: '/collections/caftan'},
-    {label: t('nav.fabrics.jellabaShort'), href: '/collections/jellaba'},
-    {label: t('nav.fabrics.tekchitaShort'), href: '/collections/tekchita'}
+    {label: t('nav.fabrics.hommeShort'), href: '/collections/homme'},
+    {label: t('nav.fabrics.femmeShort'), href: '/collections/femme'}
   ];
 
   return (

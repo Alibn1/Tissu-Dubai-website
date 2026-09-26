@@ -7,9 +7,12 @@ import {Save, Loader2, Check} from 'lucide-react';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';
 import {ModelSelect} from '@/components/admin/ModelSelect';
 import {ColorVariantsEditor, type ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
+import {ProductSeoFields} from '@/components/admin/ProductSeoFields';
 import type {Collection, Locale, Product, Model} from '@/types';
 import type {ProductTranslations, TranslatableFieldKey} from '@/lib/translation';
 import {missingVariantImageMessage} from '@/lib/variantValidation';
+import {toggleCollectionSlugs} from '@/lib/collections';
+import {normalizeSeo, type ProductSeoByLanguage, type SeoFieldKey} from '@/lib/productSeo';
 
 type Props = {
   product: Product;
@@ -65,9 +68,7 @@ export function ProductEditForm({product, models, collections}: Props) {
   });
 
   const toggleCollection = (slug: string) => {
-    const next = collectionSlugs.includes(slug)
-      ? collectionSlugs.filter((s) => s !== slug)
-      : [...collectionSlugs, slug];
+    const next = toggleCollectionSlugs(collectionSlugs, slug);
     const modelStillValid = models.some(
       (m) => m.id === modelId && m.collectionSlugs.some((s) => next.includes(s))
     );
@@ -109,6 +110,22 @@ export function ProductEditForm({product, models, collections}: Props) {
     featured: product.featured,
     isNew: product.isNew,
   });
+
+  const [seo, setSeo] = useState<ProductSeoByLanguage>(() => normalizeSeo(product.seo));
+
+  // Typing over auto-filled text means the admin takes control of that
+  // language; the value and the toggle move together so no keystroke is lost.
+  const editSeoField = (lang: Locale, field: SeoFieldKey, value: string) =>
+    setSeo((prev) => {
+      const current = prev[lang];
+      const next = current.enabled
+        ? {...current, [field]: value}
+        : {...current, [field]: value, enabled: true};
+      return {...prev, [lang]: next};
+    });
+
+  const setSeoEnabled = (lang: Locale, enabled: boolean) =>
+    setSeo((prev) => ({...prev, [lang]: {...prev[lang], enabled}}));
 
   const [colorVariants, setColorVariants] = useState<ColorVariantForm[]>(() =>
     (product.variants ?? []).map((v, idx) => ({
@@ -230,6 +247,7 @@ export function ProductEditForm({product, models, collections}: Props) {
           featured: formData.featured,
           isNew: formData.isNew,
           variants: buildVariants(),
+          seo,
         }),
       });
 
@@ -322,9 +340,15 @@ export function ProductEditForm({product, models, collections}: Props) {
           <div className="w-full sm:w-64 lg:w-60">
             <label className={labelClass}>Prix de base (MAD)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               value={formData.price}
-              onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : Number(e.target.value)})}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  price: e.target.value.replace(/[^0-9.]/g, '').replace(/\.(?=.*\.)/g, ''),
+                })
+              }
               className={inputClass}
               placeholder="Laisser vide pour un prix sur demande"
             />
@@ -374,6 +398,18 @@ export function ProductEditForm({product, models, collections}: Props) {
           invalidIds={variantError?.ids ?? []}
         />
       </section>
+
+      {/* SEO */}
+      <ProductSeoFields
+        seo={seo}
+        content={{
+          en: {name: translations.en.name, description: translations.en.description},
+          fr: {name: translations.fr.name, description: translations.fr.description},
+          ar: {name: translations.ar.name, description: translations.ar.description},
+        }}
+        onFieldEdit={editSeoField}
+        onEnabledChange={setSeoEnabled}
+      />
 
       {/* Save */}
       {variantError && (

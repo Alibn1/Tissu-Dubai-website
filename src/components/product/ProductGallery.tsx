@@ -5,6 +5,7 @@ import {useTranslations} from 'next-intl';
 import {cn} from '@/lib/utils';
 import {type Product, type Locale, type ProductVariant} from '@/types';
 import {Expand} from 'lucide-react';
+import {resolveSeoValue} from '@/lib/productSeo';
 
 type ProductGalleryProps = {
   product: Product;
@@ -24,13 +25,22 @@ export function ProductGallery({
   const selected = variants[selectedVariant];
   const mainImage = selected?.images?.[0] || product.images?.[0] || '/images/products/product-1.svg';
 
+  // The admin can override the accessible description of the product photo;
+  // without one we keep the localized product name.
+  const productAlt = resolveSeoValue(
+    product.seo,
+    locale,
+    'altImage',
+    product.name[locale] || product.name.fr
+  );
+
   return (
     <div className="space-y-3">
       {/* Main Image */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-md border border-brand-border bg-brand-light">
         <Image
           src={mainImage}
-          alt={product.name[locale] || product.name.fr}
+          alt={productAlt}
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 50vw"

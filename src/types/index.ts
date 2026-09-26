@@ -1,5 +1,16 @@
 export type Locale = 'fr' | 'ar' | 'en';
 
+/** Per-language SEO overrides for a product. Empty values fall back to the
+ *  auto-generated text, so an admin only fills in what they want to change. */
+export type ProductSeo = {
+  title: string;
+  metaDescription: string;
+  altImage: string;
+  enabled: boolean;
+};
+
+export type ProductSeoByLanguage = Record<Locale, ProductSeo>;
+
 export type ProductVariant = {
   id: string;
   color: Record<Locale, string>;
@@ -27,6 +38,7 @@ export type Product = {
   isNew: boolean;
   images: string[];
   characteristics: Record<Locale, string[]>;
+  seo?: ProductSeoByLanguage;
 };
 
 export type Collection = {

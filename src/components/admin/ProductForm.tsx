@@ -13,20 +13,23 @@ import {
   type TranslatableFieldKey,
 } from '@/lib/translation';
 import {missingVariantImageMessage} from '@/lib/variantValidation';
-import {Package, Palette, Search as SearchIcon, Check, Loader2, Trash2} from 'lucide-react';
+import {toggleCollectionSlugs} from '@/lib/collections';
+import {ProductSeoFields} from '@/components/admin/ProductSeoFields';
+import {
+  createEmptySeo,
+  type ProductSeo,
+  type ProductSeoByLanguage,
+  type SeoFieldKey,
+} from '@/lib/productSeo';
+import {Package, Palette, Check, Loader2, Trash2} from 'lucide-react';
 
 // ── Types ──
 
 export type {ColorVariantForm} from '@/components/admin/ColorVariantsEditor';
 
-export interface SeoFieldsForm {
-  title: string;
-  metaDescription: string;
-  altImage: string;
-  enabled: boolean;
-}
+export type SeoFieldsForm = ProductSeo;
 
-export type SeoByLanguage = Record<Locale, SeoFieldsForm>;
+export type SeoByLanguage = ProductSeoByLanguage;
 
 export interface ProductFormData {
   collectionSlugs: string[];
@@ -45,12 +48,6 @@ export interface ProductFormData {
 
 // ── Constants ──
 
-const LANGUAGES: {key: Locale; label: string; dir: 'ltr' | 'rtl'}[] = [
-  {key: 'fr', label: 'Français', dir: 'ltr'},
-  {key: 'en', label: 'English', dir: 'ltr'},
-  {key: 'ar', label: 'العربية', dir: 'rtl'},
-];
-
 const inputClass = cn(
   'w-full rounded-md border border-brand-border bg-brand-surface px-3 py-2 text-sm text-brand-secondary',
   'placeholder:text-brand-muted/70',
@@ -60,14 +57,6 @@ const inputClass = cn(
 const labelClass = 'block text-sm font-medium text-brand-secondary mb-1';
 
 // ── Helpers ──
-
-function createEmptySeo(): SeoByLanguage {
-  return {
-    en: {title: '', metaDescription: '', altImage: '', enabled: false},
-    fr: {title: '', metaDescription: '', altImage: '', enabled: false},
-    ar: {title: '', metaDescription: '', altImage: '', enabled: false},
-  };
-}
 
 const uidCounter = 0;
 
@@ -87,24 +76,6 @@ export function createEmptyFormData(): ProductFormData {
     seo: createEmptySeo(),
   };
 }
-
-function generateSeoTitle(lang: Locale, name: string): string {
-  if (lang === 'ar') return `لـ ${name} | تيسو دبي`;
-  if (lang === 'fr') return `pour ${name} | Tissu Dubai`;
-  return `for ${name} | Tissu Dubai`;
-}
-
-function generateSeoDescription(lang: Locale, name: string): string {
-  if (lang === 'ar') return `${name}. جديد. تواصل مع تيسو دبي للحصول على عرض سعر، توصيل لجميع أنحاء المغرب.`;
-  if (lang === 'fr') return `${name}. Nouveau. Contactez Tissu Dubai pour un devis, livraison partout au Maroc.`;
-  return `${name}. New. Contact Tissu Dubai for a quote, delivery across Morocco.`;
-}
-
-function generateSeoAltImage(_lang: Locale, name: string): string {
-  return name;
-}
-
-type SeoFieldKey = keyof Omit<SeoFieldsForm, 'enabled'>;
 
 // ── Sub components ──
 
@@ -130,73 +101,6 @@ function Section({
       </div>
       <div className="p-5">{children}</div>
     </section>
-  );
-}
-
-function Toggle({checked, onChange}: {checked: boolean; onChange: (v: boolean) => void}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label="Activer les champs SEO personnalisés"
-      onClick={() => onChange(!checked)}
-      className={cn(
-        'relative h-5 w-9 shrink-0 rounded-full transition-colors',
-        checked ? 'bg-brand-primary' : 'bg-brand-light'
-      )}
-    >
-      <span
-        className={cn(
-          'absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all',
-          checked ? 'left-[18px]' : 'left-0.5'
-        )}
-      />
-    </button>
-  );
-}
-
-function SeoField({
-  label,
-  value,
-  placeholder,
-  final,
-  textarea,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  placeholder: string;
-  final: string;
-  textarea?: boolean;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div>
-      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-brand-muted">
-        {label}
-      </label>
-      {textarea ? (
-        <textarea
-          rows={3}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={cn(inputClass, 'resize-none')}
-        />
-      ) : (
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={inputClass}
-        />
-      )}
-      <p className="mt-1 text-xs text-brand-muted">
-        Final:{' '}
-        <span className="font-medium text-brand-primary">{final || '—'}</span>
-      </p>
-    </div>
   );
 }
 
@@ -226,25 +130,37 @@ export function ProductForm({mode, productId, initialData, collections, models}:
   const [referenceError, setReferenceError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [variantError, setVariantError] = useState<{ids: string[]; message: string} | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const [translations, setTranslations] = useState<ProductTranslations>(createEmptyTranslations);
 
-  const setTranslationValue = (lang: Locale, field: TranslatableFieldKey, value: string) =>
+  const setTranslationValue = (lang: Locale, field: TranslatableFieldKey, value: string) => {
+    setSubmitError(null);
     setTranslations((prev) => ({
       ...prev,
       [lang]: {...prev[lang], [field]: value},
     }));
+  };
 
   const setField = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) =>
-    setFormData((f) => ({...f, [key]: value}));
+    setFormData((f) => {
+      // Any edit means the admin is addressing the last failure.
+      setSubmitError(null);
+      return {...f, [key]: value};
+    });
 
   const setSeoField = (lang: Locale, field: SeoFieldKey, value: string) =>
-    setFormData((f) => ({
-      ...f,
-      seo: {...f.seo, [lang]: {...f.seo[lang], [field]: value}},
-    }));
+    setFormData((f) => {
+      const current = f.seo[lang];
+      // Typing over auto-filled text means the admin takes control of that
+      // language; value and toggle move together so no keystroke is lost.
+      const next = current.enabled
+        ? {...current, [field]: value}
+        : {...current, [field]: value, enabled: true};
+      return {...f, seo: {...f.seo, [lang]: next}};
+    });
 
   const setSeoEnabled = (lang: Locale, enabled: boolean) =>
     setFormData((f) => ({
@@ -254,9 +170,7 @@ export function ProductForm({mode, productId, initialData, collections, models}:
 
   const toggleCollection = (slug: string) =>
     setFormData((f) => {
-      const next = f.collectionSlugs.includes(slug)
-        ? f.collectionSlugs.filter((s) => s !== slug)
-        : [...f.collectionSlugs, slug];
+      const next = toggleCollectionSlugs(f.collectionSlugs, slug);
       const modelStillValid = models.some(
         (m) => m.id === f.modelId && m.collectionSlugs.some((s) => next.includes(s))
       );
@@ -289,12 +203,6 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       });
       return stillMissing.length === 0 ? null : {...prev, ids: stillMissing};
     });
-  };
-
-  const resolveFinal = (lang: Locale, field: SeoFieldKey, auto: string) => {
-    const seo = formData.seo[lang];
-    const override = seo[field]?.trim();
-    return seo.enabled && override ? override : auto;
   };
 
   // Build the payload to send — swap with a real API call later.
@@ -436,7 +344,21 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       }
     );
 
-    return res.ok;
+    if (res.ok) {
+      setSubmitError(null);
+      return true;
+    }
+
+    // The API explains what is missing; surface it instead of failing silently.
+    let message = `Enregistrement impossible (HTTP ${res.status}).`;
+    try {
+      const data = await res.json();
+      if (typeof data?.error === 'string' && data.error.trim()) message = data.error;
+    } catch {
+      // Non-JSON error body: keep the generic message.
+    }
+    setSubmitError(message);
+    return false;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -609,9 +531,12 @@ export function ProductForm({mode, productId, initialData, collections, models}:
           <div>
             <label className={labelClass}>Prix (MAD)</label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               value={formData.price}
-              onChange={(e) => setField('price', e.target.value === '' ? '' : e.target.value)}
+              onChange={(e) =>
+                setField('price', e.target.value.replace(/[^0-9.]/g, '').replace(/\.(?=.*\.)/g, ''))
+              }
               className={inputClass}
               placeholder="Laisser vide pour prix sur demande"
             />
@@ -728,66 +653,25 @@ export function ProductForm({mode, productId, initialData, collections, models}:
       </Section>
 
       {/* ── 3. SEO Management ── */}
-      <Section
-        icon={SearchIcon}
-        title="SEO (aperçu par langue)"
-        subtitle="Aperçu en direct du titre et de la description pour chaque langue ; laissez un champ vide pour utiliser la valeur générée automatiquement, ou saisissez du texte pour la remplacer"
-      >
-        <div className="grid grid-cols-1 gap-0 divide-y divide-brand-border md:grid-cols-3 md:divide-x md:divide-y-0">
-          {LANGUAGES.map((lang) => {
-            const seo = formData.seo[lang.key];
-            const localizedName = translations[lang.key].name;
-            const autoTitle = generateSeoTitle(lang.key, localizedName);
-            const autoDescription = generateSeoDescription(lang.key, localizedName);
-            const autoAltImage = generateSeoAltImage(lang.key, localizedName);
-
-            return (
-              <div key={lang.key} dir={lang.dir} className="p-5">
-                <div className="mb-5 flex items-center justify-between gap-3">
-                  <span className="text-sm font-bold uppercase tracking-wide text-brand-secondary">
-                    {lang.label}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-brand-muted">
-                      {seo.enabled ? 'Personnalisé' : 'Auto'}
-                    </span>
-                    <Toggle checked={seo.enabled} onChange={(v) => setSeoEnabled(lang.key, v)} />
-                  </div>
-                </div>
-
-                <div className="space-y-5">
-                  <SeoField
-                    label="Titre"
-                    value={seo.title}
-                    onChange={(v) => setSeoField(lang.key, 'title', v)}
-                    placeholder={autoTitle || '…'}
-                    final={resolveFinal(lang.key, 'title', autoTitle)}
-                  />
-                  <SeoField
-                    label="Meta description"
-                    textarea
-                    value={seo.metaDescription}
-                    onChange={(v) => setSeoField(lang.key, 'metaDescription', v)}
-                    placeholder={autoDescription || '…'}
-                    final={resolveFinal(lang.key, 'metaDescription', autoDescription)}
-                  />
-                  <SeoField
-                    label="Alt image"
-                    value={seo.altImage}
-                    onChange={(v) => setSeoField(lang.key, 'altImage', v)}
-                    placeholder={autoAltImage || '…'}
-                    final={resolveFinal(lang.key, 'altImage', autoAltImage)}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Section>
+      <ProductSeoFields
+        seo={formData.seo}
+        content={{
+          en: {name: translations.en.name, description: translations.en.description},
+          fr: {name: translations.fr.name, description: translations.fr.description},
+          ar: {name: translations.ar.name, description: translations.ar.description},
+        }}
+        onFieldEdit={setSeoField}
+        onEnabledChange={setSeoEnabled}
+      />
 
       {/* ── Submit ── */}
       {variantError && (
         <p className="text-sm font-medium text-brand-error">{variantError.message}</p>
+      )}
+      {submitError && (
+        <p role="alert" className="rounded-md border border-brand-error bg-brand-error/10 px-3 py-2 text-sm font-medium text-brand-error">
+          {submitError}
+        </p>
       )}
       <div className="flex items-center gap-4">
         <button
