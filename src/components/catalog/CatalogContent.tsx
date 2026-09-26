@@ -15,6 +15,7 @@ type CatalogContentProps = {
   locale: string;
   activeCollection?: string;
   hideCollectionsFilter?: boolean;
+  collectionFilterSlugs?: readonly string[];
 };
 
 const SORT_OPTIONS = [
@@ -31,7 +32,8 @@ export function CatalogContent({
   models,
   locale,
   activeCollection,
-  hideCollectionsFilter = false
+  hideCollectionsFilter = false,
+  collectionFilterSlugs
 }: CatalogContentProps) {
   const t = useTranslations();
   const loc = locale as Locale;
@@ -254,6 +256,7 @@ export function CatalogContent({
             onClear={clearAllFilters}
             activeFilterCount={activeFilterCount}
             hideCollectionsFilter={hideCollectionsFilter}
+            collectionFilterSlugs={collectionFilterSlugs}
           />
         </aside>
 
@@ -319,6 +322,7 @@ export function CatalogContent({
                 activeTab={activeFilterTab}
                 setActiveTab={setActiveFilterTab}
                 hideCollectionsFilter={hideCollectionsFilter}
+                collectionFilterSlugs={collectionFilterSlugs}
               />
             </div>
 
@@ -360,7 +364,8 @@ function FilterSidebar({
   locale,
   onClear,
   activeFilterCount,
-  hideCollectionsFilter
+  hideCollectionsFilter,
+  collectionFilterSlugs
 }: {
   filters: FilterState;
   toggleFilter: (type: keyof FilterState, value: string) => void;
@@ -371,6 +376,7 @@ function FilterSidebar({
   onClear: () => void;
   activeFilterCount: number;
   hideCollectionsFilter?: boolean;
+  collectionFilterSlugs?: readonly string[];
 }) {
   const t = useTranslations('catalog.filters');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -382,6 +388,10 @@ function FilterSidebar({
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({...prev, [section]: !prev[section]}));
   };
+
+  const visibleCollections = collectionFilterSlugs
+    ? collections.filter((c) => collectionFilterSlugs.includes(c.slug))
+    : collections;
 
   return (
     <div className="space-y-1">
@@ -395,9 +405,9 @@ function FilterSidebar({
       )}
 
       {/* Collections */}
-      {!hideCollectionsFilter && (
+      {!hideCollectionsFilter && visibleCollections.length > 0 && (
         <FilterSection title={t('collections')} expanded={expandedSections.collections} onToggle={() => toggleSection('collections')}>
-          {collections.map((cat) => (
+          {visibleCollections.map((cat) => (
             <Checkbox
               key={cat.id}
               checked={filters.collections.includes(cat.slug)}
@@ -480,7 +490,8 @@ function FilterContent({
   locale,
   activeTab,
   setActiveTab,
-  hideCollectionsFilter
+  hideCollectionsFilter,
+  collectionFilterSlugs
 }: {
   filters: FilterState;
   toggleFilter: (type: keyof FilterState, value: string) => void;
@@ -491,11 +502,18 @@ function FilterContent({
   activeTab: string;
   setActiveTab: (tab: string) => void;
   hideCollectionsFilter?: boolean;
+  collectionFilterSlugs?: readonly string[];
 }) {
   const t = useTranslations('catalog.filters');
 
+  const visibleCollections = collectionFilterSlugs
+    ? collections.filter((c) => collectionFilterSlugs.includes(c.slug))
+    : collections;
+
   const tabs = [
-    ...(hideCollectionsFilter ? [] : [{id: 'collections', label: t('collections')}]),
+    ...(hideCollectionsFilter || visibleCollections.length === 0
+      ? []
+      : [{id: 'collections', label: t('collections')}]),
     ...(models.length > 0 ? [{id: 'materials', label: t('materials')}] : []),
     {id: 'availability', label: t('availability')}
   ];
@@ -526,7 +544,7 @@ function FilterContent({
       <div>
         {currentTab === 'collections' && (
           <div className="space-y-1">
-            {collections.map((cat) => (
+            {visibleCollections.map((cat) => (
               <Checkbox
                 key={cat.id}
                 checked={filters.collections.includes(cat.slug)}

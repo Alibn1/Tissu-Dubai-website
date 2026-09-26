@@ -7,6 +7,7 @@ import {getModels} from '@/lib/data/store';
 import {CatalogContent} from '@/components/catalog/CatalogContent';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 import {collectionAlternates} from '@/lib/seo/productUrls';
+import {WOMEN_COLLECTION_SLUGS} from '@/lib/siteSettings';
 import type {Locale} from '@/types';
 
 type Props = {
@@ -66,6 +67,9 @@ export default async function CollectionPage({params}: Props) {
           locale={locale}
           activeCollection={collection}
           hideCollectionsFilter={collection === 'homme'}
+          collectionFilterSlugs={
+            WOMEN_COLLECTION_SLUGS.includes(collection) ? WOMEN_COLLECTION_SLUGS : undefined
+          }
         />
       </div>
     </section>
