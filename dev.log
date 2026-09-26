@@ -1,0 +1,359 @@
+
+> tissudubai@0.1.0 dev
+> cross-env NODE_OPTIONS=--experimental-sqlite next dev
+
+▲ Next.js 16.3.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.11.104:3000
+- Environments: .env.local
+✓ Ready in 1325ms
+✓ Running next.config.ts took 324ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+
+  To migrate automatically, run:
+  npx @next/codemod@canary middleware-to-proxy .
+
+  Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+- Experiments (use with caution):
+  ⨯ turbopackFileSystemCacheForBuild
+
+○ Compiling /[locale]/collections/[collection] ...
+(node:17356) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12984) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/admin/login 200 in 9.4s (next.js: 4.9s, proxy.ts: 205ms, generate-params: 1159ms, application-code: 3.2s)
+ GET /fr/collections/caftan 200 in 11.7s (next.js: 4.8s, proxy.ts: 211ms, generate-params: 2.1s, application-code: 4.5s)
+[browser] Image with src "/images/products/product-14.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+ GET /fr/collections/caftan 200 in 1050ms (next.js: 29ms, proxy.ts: 21ms, generate-params: 9ms, application-code: 991ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:14760) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/admin/login 200 in 135ms (next.js: 20ms, proxy.ts: 8ms, generate-params: 9ms, application-code: 98ms)
+(node:16804) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections/caftan 200 in 860ms (next.js: 14ms, proxy.ts: 9ms, generate-params: 8ms, application-code: 829ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:18188) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6600) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en 200 in 2.9s (next.js: 1291ms, proxy.ts: 9ms, generate-params: 1115ms, application-code: 510ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+ GET /fr 200 in 379ms (next.js: 19ms, proxy.ts: 14ms, generate-params: 12ms, application-code: 335ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+(node:12356) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:8516) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections 200 in 2.1s (next.js: 686ms, proxy.ts: 12ms, generate-params: 1262ms, application-code: 170ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 389ms (next.js: 18ms, proxy.ts: 13ms, generate-params: 9ms, application-code: 350ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+(node:5288) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections/caftan 200 in 939ms (next.js: 15ms, proxy.ts: 12ms, generate-params: 8ms, application-code: 903ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:10464) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections/caftan 200 in 881ms (next.js: 17ms, proxy.ts: 7ms, generate-params: 9ms, application-code: 848ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:17160) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17904) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections/caftan 200 in 4.1s (next.js: 36ms, proxy.ts: 14ms, generate-params: 21ms, application-code: 4.0s)
+✓ Compiled in 327ms
+ GET /fr/admin/login 200 in 693ms (next.js: 160ms, proxy.ts: 195ms, generate-params: 17ms, application-code: 320ms)
+ GET /fr/collections/caftan 200 in 1839ms (next.js: 75ms, proxy.ts: 18ms, generate-params: 13ms, application-code: 1734ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:17952) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3528) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:13228) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections/caftan 200 in 3.8s (next.js: 51ms, proxy.ts: 12ms, generate-params: 14ms, application-code: 3.7s)
+ GET /fr/collections/caftan 200 in 905ms (next.js: 15ms, proxy.ts: 11ms, generate-params: 10ms, application-code: 869ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:11348) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ Compiled in 338ms
+ GET /fr/admin/login 200 in 407ms (next.js: 259ms, proxy.ts: 9ms, generate-params: 10ms, application-code: 130ms)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 775ms (next.js: 55ms, proxy.ts: 13ms, generate-params: 11ms, application-code: 696ms)
+(node:15184) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17864) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ Compiled in 282ms
+ GET /fr/admin/login 200 in 346ms (next.js: 37ms, proxy.ts: 10ms, generate-params: 15ms, application-code: 284ms)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 645ms (next.js: 151ms, proxy.ts: 8ms, generate-params: 11ms, application-code: 475ms)
+(node:1788) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12276) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2604) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections/caftan 200 in 6.7s (next.js: 17ms, proxy.ts: 15ms, generate-params: 10ms, application-code: 6.6s)
+ GET /fr/collections/caftan 200 in 1462ms (next.js: 17ms, proxy.ts: 10ms, generate-params: 8ms, application-code: 1426ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:15788) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 611ms (next.js: 65ms, proxy.ts: 7ms, generate-params: 14ms, application-code: 525ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+(node:1360) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections 200 in 126ms (next.js: 30ms, proxy.ts: 8ms, generate-params: 13ms, application-code: 75ms)
+(node:15308) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 612ms (next.js: 31ms, proxy.ts: 5ms, generate-params: 14ms, application-code: 562ms)
+(node:4900) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 535ms (next.js: 51ms, proxy.ts: 7ms, generate-params: 19ms, application-code: 459ms)
+(node:4288) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en 200 in 627ms (next.js: 56ms, proxy.ts: 9ms, generate-params: 26ms, application-code: 537ms)
+(node:14024) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/admin/login 200 in 379ms (next.js: 262ms, proxy.ts: 8ms, generate-params: 10ms, application-code: 99ms)
+ GET /en 200 in 431ms (next.js: 31ms, proxy.ts: 8ms, generate-params: 6ms, application-code: 386ms)
+ GET /en 200 in 365ms (next.js: 39ms, proxy.ts: 8ms, generate-params: 0.1ms, application-code: 317ms)
+(node:18908) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:14844) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 409ms (next.js: 40ms, proxy.ts: 5ms, generate-params: 7ms, application-code: 358ms)
+(node:17156) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/admin/login 200 in 509ms (next.js: 33ms, proxy.ts: 5ms, generate-params: 6ms, application-code: 464ms)
+ GET /en 200 in 536ms (next.js: 156ms, proxy.ts: 3ms, generate-params: 8ms, application-code: 369ms)
+ GET /fr/admin/login 200 in 104ms (next.js: 16ms, proxy.ts: 8ms, generate-params: 0.1ms, application-code: 80ms)
+(node:9056) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:724) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 295ms (next.js: 17ms, proxy.ts: 4ms, generate-params: 7ms, application-code: 267ms)
+(node:704) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en 200 in 588ms (next.js: 49ms, proxy.ts: 18ms, generate-params: 13ms, application-code: 508ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:20368) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 846ms (next.js: 66ms, proxy.ts: 56ms, generate-params: 36ms, application-code: 688ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+(node:8860) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12148) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/localisation 200 in 3.8s (next.js: 2.6s, proxy.ts: 12ms, generate-params: 957ms, application-code: 230ms)
+ GET /fr/localisation 200 in 107ms (next.js: 28ms, proxy.ts: 9ms, generate-params: 14ms, application-code: 56ms)
+(node:1576) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 463ms (next.js: 43ms, proxy.ts: 8ms, generate-params: 17ms, application-code: 395ms)
+(node:15416) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en 200 in 349ms (next.js: 18ms, proxy.ts: 8ms, generate-params: 14ms, application-code: 310ms)
+(node:720) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ Compiled in 549ms
+ GET /fr/admin/login 200 in 349ms (next.js: 71ms, proxy.ts: 10ms, generate-params: 31ms, application-code: 238ms)
+ GET /en 200 in 893ms (next.js: 45ms, proxy.ts: 11ms, generate-params: 14ms, application-code: 824ms)
+(node:7292) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4820) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 440ms (next.js: 25ms, proxy.ts: 15ms, generate-params: 13ms, application-code: 388ms)
+(node:8872) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en 200 in 480ms (next.js: 13ms, proxy.ts: 6ms, generate-params: 9ms, application-code: 453ms)
+(node:19492) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:19516) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/contact 200 in 2.4s (next.js: 1266ms, proxy.ts: 6ms, generate-params: 967ms, application-code: 112ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /en/localisation 200 in 124ms (next.js: 30ms, proxy.ts: 5ms, generate-params: 14ms, application-code: 76ms)
+(node:5124) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/localisation 200 in 102ms (next.js: 13ms, proxy.ts: 4ms, generate-params: 7ms, application-code: 77ms)
+(node:12620) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 493ms (next.js: 36ms, proxy.ts: 8ms, generate-params: 7ms, application-code: 442ms)
+(node:9968) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/contact 200 in 106ms (next.js: 21ms, proxy.ts: 8ms, generate-params: 13ms, application-code: 64ms)
+(node:2544) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/localisation 200 in 88ms (next.js: 15ms, proxy.ts: 5ms, generate-params: 12ms, application-code: 57ms)
+(node:17424) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en 200 in 348ms (next.js: 13ms, proxy.ts: 4ms, generate-params: 13ms, application-code: 318ms)
+(node:14080) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/localisation 200 in 84ms (next.js: 14ms, proxy.ts: 6ms, generate-params: 12ms, application-code: 52ms)
+(node:18744) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en 200 in 328ms (next.js: 36ms, proxy.ts: 12ms, generate-params: 23ms, application-code: 258ms)
+(node:16108) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en 200 in 485ms (next.js: 17ms, proxy.ts: 8ms, generate-params: 12ms, application-code: 447ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:13556) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 491ms (next.js: 37ms, proxy.ts: 16ms, generate-params: 19ms, application-code: 420ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+(node:13228) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 415ms (next.js: 16ms, proxy.ts: 7ms, generate-params: 11ms, application-code: 380ms)
+(node:8144) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 392ms (next.js: 15ms, proxy.ts: 5ms, generate-params: 11ms, application-code: 361ms)
+(node:11968) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /ar/collections/caftan 200 in 403ms (next.js: 17ms, proxy.ts: 8ms, generate-params: 14ms, application-code: 364ms)
+(node:14212) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 359ms (next.js: 14ms, proxy.ts: 6ms, generate-params: 13ms, application-code: 325ms)
+(node:12948) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 377ms (next.js: 16ms, proxy.ts: 6ms, generate-params: 15ms, application-code: 340ms)
+(node:12364) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ Compiled in 241ms
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 421ms (next.js: 27ms, proxy.ts: 5ms, generate-params: 7ms, application-code: 382ms)
+(node:18344) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 409ms (next.js: 30ms, proxy.ts: 7ms, generate-params: 9ms, application-code: 363ms)
+(node:1044) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 949ms (next.js: 19ms, proxy.ts: 7ms, generate-params: 13ms, application-code: 909ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:16840) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 853ms (next.js: 16ms, proxy.ts: 8ms, generate-params: 14ms, application-code: 816ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:19844) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ Compiled in 118ms
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 500ms (next.js: 29ms, proxy.ts: 10ms, generate-params: 8ms, application-code: 453ms)
+(node:19592) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 400ms (next.js: 30ms, proxy.ts: 11ms, generate-params: 8ms, application-code: 350ms)
+(node:4328) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 789ms (next.js: 16ms, proxy.ts: 5ms, generate-params: 7ms, application-code: 761ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:8168) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 883ms (next.js: 18ms, proxy.ts: 8ms, generate-params: 14ms, application-code: 843ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:14132) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /ar/collections/caftan 200 in 346ms (next.js: 14ms, proxy.ts: 7ms, generate-params: 10ms, application-code: 316ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+(node:6896) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 367ms (next.js: 16ms, proxy.ts: 6ms, generate-params: 13ms, application-code: 333ms)
+(node:17476) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr/collections/caftan 200 in 826ms (next.js: 17ms, proxy.ts: 7ms, generate-params: 13ms, application-code: 788ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:16696) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 375ms (next.js: 22ms, proxy.ts: 10ms, generate-params: 14ms, application-code: 329ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+(node:5736) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ Compiled in 248ms
+ GET /fr/admin/login 200 in 475ms (next.js: 289ms, proxy.ts: 9ms, generate-params: 16ms, application-code: 160ms)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 732ms (next.js: 42ms, proxy.ts: 9ms, generate-params: 9ms, application-code: 672ms)
+(node:6376) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2280) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 388ms (next.js: 33ms, proxy.ts: 10ms, generate-params: 7ms, application-code: 337ms)
+(node:5480) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 1154ms (next.js: 29ms, proxy.ts: 10ms, generate-params: 14ms, application-code: 1100ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:8536) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 997ms (next.js: 17ms, proxy.ts: 7ms, generate-params: 42ms, application-code: 931ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:12960) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ Compiled in 257ms
+ GET /fr/admin/login 200 in 392ms (next.js: 36ms, proxy.ts: 9ms, generate-params: 9ms, application-code: 339ms)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 780ms (next.js: 173ms, proxy.ts: 10ms, generate-params: 21ms, application-code: 577ms)
+(node:19272) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:10904) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 338ms (next.js: 27ms, proxy.ts: 6ms, generate-params: 9ms, application-code: 296ms)
+(node:6752) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 873ms (next.js: 42ms, proxy.ts: 7ms, generate-params: 22ms, application-code: 802ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:7280) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 829ms (next.js: 20ms, proxy.ts: 8ms, generate-params: 16ms, application-code: 784ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:20424) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 353ms (next.js: 15ms, proxy.ts: 5ms, generate-params: 12ms, application-code: 321ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+(node:8668) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /ar/collections/caftan 200 in 421ms (next.js: 45ms, proxy.ts: 5ms, generate-params: 24ms, application-code: 347ms)
+(node:19128) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /ar 200 in 299ms (next.js: 13ms, proxy.ts: 5ms, generate-params: 10ms, application-code: 271ms)
+(node:14960) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /ar/collections 200 in 139ms (next.js: 31ms, proxy.ts: 7ms, generate-params: 13ms, application-code: 87ms)
+(node:11700) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /ar/collections/caftan 200 in 338ms (next.js: 12ms, proxy.ts: 5ms, generate-params: 8ms, application-code: 314ms)
+(node:17376) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /fr/collections/caftan 200 in 366ms (next.js: 24ms, proxy.ts: 8ms, generate-params: 14ms, application-code: 320ms)
+(node:10308) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11928) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 drain listeners added to [Gzip]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+ GET /en/collections/caftan 200 in 412ms (next.js: 13ms, proxy.ts: 7ms, generate-params: 36ms, application-code: 356ms)
+(node:7680) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /en/collections/caftan 200 in 1014ms (next.js: 16ms, proxy.ts: 9ms, generate-params: 9ms, application-code: 980ms)
+[browser] Image with src "/Logo tissudubai.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+(node:12552) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /fr 200 in 379ms (next.js: 11ms, proxy.ts: 8ms, generate-params: 10ms, application-code: 350ms)
+(node:8064) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[?25h
