@@ -7,9 +7,7 @@ import {JsonLd} from '@/lib/seo/JsonLd';
 import {resolveSeoValue} from '@/lib/productSeo';
 import {productAlternates} from '@/lib/seo/productUrls';
 import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
-import {ProductGallery} from '@/components/product/ProductGallery';
 import {ProductView} from '@/components/product/ProductView';
-import {ProductInfo} from '@/components/product/ProductInfo';
 import {ProductDetails} from '@/components/product/ProductDetails';
 import {RelatedProducts} from '@/components/product/RelatedProducts';
 import {type Locale} from '@/types';
@@ -142,7 +140,7 @@ export default async function ProductDetailPage({params}: Props) {
           <ProductDetails product={product} locale={loc} />
 
           {relatedProducts.length > 0 && (
-            <RelatedProducts products={relatedProducts} locale={loc} />
+            <RelatedProducts products={relatedProducts} />
           )}
         </div>
       </section>

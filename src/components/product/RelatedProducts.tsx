@@ -1,14 +1,13 @@
 import {getTranslations} from 'next-intl/server';
 import {ProductCard} from '@/components/product/ProductCard';
 import {SectionHeading} from '@/components/ui/SectionHeading';
-import {type Product, type Locale} from '@/types';
+import {type Product} from '@/types';
 
 type RelatedProductsProps = {
   products: Product[];
-  locale: Locale;
 };
 
-export async function RelatedProducts({products, locale}: RelatedProductsProps) {
+export async function RelatedProducts({products}: RelatedProductsProps) {
   const t = await getTranslations('product');
 
   return (

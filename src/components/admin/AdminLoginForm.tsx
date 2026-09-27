@@ -19,11 +19,14 @@ export function AdminLoginForm() {
         body: JSON.stringify({password})
       });
 
-      if (res.ok) {
-        // Hard navigation so the admin layout re-renders server-side
-        // with the session cookie and the sidebar becomes visible.
-        window.location.href = '/admin/dashboard';
-      } else {
+        if (res.ok) {
+          // Hard navigation so the admin layout re-renders server-side
+          // with the session cookie and the sidebar becomes visible.
+          // A client-side router.push() would leave the server layout reading
+          // the old, cookieless render, so the sidebar would stay hidden.
+          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+          window.location.href = '/admin/dashboard';
+        } else {
         setError(true);
       }
     } catch {

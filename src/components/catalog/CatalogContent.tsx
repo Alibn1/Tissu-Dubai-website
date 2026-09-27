@@ -1,6 +1,6 @@
 'use client';
 
-import {useTranslations, useLocale} from 'next-intl';
+import {useTranslations} from 'next-intl';
 import {useState, useMemo, useCallback} from 'react';
 import {Search, SlidersHorizontal, X, ChevronDown, ArrowUpDown} from 'lucide-react';
 import {cn} from '@/lib/utils';

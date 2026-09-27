@@ -20,9 +20,11 @@ export function AdminSidebar() {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', {method: 'POST'});
-    // Hard navigation so the admin layout re-renders server-side
-    // without the session cookie and hides the sidebar.
-    window.location.href = '/admin/login';
+      // Hard navigation so the admin layout re-renders server-side
+      // without the session cookie and hides the sidebar. A client-side
+      // router.push() would not re-run the server layout that reads the cookie.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.href = '/admin/login';
   };
 
   return (

@@ -1,5 +1,4 @@
 import {getTranslations} from 'next-intl/server';
-import {SectionHeading} from '@/components/ui/SectionHeading';
 import {cn} from '@/lib/utils';
 import {Check, Truck, Tag, Users, Zap, MapPin} from 'lucide-react';
 

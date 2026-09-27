@@ -74,7 +74,6 @@ export function WhatsAppConfirmationFlow({
 
   const [step, setStep] = useState<1 | 2>(1);
   const [values, setValues] = useState<FieldValues>({});
-  const [errors, setErrors] = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const [prevOpen, setPrevOpen] = useState(open);
@@ -86,7 +85,6 @@ export function WhatsAppConfirmationFlow({
     if (open) {
       setStep(1);
       setTouched({});
-      setErrors({});
       setValues(
         Object.fromEntries(fields.map((f) => [f.name, f.value ?? '']))
       );
@@ -115,12 +113,14 @@ export function WhatsAppConfirmationFlow({
     });
 
   const openStep2 = () => {
+    // Collected only to decide whether the step may advance; each field renders
+    // its own message from fieldErrors() and touched, so there is no need to
+    // hold this in state.
     const nextErrors: FieldErrors = {};
     for (const f of fields) {
       const err = fieldErrors(f);
       if (err) nextErrors[f.name] = err;
     }
-    setErrors(nextErrors);
     if (Object.keys(nextErrors).length === 0) {
       setStep(2);
     }
