@@ -17,7 +17,7 @@ export default async function AdminProtectedLayout({children, params}: Props) {
   const session = cookieStore.get('admin-session')?.value;
 
   if (!verifySessionToken(session)) {
-    redirect(`/${locale}/admin/login`);
+    redirect('/admin/login');
   }
 
   return (

@@ -2,7 +2,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {getCollections, getModels} from '@/lib/data/store';
 import {ProductForm} from '@/components/admin/ProductForm';
 import {ArrowLeft} from 'lucide-react';
-import {Link} from '@/i18n/navigation';
+import Link from 'next/link';
 
 type Props = {
   params: Promise<{locale: string}>;

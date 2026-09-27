@@ -1,6 +1,6 @@
 import {setRequestLocale} from 'next-intl/server';
 import {getAllProducts} from '@/lib/data/store';
-import {Link} from '@/i18n/navigation';
+import Link from 'next/link';
 import {Package} from 'lucide-react';
 import {ProductsTable} from '@/components/admin/ProductsTable';
 

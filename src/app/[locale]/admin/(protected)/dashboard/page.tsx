@@ -1,7 +1,7 @@
 import {setRequestLocale} from 'next-intl/server';
 import {getDashboardData} from '@/lib/data/store';
 import {Package, ChevronRight} from 'lucide-react';
-import {Link} from '@/i18n/navigation';
+import Link from 'next/link';
 
 type Props = {
   params: Promise<{locale: string}>;

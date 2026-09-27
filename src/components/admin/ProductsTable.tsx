@@ -1,7 +1,7 @@
 'use client';
 
 import {useMemo, useState} from 'react';
-import {Link} from '@/i18n/navigation';
+import Link from 'next/link';
 import {Edit, Loader2, Package, Search, Filter, Trash2} from 'lucide-react';
 import type {Locale, Product} from '@/types';
 
