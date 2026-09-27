@@ -83,22 +83,38 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
           </span>
         </div>
 
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo + Brand Name */}
-          <Link
-            href="/"
-            onClick={handleHomeClick}
-            className="flex items-center gap-2.5 flex-shrink-0 group"
-            aria-label={t('common.brand')}
-          >
-            <Logo size="lg" />
-            <span className="hidden sm:block font-heading text-xl font-bold text-brand-secondary group-hover:text-brand-primary transition-colors duration-200">
-              Tissu Dubai
-            </span>
-          </Link>
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
+          {/* Left cluster: sidebar toggle + Logo (flex dir auto-mirrors for RTL) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className={cn(
+                'lg:hidden flex items-center justify-center',
+                'h-10 w-10 rounded-lg -ms-1 sm:ms-0',
+                'text-brand-secondary hover:bg-brand-light',
+                'transition-colors duration-200'
+              )}
+              aria-label={t('common.openMenu')}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+
+            <Link
+              href="/"
+              onClick={handleHomeClick}
+              className="flex items-center gap-2.5 flex-shrink-0 group"
+              aria-label={t('common.brand')}
+            >
+              <Logo size="lg" />
+              <span className="hidden sm:block font-heading text-xl font-bold text-brand-secondary group-hover:text-brand-primary transition-colors duration-200">
+                Tissu Dubai
+              </span>
+            </Link>
+          </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-0.5" aria-label="Main navigation">
+          <nav className="hidden lg:flex flex-1 items-center justify-center gap-0.5" aria-label="Main navigation">
             {navLinks.map((link) => (
               <Link
                 key={link.key}
@@ -115,35 +131,22 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
             ))}
           </nav>
 
-          {/* Right section */}
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher className="hidden sm:block" />
-
+          {/* Right cluster: Call icon then Language menu */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <a
               href={`tel:${phone}`}
               className={cn(
-                'hidden md:flex items-center gap-2 px-3 py-2 text-sm',
+                'flex items-center justify-center',
+                'h-10 w-10 rounded-lg',
                 'text-brand-secondary hover:text-brand-primary',
                 'transition-colors duration-200 rounded-lg hover:bg-brand-light'
               )}
               aria-label={t('common.phone')}
             >
-              <Phone className="h-4 w-4" />
+              <Phone className="h-[18px] w-[18px]" />
             </a>
 
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className={cn(
-                'lg:hidden flex items-center justify-center',
-                'h-10 w-10 rounded-lg',
-                'text-brand-secondary hover:bg-brand-light',
-                'transition-colors duration-200'
-              )}
-              aria-label={t('common.openMenu')}
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+            <LanguageSwitcher />
           </div>
         </div>
       </header>

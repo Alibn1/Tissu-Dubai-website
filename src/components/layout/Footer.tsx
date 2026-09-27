@@ -47,12 +47,12 @@ export function Footer({siteSettings}: {siteSettings: SiteSettings}) {
 
   return (
     <footer className="bg-brand-light text-brand-muted">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ps-2 sm:ps-3 lg:ps-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main Footer */}
-        <div className="grid grid-cols-1 gap-8 py-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
+        <div className="grid grid-cols-1 gap-10 py-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
 
           {/* Column 1: Brand */}
-          <div className="space-y-4 pt-[80px]">
+          <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-4">
               <Logo variant="mark" size="md" />
               <h2 className="font-heading text-3xl font-bold text-brand-secondary">
@@ -65,11 +65,11 @@ export function Footer({siteSettings}: {siteSettings: SiteSettings}) {
           </div>
 
           {/* Column 2: Collections */}
-          <div className="space-y-4">
-            <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-brand-secondary">
+          <div className="space-y-3">
+            <h3 className="font-heading text-xl font-bold uppercase tracking-wider text-brand-secondary">
               {t('common.collections')}
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {collections.map((item) => (
                 <li key={item.href}>
                   <Link
@@ -82,7 +82,7 @@ export function Footer({siteSettings}: {siteSettings: SiteSettings}) {
               ))}
             </ul>
             <div className="pt-2">
-              <h4 className="font-heading pt-6 text-lg font-bold uppercase tracking-wider text-brand-secondary">
+              <h4 className="font-heading text-lg font-bold uppercase tracking-wider text-brand-secondary">
                 {t('common.followUs')}
               </h4>
               <div className="mt-3 flex items-center gap-4">
@@ -125,7 +125,7 @@ export function Footer({siteSettings}: {siteSettings: SiteSettings}) {
 
           {/* Column 3: Our Store */}
           <div className="space-y-3">
-            <h3 className="font-heading pt-6 text-xl font-bold uppercase tracking-wider text-brand-secondary">
+            <h3 className="font-heading text-xl font-bold uppercase tracking-wider text-brand-secondary">
               {t('common.location')}
             </h3>
             {mapsUrl && (
@@ -158,7 +158,7 @@ export function Footer({siteSettings}: {siteSettings: SiteSettings}) {
         </div>
 
         {/* Bottom Bar */}
-        <div className="py-5">
+        <div className="border-t border-brand-border/40 py-6">
           <p className="text-center text-sm text-brand-muted/50">
             &copy; 2026 Tissu Dubai. All rights reserved.
           </p>

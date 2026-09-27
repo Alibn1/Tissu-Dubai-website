@@ -3,6 +3,7 @@
 import {useLocale, useTranslations} from 'next-intl';
 import {useRouter, usePathname} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
+import {Languages} from 'lucide-react';
 import {type Locale} from '@/types';
 import {useState, useRef, useEffect} from 'react';
 
@@ -40,7 +41,7 @@ export function LanguageSwitcher({className}: {className?: string}) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium',
+          'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-sm font-medium',
           'rounded-md border border-brand-border',
           'text-brand-secondary hover:bg-brand-light',
           'transition-colors duration-200'
@@ -49,11 +50,12 @@ export function LanguageSwitcher({className}: {className?: string}) {
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <span className="text-xs capitalize tracking-wider">
+        <Languages className="h-4 w-4" />
+        <span className="hidden sm:inline text-xs capitalize tracking-wider">
           {localeConfig[locale].label}
         </span>
         <svg
-          className={cn('h-3 w-3 transition-transform', isOpen && 'rotate-180')}
+          className={cn('hidden sm:block h-3 w-3 transition-transform', isOpen && 'rotate-180')}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -68,7 +70,7 @@ export function LanguageSwitcher({className}: {className?: string}) {
           role="listbox"
           aria-label="Language selection"
           className={cn(
-            'absolute top-full mt-1 z-50 min-w-[140px]',
+            'absolute top-full end-0 mt-1 z-50 min-w-[140px]',
             'bg-brand-surface border border-brand-border rounded-md shadow-lg',
             'py-1'
           )}
