@@ -1,0 +1,140 @@
+// Generates a SQL file that loads data/tissu.db into the D1 database.
+//
+// Images are deliberately left out. They are currently base64 data URLs held in
+// the products/variants/collections rows and inside the site_settings JSON, and
+// D1 caps a single row at 2 MB: the hero image alone is 4.7 MB, and the whole
+// database is 14.8 MB. The images go to R2 instead and can be re-attached one
+// product at a time once the bucket exists.
+//
+//   node --experimental-sqlite scripts/import-sqlite-to-d1.mjs > import.sql
+//   npx wrangler d1 execute tissu-dubai --remote --file=import.sql
+//
+// The source database is only ever read.
+
+import {DatabaseSync} from 'node:sqlite';
+import {writeFileSync} from 'node:fs';
+
+const DB_PATH = process.env.SOURCE_DB ?? 'data/tissu.db';
+const OUT_PATH = process.env.OUT_SQL ?? 'import.sql';
+
+const db = new DatabaseSync(DB_PATH, {readOnly: true});
+
+const log = [];
+
+function q(value) {
+  if (value === null || value === undefined) return 'NULL';
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : 'NULL';
+  if (typeof value === 'boolean') return value ? '1' : '0';
+  // SQLite has no backslash escapes, so only the single quote needs doubling.
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+// Drops base64 payloads from an arbitrary parsed JSON value. Any string that is
+// a data URL becomes an empty string, so the surrounding shape and every
+// non-image field survive untouched.
+function stripDataUrls(value) {
+  if (typeof value === 'string') return value.startsWith('data:') ? '' : value;
+  if (Array.isArray(value)) return value.map(stripDataUrls);
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) out[k] = stripDataUrls(v);
+    return out;
+  }
+  return value;
+}
+
+const statements = [];
+let removedImages = 0;
+
+function emit(sql) {
+  statements.push(sql);
+}
+
+function insert(table, row, overrides = {}) {
+  const merged = {...row, ...overrides};
+  const cols = Object.keys(merged);
+  emit(
+    `INSERT OR REPLACE INTO ${table} (${cols.join(', ')}) VALUES (${cols.map((c) => q(merged[c])).join(', ')});`
+  );
+}
+
+// ---------------------------------------------------------------- collections
+const collections = db.prepare('SELECT * FROM collections ORDER BY sort_order').all();
+for (const row of collections) {
+  if (typeof row.image === 'string' && row.image.startsWith('data:')) {
+    row.image = '';
+    removedImages += 1;
+  }
+  insert('collections', row);
+}
+log.push(`collections: ${collections.length}`);
+
+// -------------------------------------------------------------------- models
+const models = db.prepare('SELECT * FROM models ORDER BY slug').all();
+for (const row of models) insert('models', row);
+log.push(`models: ${models.length}`);
+
+const modelLinks = db.prepare('SELECT * FROM model_collections').all();
+for (const row of modelLinks) insert('model_collections', row);
+log.push(`model_collections: ${modelLinks.length}`);
+
+// ------------------------------------------------------------------ products
+const products = db.prepare('SELECT * FROM products ORDER BY created_at').all();
+for (const row of products) {
+  const images = JSON.parse(row.images || '[]');
+  if (Array.isArray(images) && images.some((i) => typeof i === 'string' && i.startsWith('data:'))) {
+    removedImages += images.length;
+  }
+  insert('products', row, {images: '[]'});
+}
+log.push(`products: ${products.length} (images skipped)`);
+
+const productLinks = db.prepare('SELECT * FROM product_collections').all();
+for (const row of productLinks) insert('product_collections', row);
+log.push(`product_collections: ${productLinks.length}`);
+
+const variants = db.prepare('SELECT * FROM product_variants ORDER BY product_id, sort_order').all();
+for (const row of variants) {
+  const images = JSON.parse(row.images || '[]');
+  if (Array.isArray(images) && images.length) removedImages += images.length;
+  insert('product_variants', row, {images: '[]'});
+}
+log.push(`product_variants: ${variants.length} (images skipped)`);
+
+// ------------------------------------------------------------- site_settings
+const settings = db.prepare('SELECT * FROM site_settings').all();
+for (const row of settings) {
+  let value = row.value;
+  try {
+    const before = value.length;
+    const stripped = JSON.stringify(stripDataUrls(JSON.parse(value)));
+    if (stripped.length < before) {
+      log.push(`site_settings.${row.key}: ${before} -> ${stripped.length} bytes after stripping`);
+    }
+    value = stripped;
+  } catch {
+    log.push(`site_settings.${row.key}: not JSON, copied as-is (${value.length} bytes)`);
+  }
+  insert('site_settings', {key: row.key, value});
+}
+log.push(`site_settings: ${settings.length}`);
+
+// --------------------------------------------------------------------- report
+const body = statements.join('\n');
+const out = [
+  '-- Generated by scripts/import-sqlite-to-d1.mjs',
+  `-- source: ${DB_PATH}`,
+  `-- statements: ${statements.length}`,
+  '-- images were stripped out; they belong in R2, not D1',
+  '',
+  body,
+  ''
+].join('\n');
+
+writeFileSync(OUT_PATH, out, 'utf8');
+
+log.push(`image references skipped: ${removedImages}`);
+log.push(`wrote ${OUT_PATH}: ${statements.length} statements, ${(out.length / 1024).toFixed(1)} KB`);
+
+db.close();
+for (const line of log) console.log(line);
