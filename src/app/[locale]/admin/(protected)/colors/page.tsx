@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import {setRequestLocale} from 'next-intl/server';
 import Link from 'next/link';
-import {getAllProducts} from '@/lib/data/store';
+import {getAllProducts, getCollections} from '@/lib/data/store';
 import {ArrowLeft, Package, ChevronRight} from 'lucide-react';
 import {cn} from '@/lib/utils';
 
@@ -13,19 +13,25 @@ export default async function AdminColorsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const products = await getAllProducts();
+  const [products, collections] = await Promise.all([getAllProducts(), getCollections()]);
 
   const variantCount = (p: (typeof products)[number]) => Math.max(p.variants?.length ?? 0, 1);
 
-  const grouped = products.reduce<
+  // Seeded from the full collection list so a collection with no products still
+  // gets its own section, showing 0 rather than vanishing from the page.
+  const grouped = collections.reduce<
     Record<string, {name: string; products: (typeof products)[number][]}>
-  >((acc, p) => {
-    for (const collection of p.collections) {
-      if (!acc[collection.slug]) acc[collection.slug] = {name: collection.name.fr, products: []};
-      acc[collection.slug].products.push(p);
-    }
+  >((acc, collection) => {
+    acc[collection.slug] = {name: collection.name.fr, products: []};
     return acc;
   }, {});
+
+  for (const p of products) {
+    for (const collection of p.collections) {
+      const group = (grouped[collection.slug] ??= {name: collection.name.fr, products: []});
+      group.products.push(p);
+    }
+  }
 
   const totalProducts = products.length;
   const totalVariants = products.reduce((sum, p) => sum + variantCount(p), 0);
@@ -149,6 +155,13 @@ export default async function AdminColorsPage({params}: Props) {
                     </li>
                   );
                 })}
+
+                {group.products.length === 0 && (
+                  <li className="flex items-center gap-3 px-5 py-6 text-sm text-brand-muted">
+                    <Package className="h-5 w-5 shrink-0" />
+                    Aucun produit dans cette collection pour le moment.
+                  </li>
+                )}
               </ul>
             </section>
           );
