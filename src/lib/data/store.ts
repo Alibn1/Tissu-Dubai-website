@@ -177,7 +177,8 @@ export async function getCollections(): Promise<Collection[]> {
   const rows = await dbAll<Row>(
     'SELECT *, (SELECT COUNT(*) FROM product_collections pc WHERE pc.collection_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order'
   );
-  return rows.map((r) => ({...mapCollectionRow(r), productCount: Number(r.product_count ?? 0)}));
+  // mapCollectionRow already reads product_count, so there is nothing to add.
+  return rows.map((row) => mapCollectionRow(row));
 }
 
 export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
