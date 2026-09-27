@@ -9,9 +9,12 @@ import {describe, expect, it, beforeAll} from 'vitest';
  * same store functions through `getCloudflareContext` against a real D1
  * database, which is what the deployed Worker does.
  *
- * It is skipped unless TISSU_FORCE_D1=1, because it needs a seeded database:
+ * It is skipped unless TISSU_FORCE_D1=1, because it needs a seeded database.
+ * Every migration must be applied in order; a missing one shows up as
+ * "no such table" rather than an obvious setup error.
  *
  *   npx wrangler d1 execute tissu-dubai --local --file=migrations/0001_init.sql
+ *   npx wrangler d1 execute tissu-dubai --local --file=migrations/0002_faqs.sql
  *   npx wrangler d1 execute tissu-dubai --local --file=import.sql
  *   TISSU_FORCE_D1=1 npx vitest run src/db/d1.integration.test.ts
  */

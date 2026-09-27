@@ -29,8 +29,13 @@ type D1Statement = {
   };
 };
 
+type D1BatchStatement = {
+  run(): Promise<{meta?: {changes?: number}}>;
+};
+
 type D1Like = {
   prepare(sql: string): D1Statement;
+  batch(statements: D1BatchStatement[]): Promise<unknown>;
 };
 
 let sqlite: DatabaseSync | null = null;
@@ -153,6 +158,49 @@ export async function dbRun(sql: string, params: unknown[] = []): Promise<number
   const d1 = await getD1();
   const result = await d1.prepare(sql).bind(...bound).run();
   return Number(result?.meta?.changes ?? 0);
+}
+
+/** One statement in a dbBatch() call. */
+export type BatchStatement = {sql: string; params?: unknown[]};
+
+/**
+ * Runs several statements as one unit of work.
+ *
+ * Saving the site settings writes a dozen or so rows, and on D1 every statement
+ * is a separate round trip to the edge, which is slow enough to matter. D1's
+ * batch() sends them in a single request inside a transaction; local node:sqlite
+ * gets an explicit transaction for the same all-or-nothing behaviour.
+ */
+export async function dbBatch(statements: BatchStatement[]): Promise<number> {
+  if (statements.length === 0) return 0;
+
+  const prepared = statements.map((statement) => ({
+    sql: statement.sql,
+    params: normalizeParams(statement.params ?? [])
+  }));
+
+  const local = getSqlite();
+  if (local) {
+    let changes = 0;
+    local.exec('BEGIN IMMEDIATE;');
+    try {
+      for (const statement of prepared) {
+        changes += Number(local.prepare(statement.sql).run(...statement.params).changes);
+      }
+      local.exec('COMMIT;');
+      return changes;
+    } catch (error) {
+      local.exec('ROLLBACK;');
+      throw error;
+    }
+  }
+
+  const d1 = await getD1();
+  const results = await d1.batch(
+    prepared.map((statement) => d1.prepare(statement.sql).bind(...statement.params))
+  );
+  const list = (results ?? []) as Array<{meta?: {changes?: number}}>;
+  return list.reduce((total, result) => total + Number(result?.meta?.changes ?? 0), 0);
 }
 
 /** True when reads and writes are going to the D1 binding. */

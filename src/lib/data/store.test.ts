@@ -207,7 +207,7 @@ describe('FAQ storage', () => {
   it('stores questions in their own table and leaves them out of the blob', async () => {
     const store = await import('@/lib/data/store');
     const {getFaqs} = store;
-    const {getDb, dbFirst} = await import('@/db');
+    const {getDb, dbAll} = await import('@/db');
 
     const settings = await store.getSiteSettings();
     const faq = [
@@ -231,11 +231,14 @@ describe('FAQ storage', () => {
     expect(fromTable[0].question.fr).toBe('Question un');
     expect(fromTable[1].answer.en).toBe('Answer two');
 
-    // The blob must not keep a second copy that could drift from the table.
-    const row = await dbFirst<{value: string}>(
-      "SELECT value FROM site_settings WHERE key = 'site'"
-    );
-    expect(JSON.parse(row!.value)).not.toHaveProperty('faq');
+    // The blob must not keep a second copy that could drift from the table, and
+    // the old single-document row must not survive the split.
+    const rows = await dbAll<{key: string; value: string}>('SELECT key, value FROM site_settings');
+    const keys = rows.map((row) => row.key);
+    expect(keys).not.toContain('site');
+    for (const row of rows) {
+      expect(JSON.parse(row.value)).not.toHaveProperty('faq');
+    }
 
     // ...and getSiteSettings still exposes faq, unchanged for every consumer.
     expect((await store.getSiteSettings()).faq.map((entry) => entry.id)).toEqual([
@@ -254,5 +257,109 @@ describe('FAQ storage', () => {
     // Removing an entry from the list deletes its row.
     await store.saveSiteSettings({...(await store.getSiteSettings()), faq: [faq[0]]});
     expect((await getFaqs()).map((entry) => entry.id)).toEqual(['faq-test-1']);
+  });
+});
+
+describe('Site settings rows', () => {
+  it('stores every setting on its own row and drops the single-document row', async () => {
+    const store = await import('@/lib/data/store');
+    const {getDb} = await import('@/db');
+    const db = getDb();
+    const keys = () =>
+      (
+        db.prepare("SELECT key FROM site_settings WHERE key <> 'site' ORDER BY key").all() as {
+          key: string;
+        }[]
+      ).map((row) => row.key);
+
+    const settings = await store.getSiteSettings();
+    await store.saveSiteSettings(settings);
+
+    // One row per setting: the contact details, the hero, every day of opening
+    // hours and every homepage card, rather than one document holding all of it.
+    expect(keys()).toEqual([
+      'business_hours.friday',
+      'business_hours.monday',
+      'business_hours.saturday',
+      'business_hours.sunday',
+      'business_hours.thursday',
+      'business_hours.tuesday',
+      'business_hours.wednesday',
+      'contact',
+      'homepage.collection_cards.caftan',
+      'homepage.collection_cards.jellaba',
+      'homepage.collection_cards.tekchita',
+      'homepage.gender_cards.femme',
+      'homepage.gender_cards.homme',
+      'homepage.hero'
+    ]);
+
+    // The pre-split document is gone, so the old "everything in one row" copy
+    // cannot drift back in.
+    expect(db.prepare("SELECT COUNT(*) AS n FROM site_settings WHERE key = 'site'").get()).toEqual({
+      n: 0
+    });
+
+    // Every setting survives the round trip.
+    const reloaded = await store.getSiteSettings();
+    expect(reloaded.contact).toEqual(settings.contact);
+    expect(reloaded.homepage.hero).toEqual(settings.homepage.hero);
+    expect(reloaded.businessHours).toEqual(settings.businessHours);
+    expect(reloaded.homepage.collectionCards).toEqual(settings.homepage.collectionCards);
+    expect(reloaded.homepage.genderCards).toEqual(settings.homepage.genderCards);
+  });
+
+  it('does not disturb other sections when one is edited', async () => {
+    const store = await import('@/lib/data/store');
+    const {getDb} = await import('@/db');
+    const db = getDb();
+
+    const settings = await store.getSiteSettings();
+    const phoneBefore = settings.contact.phones[0];
+    const heroBefore = settings.homepage.hero.title.fr;
+
+    // Change only the address, the way an edit to a single section arrives.
+    await store.saveSiteSettings({
+      ...settings,
+      contact: {...settings.contact, address: 'Nouvelle adresse test'}
+    });
+
+    const after = await store.getSiteSettings();
+    expect(after.contact.address).toBe('Nouvelle adresse test');
+    // The rest of the contact row and every other row are untouched.
+    expect(after.contact.phones[0]).toBe(phoneBefore);
+    expect(after.homepage.hero.title.fr).toBe(heroBefore);
+
+    const heroRow = db
+      .prepare("SELECT value FROM site_settings WHERE key = 'homepage.hero'")
+      .get() as {value: string};
+    expect(JSON.parse(heroRow.value).title.fr).toBe(heroBefore);
+  });
+
+  it('drops the row of a setting that is removed', async () => {
+    const store = await import('@/lib/data/store');
+    const {getDb} = await import('@/db');
+    const db = getDb();
+
+    const settings = await store.getSiteSettings();
+    await store.saveSiteSettings({
+      ...settings,
+      homepage: {
+        ...settings.homepage,
+        collectionCards: settings.homepage.collectionCards.filter(
+          (card) => card.id !== 'tekchita'
+        )
+      }
+    });
+
+    const remaining = (
+      db
+        .prepare("SELECT key FROM site_settings WHERE key LIKE 'homepage.collection_cards.%'")
+        .all() as {key: string}[]
+    ).map((row) => row.key);
+    expect(remaining).toEqual([
+      'homepage.collection_cards.caftan',
+      'homepage.collection_cards.jellaba'
+    ]);
   });
 });

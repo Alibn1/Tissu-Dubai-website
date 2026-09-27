@@ -1,4 +1,4 @@
-import {dbAll, dbFirst, dbRun} from '@/db';
+import {dbAll, dbBatch, dbFirst, dbRun, type BatchStatement} from '@/db';
 import type {
   Collection,
   Locale,
@@ -9,9 +9,12 @@ import type {
 } from '@/types';
 import {normalizeSeo, parseSeoFields} from '@/lib/productSeo';
 import {
-  getDefaultSiteSettings,
   migrateSiteSettings,
+  type BusinessDay,
+  type BusinessHours,
+  type CollectionCard,
   type FaqEntry,
+  type GenderCard,
   type SiteSettings
 } from '@/lib/siteSettings';
 
@@ -518,76 +521,170 @@ export async function getFaqs(): Promise<FaqEntry[]> {
  * wording was merely edited.
  */
 export async function saveFaqs(faqs: FaqEntry[]): Promise<void> {
-  for (const [index, entry] of faqs.entries()) {
-    await dbRun(
-      `INSERT INTO faqs (id, question_fr, question_ar, question_en, answer_fr, answer_ar, answer_en, sort_order, is_active, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))
-       ON CONFLICT(id) DO UPDATE SET
-         question_fr = excluded.question_fr,
-         question_ar = excluded.question_ar,
-         question_en = excluded.question_en,
-         answer_fr = excluded.answer_fr,
-         answer_ar = excluded.answer_ar,
-         answer_en = excluded.answer_en,
-         sort_order = excluded.sort_order,
-         is_active = 1,
-         updated_at = excluded.updated_at`,
-      [
-        entry.id,
-        entry.question?.fr ?? '',
-        entry.question?.ar ?? '',
-        entry.question?.en ?? '',
-        entry.answer?.fr ?? '',
-        entry.answer?.ar ?? '',
-        entry.answer?.en ?? '',
-        index
-      ]
-    );
-  }
+  const statements: BatchStatement[] = faqs.map((entry, index) => ({
+    sql: `INSERT INTO faqs (id, question_fr, question_ar, question_en, answer_fr, answer_ar, answer_en, sort_order, is_active, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))
+          ON CONFLICT(id) DO UPDATE SET
+            question_fr = excluded.question_fr,
+            question_ar = excluded.question_ar,
+            question_en = excluded.question_en,
+            answer_fr = excluded.answer_fr,
+            answer_ar = excluded.answer_ar,
+            answer_en = excluded.answer_en,
+            sort_order = excluded.sort_order,
+            is_active = 1,
+            updated_at = excluded.updated_at`,
+    params: [
+      entry.id,
+      entry.question?.fr ?? '',
+      entry.question?.ar ?? '',
+      entry.question?.en ?? '',
+      entry.answer?.fr ?? '',
+      entry.answer?.ar ?? '',
+      entry.answer?.en ?? '',
+      index
+    ]
+  }));
 
   if (faqs.length === 0) {
     await dbRun('DELETE FROM faqs');
     return;
   }
   const placeholders = faqs.map(() => '?').join(', ');
-  await dbRun(`DELETE FROM faqs WHERE id NOT IN (${placeholders})`, faqs.map((entry) => entry.id));
+  statements.push({
+    sql: `DELETE FROM faqs WHERE id NOT IN (${placeholders})`,
+    params: faqs.map((entry) => entry.id)
+  });
+
+  await dbBatch(statements);
 }
 
 // ── Site settings ──
+//
+// site_settings stays a key/value table, but every setting gets its own row
+// rather than one JSON document holding the whole site. Editing the hero no
+// longer rewrites the phone numbers, and two people saving different sections
+// cannot clobber each other. FAQ is the exception: it has a real table
+// (migrations/0002_faqs.sql) because each question is individually ordered.
+//
+// One row per setting, so the homepage images are no longer packed together with
+// the contact details and every row stays far below the D1 row size limit.
 
-const SITE_SETTINGS_KEY = 'site';
+const CONTACT_KEY = 'contact';
+const HERO_KEY = 'homepage.hero';
+const BUSINESS_HOURS_PREFIX = 'business_hours.';
+const COLLECTION_CARDS_PREFIX = 'homepage.collection_cards.';
+const GENDER_CARDS_PREFIX = 'homepage.gender_cards.';
+
+/** The pre-split single-document row, read as a fallback and dropped on save. */
+const LEGACY_SETTINGS_KEY = 'site';
+
+const BUSINESS_DAY_ORDER: readonly BusinessDay[] = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday'
+];
+
+function valuesUnder(rows: Row[], prefix: string): unknown[] {
+  return rows
+    .filter((row) => String(row.key).startsWith(prefix))
+    .map((row) => parseJSON<unknown>(row.value, null))
+    .filter((value): value is NonNullable<unknown> => value !== null);
+}
+
+function valueAt(rows: Row[], key: string): unknown {
+  const row = rows.find((candidate) => candidate.key === key);
+  return row ? parseJSON<unknown>(row.value, null) : null;
+}
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const [row, faqs] = await Promise.all([
-    dbFirst<Row>('SELECT value FROM site_settings WHERE key = ?', [SITE_SETTINGS_KEY]),
+  const [rows, faqs] = await Promise.all([
+    dbAll<Row>('SELECT key, value FROM site_settings'),
     getFaqs()
   ]);
 
-  const defaults = getDefaultSiteSettings();
-  if (!row) return {...defaults, faq: faqs.length > 0 ? faqs : defaults.faq};
+  const sectionRows = rows.filter((row) => row.key !== LEGACY_SETTINGS_KEY);
 
-  const parsed = migrateSiteSettings(parseJSON<unknown>(row.value, null));
-  // The faqs table wins once it holds rows. Falling back to the blob keeps a
-  // fresh deploy working in the window between the migration and the backfill;
-  // the first saveSiteSettings() call writes the entries to the table and drops
-  // them from the blob, so this path is not permanent.
-  return faqs.length > 0 ? {...parsed, faq: faqs} : parsed;
+  // Before the first save nothing is stored per section yet, so the legacy
+  // document is all there is. Reading it keeps a deploy in the window between
+  // the code change and the backfill working.
+  const legacy =
+    sectionRows.length === 0
+      ? migrateSiteSettings(
+          parseJSON<unknown>(valueAt(rows, LEGACY_SETTINGS_KEY), null)
+        )
+      : null;
+
+  const collectionCards = valuesUnder(sectionRows, COLLECTION_CARDS_PREFIX) as CollectionCard[];
+  const genderCards = valuesUnder(sectionRows, GENDER_CARDS_PREFIX) as GenderCard[];
+  const businessHours = (
+    valuesUnder(sectionRows, BUSINESS_HOURS_PREFIX) as BusinessHours[]
+  ).sort(
+    (a, b) => BUSINESS_DAY_ORDER.indexOf(a.day) - BUSINESS_DAY_ORDER.indexOf(b.day)
+  );
+
+  const merged = migrateSiteSettings({
+    contact: valueAt(sectionRows, CONTACT_KEY) ?? legacy?.contact,
+    businessHours: businessHours.length > 0 ? businessHours : legacy?.businessHours,
+    homepage: {
+      hero: valueAt(sectionRows, HERO_KEY) ?? legacy?.homepage.hero,
+      collectionCards:
+        collectionCards.length > 0 ? collectionCards : legacy?.homepage.collectionCards,
+      genderCards: genderCards.length > 0 ? genderCards : legacy?.homepage.genderCards
+    }
+  });
+
+  // The faqs table wins once it holds rows, and otherwise the merged document
+  // still carries the entries from before the split.
+  return faqs.length > 0 ? {...merged, faq: faqs} : merged;
 }
 
 /**
- * Persists the settings blob and the FAQ table together. `faq` is destructured
- * out of the object before stringify so the blob cannot hold a second, stale
- * copy that would drift from the table. The FAQ write goes first: if the blob
- * write then fails, the table still wins on read and nothing is lost.
+ * Writes each setting to its own row and saves the FAQ table alongside.
+ *
+ * Rows that are no longer produced are deleted first, so removing a collection
+ * card or a day of opening hours actually takes effect instead of lingering. The
+ * legacy single-document row is dropped here too, which is what stops the old
+ * "everything in one row" document from coming back.
  */
 export async function saveSiteSettings(settings: SiteSettings): Promise<void> {
   const {faq, ...rest} = settings;
   await saveFaqs(faq ?? []);
-  await dbRun(
-    `INSERT INTO site_settings (key, value) VALUES (?, ?)
-     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
-    [SITE_SETTINGS_KEY, JSON.stringify(rest)]
-  );
+
+  const home = rest.homepage;
+  const rows: Array<[string, unknown]> = [
+    [CONTACT_KEY, rest.contact],
+    [HERO_KEY, home?.hero],
+    ...(home?.collectionCards ?? []).map(
+      (card): [string, unknown] => [`${COLLECTION_CARDS_PREFIX}${card.id}`, card]
+    ),
+    ...(home?.genderCards ?? []).map(
+      (card): [string, unknown] => [`${GENDER_CARDS_PREFIX}${card.id}`, card]
+    ),
+    ...(rest.businessHours ?? []).map(
+      (day): [string, unknown] => [`${BUSINESS_HOURS_PREFIX}${day.day}`, day]
+    )
+  ];
+
+  const keys = rows.map(([key]) => key);
+  const filter = keys.length > 0 ? `('${keys.join("', '")}')` : "('')";
+
+  // One round trip: the delete and every upsert travel together, so saving the
+  // settings stays as fast as it was when the whole site was a single row.
+  await dbBatch([
+    {sql: `DELETE FROM site_settings WHERE key NOT IN ${filter}`},
+    ...rows
+      .filter(([, value]) => value !== undefined && value !== null)
+      .map(([key, value]) => ({
+        sql: `INSERT INTO site_settings (key, value) VALUES (?, ?)
+              ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+        params: [key, JSON.stringify(value)]
+      }))
+  ]);
 }
 
 // ── Dashboard stats ──
