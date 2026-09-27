@@ -1,7 +1,18 @@
 import type {NextConfig} from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import {initOpenNextCloudflareForDev} from '@opennextjs/cloudflare';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
+// Gives `getCloudflareContext()` a real binding set during `next dev`, so the
+// D1 code path can be exercised locally. Deliberately limited to development:
+// the helper starts a miniflare/workerd instance, and letting that happen while
+// `next build` or `opennextjs-cloudflare build` loads this file leaves a
+// workerd process holding the build output directory open. Not awaited by
+// design.
+if (process.env.NODE_ENV === 'development') {
+  initOpenNextCloudflareForDev();
+}
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -27,9 +38,9 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https:",
               "style-src 'self' 'unsafe-inline'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              // The four brand faces (Playfair, Inter, Noto Naskh, IBM Plex
-              // Arabic) are @font-face'd straight from fonts.gstatic.com in
-              // globals.css. Self-hosting them would let this drop to 'self'.
+              // Playfair Display is @font-face'd straight from
+              // fonts.gstatic.com in globals.css. Self-hosting it would let
+              // this drop to 'self'.
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self'",
               // Store address map on the footer, /localisation and the home

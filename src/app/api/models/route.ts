@@ -4,7 +4,7 @@ import type {Locale, Model} from '@/types';
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 
 export async function GET() {
-  return NextResponse.json(getModels());
+  return NextResponse.json(await getModels());
 }
 
 export async function POST(request: NextRequest) {
@@ -35,6 +35,6 @@ export async function POST(request: NextRequest) {
     name,
   };
 
-  upsertModel(model);
+  await upsertModel(model);
   return NextResponse.json({success: true, model}, {status: 201});
 }

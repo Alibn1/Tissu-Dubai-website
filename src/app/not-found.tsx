@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import './globals.css';
 
 // This has to live at the app root: a nested not-found.tsx only catches
@@ -20,19 +21,19 @@ export default function NotFound() {
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="/"
+            <Link
+              href="/fr"
               className="rounded-md bg-brand-primary px-6 py-3 text-sm font-semibold text-brand-light transition-opacity hover:opacity-90"
             >
               Retour à la boutique
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/fr/contact"
               className="rounded-md border border-brand-border px-6 py-3 text-sm font-medium text-brand-muted transition-colors hover:border-brand-primary hover:text-brand-secondary"
             >
               Nous contacter
-            </a>
+            </Link>
           </div>
         </main>
       </body>

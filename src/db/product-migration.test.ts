@@ -82,7 +82,7 @@ afterAll(async () => {
 describe('products-to-collections junction migration', () => {
   it('moves collection_slug links into product_collections and keeps data intact', async () => {
     const {getAllProducts} = await import('@/lib/data/store');
-    const products = getAllProducts();
+    const products = await getAllProducts();
     expect(products).toHaveLength(2);
 
     const soie = products.find((p) => p.id === 'p1');
@@ -102,7 +102,7 @@ describe('products-to-collections junction migration', () => {
 
   it('keeps collection counts driven by the junction table', async () => {
     const {getCollections} = await import('@/lib/data/store');
-    const collections = getCollections();
+    const collections = await getCollections();
     expect(collections.find((c) => c.slug === 'caftan')?.productCount).toBe(1);
     expect(collections.find((c) => c.slug === 'tekchita')?.productCount).toBe(1);
   });
@@ -117,7 +117,7 @@ describe('products-to-collections junction migration', () => {
 
   it('defaults pre-existing rows to auto SEO without data loss', async () => {
     const {getProductById} = await import('@/lib/data/store');
-    const soie = getProductById('p1');
+    const soie = await getProductById('p1');
     expect(soie?.name.fr).toBe('Soie Double');
     expect(soie?.seo).toEqual({
       fr: {title: '', metaDescription: '', altImage: '', enabled: false},

@@ -12,7 +12,7 @@ export default async function AdminProductsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const products = getAllProducts();
+  const products = await getAllProducts();
 
   return (
     <div className="min-h-[70vh]">

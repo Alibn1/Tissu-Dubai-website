@@ -61,12 +61,12 @@ afterAll(async () => {
 describe('junction migration', () => {
   it('dedupes models and links collections through the junction table', async () => {
     const {getModels} = await import('@/lib/data/store');
-    const models = getModels();
+    const models = await getModels();
     const soie = models.find((m) => m.slug === 'soie');
     const velours = models.find((m) => m.slug === 'velours');
     expect(soie?.collectionSlugs.sort()).toEqual(['caftan', 'tekchita']);
     expect(velours?.collectionSlugs).toEqual(['caftan']);
     expect(models.filter((m) => m.slug === 'soie')).toHaveLength(1);
-    expect(getModels().length).toBe(2);
+    expect((await getModels()).length).toBe(2);
   });
 });

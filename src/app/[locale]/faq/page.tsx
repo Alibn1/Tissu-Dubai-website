@@ -25,7 +25,7 @@ export default async function FaqPage({params}: Props) {
   setRequestLocale(locale);
 
   const loc = locale as Locale;
-  const settings = getSiteSettings();
+  const settings = await getSiteSettings();
 
   let questions = settings.faq
     .map((entry) => ({

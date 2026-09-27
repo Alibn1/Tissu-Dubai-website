@@ -5,14 +5,18 @@ import type {Locale} from '@/types';
 
 const LOCALES: Locale[] = ['fr', 'en', 'ar'];
 
+// The sitemap is generated from the database, so it must be built per request
+// rather than frozen into the Worker at deploy time.
+export const dynamic = 'force-dynamic';
+
 /**
  * Built from the database rather than a hardcoded list, so a product or
  * collection can never go missing from the sitemap, and a deleted route can
  * never be advertised to Google as a 404.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteBaseUrl();
-  const products = getAllProducts();
+  const products = await getAllProducts();
 
   // Only collections that really exist, so we never emit a dead URL.
   const collectionSlugs = [...new Set(products.flatMap((p) => p.collections.map((c) => c.slug)))];

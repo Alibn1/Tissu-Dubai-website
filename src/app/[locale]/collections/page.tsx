@@ -34,7 +34,7 @@ export default async function CollectionsPage({params}: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('collections');
-  const genderCards = getSiteSettings().homepage.genderCards;
+  const genderCards = (await getSiteSettings()).homepage.genderCards;
 
   const cardFor = (id: GenderCardId): CategoryCard => {
     const card = genderCards.find((c) => c.id === id);

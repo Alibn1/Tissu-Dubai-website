@@ -9,6 +9,10 @@ type Props = {
   params: Promise<{locale: string}>;
 };
 
+// Already reads a cookie, so Next.js treats these routes as dynamic; stated
+// explicitly because the admin also reads and writes D1.
+export const dynamic = 'force-dynamic';
+
 export default async function AdminProtectedLayout({children, params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);

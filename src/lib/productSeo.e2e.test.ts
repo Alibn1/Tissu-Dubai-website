@@ -123,10 +123,10 @@ describe('product SEO end to end (HTTP route -> database -> public page)', () =>
 
     // And the stale Arabic text must not resurface after a reload.
     const {getProductById} = await import('@/lib/data/store');
-    expect(getProductById(created.id)?.seo?.ar.title).toBe('');
+    expect((await getProductById(created.id))?.seo?.ar.title).toBe('');
 
     const store = await import('@/lib/data/store');
-    store.deleteProduct(created.id);
+    await store.deleteProduct(created.id);
   });
 
   it('falls back to the product name when no SEO is set', async () => {

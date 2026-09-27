@@ -1,4 +1,4 @@
-import {getDb} from '@/db';
+import {dbAll, dbFirst, dbRun} from '@/db';
 import type {
   Collection,
   Locale,
@@ -74,12 +74,25 @@ function mapVariantRow(row: Row): ProductVariant {
   };
 }
 
-function mapProductRow(row: Row, variants: ProductVariant[], collectionSlugs: string[], collectionCounts: Map<string, number>): Product {
+function mapProductRow(
+  row: Row,
+  variants: ProductVariant[],
+  collectionSlugs: string[],
+  collectionCounts: Map<string, number>,
+  collectionsBySlug: Map<string, Collection>
+): Product {
   const collections: Collection[] = collectionSlugs.map((slug) => {
-    const collection = collectionMap.get(slug);
+    const collection = collectionsBySlug.get(slug);
     return collection
       ? {...collection, productCount: collectionCounts.get(slug) ?? collection.productCount}
-      : {id: '', slug, name: {fr: '', ar: '', en: ''}, description: {fr: '', ar: '', en: ''}, image: '', productCount: collectionCounts.get(slug) ?? 0};
+      : {
+          id: '',
+          slug,
+          name: {fr: '', ar: '', en: ''},
+          description: {fr: '', ar: '', en: ''},
+          image: '',
+          productCount: collectionCounts.get(slug) ?? 0,
+        };
   });
 
   return {
@@ -120,146 +133,154 @@ SELECT p.*
 FROM products p
 `;
 
-function loadProductCollectionLinks(): Map<string, string[]> {
-  const db = getDb();
-  const map = new Map<string, string[]>();
-  const rows = db.prepare('SELECT * FROM product_collections').all() as Row[];
-  for (const row of rows) {
-    const productId = String(row.product_id);
-    const list = map.get(productId) ?? [];
-    list.push(String(row.collection_slug));
-    map.set(productId, list);
+/** Everything needed to turn product rows into `Product` objects, fetched in one go. */
+type ProductContext = {
+  variants: Map<string, ProductVariant[]>;
+  links: Map<string, string[]>;
+  counts: Map<string, number>;
+  collectionsBySlug: Map<string, Collection>;
+};
+
+async function loadProductContext(): Promise<ProductContext> {
+  const [variantRows, linkRows, countRows, collections] = await Promise.all([
+    dbAll<Row>('SELECT * FROM product_variants ORDER BY sort_order'),
+    dbAll<Row>('SELECT * FROM product_collections'),
+    dbAll<Row>('SELECT collection_slug, COUNT(*) AS n FROM product_collections GROUP BY collection_slug'),
+    getCollections(),
+  ]);
+
+  const variants = new Map<string, ProductVariant[]>();
+  for (const row of variantRows) {
+    const key = String(row.product_id);
+    const list = variants.get(key) ?? [];
+    list.push(mapVariantRow(row));
+    variants.set(key, list);
   }
-  return map;
-}
 
-function loadCollectionCounts(): Map<string, number> {
-  const db = getDb();
-  const map = new Map<string, number>();
-  const rows = db.prepare('SELECT collection_slug, COUNT(*) AS n FROM product_collections GROUP BY collection_slug').all() as Row[];
-  for (const row of rows) map.set(String(row.collection_slug), Number(row.n));
-  return map;
-}
+  const links = new Map<string, string[]>();
+  for (const row of linkRows) {
+    const key = String(row.product_id);
+    const list = links.get(key) ?? [];
+    list.push(String(row.collection_slug));
+    links.set(key, list);
+  }
 
-let collectionMap = new Map<string, Collection>();
+  const counts = new Map<string, number>();
+  for (const row of countRows) counts.set(String(row.collection_slug), Number(row.n));
 
-function refreshCollectionMap(): void {
-  collectionMap = new Map(getCollections().map((c) => [c.slug, c]));
+  return {variants, links, counts, collectionsBySlug: new Map(collections.map((c) => [c.slug, c]))};
 }
 
 // ── Collections (the public "collections"/garment types) ──
 
-export function getCollections(): Collection[] {
-  const db = getDb();
-  const rows = db
-    .prepare('SELECT *, (SELECT COUNT(*) FROM product_collections pc WHERE pc.collection_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order')
-    .all() as Row[];
+export async function getCollections(): Promise<Collection[]> {
+  const rows = await dbAll<Row>(
+    'SELECT *, (SELECT COUNT(*) FROM product_collections pc WHERE pc.collection_slug = collections.slug) AS product_count FROM collections ORDER BY sort_order'
+  );
   return rows.map((r) => ({...mapCollectionRow(r), productCount: Number(r.product_count ?? 0)}));
 }
 
-export function getCollectionBySlug(slug: string): Collection | null {
-  const db = getDb();
-  const row = db
-    .prepare('SELECT *, (SELECT COUNT(*) FROM product_collections pc WHERE pc.collection_slug = collections.slug) AS product_count FROM collections WHERE slug = ?')
-    .get(slug) as Row | undefined;
+export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
+  const row = await dbFirst<Row>(
+    'SELECT *, (SELECT COUNT(*) FROM product_collections pc WHERE pc.collection_slug = collections.slug) AS product_count FROM collections WHERE slug = ?',
+    [slug]
+  );
   return row ? mapCollectionRow(row) : null;
 }
 
 // ── Models ──
 
-function loadModelCollectionLinks(): Map<string, string[]> {
-  const db = getDb();
-  const map = new Map<string, string[]>();
-  const rows = db.prepare('SELECT * FROM model_collections').all() as Row[];
-  for (const row of rows) {
-    const modelId = String(row.model_id);
-    const list = map.get(modelId) ?? [];
-    list.push(String(row.collection_slug));
-    map.set(modelId, list);
-  }
-  return map;
-}
+export async function getModels(): Promise<Model[]> {
+  const [rows, linkRows] = await Promise.all([
+    dbAll<Row>('SELECT * FROM models ORDER BY name_fr'),
+    dbAll<Row>('SELECT * FROM model_collections'),
+  ]);
 
-export function getModels(): Model[] {
-  const db = getDb();
-  const links = loadModelCollectionLinks();
-  const rows = db.prepare('SELECT * FROM models ORDER BY name_fr').all() as Row[];
+  const links = new Map<string, string[]>();
+  for (const row of linkRows) {
+    const key = String(row.model_id);
+    const list = links.get(key) ?? [];
+    list.push(String(row.collection_slug));
+    links.set(key, list);
+  }
+
   return rows.map((row) => mapModelRow(row, links.get(String(row.id)) ?? []));
 }
 
-export function getModelsByCollection(collectionSlug: string): Model[] {
-  return getModels().filter((m) => m.collectionSlugs.includes(collectionSlug));
+export async function getModelsByCollection(collectionSlug: string): Promise<Model[]> {
+  const models = await getModels();
+  return models.filter((m) => m.collectionSlugs.includes(collectionSlug));
 }
 
-export function upsertModel(model: Model): Model {
-  const db = getDb();
-  db.prepare(
+export async function upsertModel(model: Model): Promise<Model> {
+  await dbRun(
     `INSERT INTO models (id, slug, name_fr, name_ar, name_en)
      VALUES (?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        slug = excluded.slug,
        name_fr = excluded.name_fr,
        name_ar = excluded.name_ar,
-       name_en = excluded.name_en`
-  ).run(model.id, model.slug, model.name.fr, model.name.ar, model.name.en);
+       name_en = excluded.name_en`,
+    [model.id, model.slug, model.name.fr, model.name.ar, model.name.en]
+  );
 
-  db.prepare('DELETE FROM model_collections WHERE model_id = ?').run(model.id);
-  const insertLink = db.prepare('INSERT INTO model_collections (model_id, collection_slug) VALUES (?, ?)');
+  await dbRun('DELETE FROM model_collections WHERE model_id = ?', [model.id]);
   for (const collectionSlug of model.collectionSlugs) {
-    insertLink.run(model.id, collectionSlug);
+    await dbRun('INSERT INTO model_collections (model_id, collection_slug) VALUES (?, ?)', [
+      model.id,
+      collectionSlug,
+    ]);
   }
   return model;
 }
 
-export function removeModel(id: string): boolean {
-  const db = getDb();
-  const result = db.prepare('DELETE FROM models WHERE id = ?').run(id);
-  return result.changes > 0;
+export async function removeModel(id: string): Promise<boolean> {
+  const changes = await dbRun('DELETE FROM models WHERE id = ?', [id]);
+  return changes > 0;
 }
 
 // ── Products ──
 
-function loadVariantsByProduct(): Map<string, ProductVariant[]> {
-  const db = getDb();
-  const map = new Map<string, ProductVariant[]>();
-  const rows = db.prepare('SELECT * FROM product_variants ORDER BY sort_order').all() as Row[];
-  for (const row of rows) {
-    const key = String(row.product_id);
-    const list = map.get(key) ?? [];
-    list.push(mapVariantRow(row));
-    map.set(key, list);
-  }
-  return map;
+export async function getAllProducts(): Promise<Product[]> {
+  const context = await loadProductContext();
+  const rows = await dbAll<Row>(`${PRODUCT_SELECT} ORDER BY p.created_at DESC, p.slug`);
+  return rows.map((row) =>
+    mapProductRow(
+      row,
+      context.variants.get(String(row.id)) ?? [],
+      context.links.get(String(row.id)) ?? [],
+      context.counts,
+      context.collectionsBySlug
+    )
+  );
 }
 
-export function getAllProducts(): Product[] {
-  const db = getDb();
-  const variants = loadVariantsByProduct();
-  const links = loadProductCollectionLinks();
-  const counts = loadCollectionCounts();
-  refreshCollectionMap();
-  const rows = db.prepare(`${PRODUCT_SELECT} ORDER BY p.created_at DESC, p.slug`).all() as Row[];
-  return rows.map((row) => mapProductRow(row, variants.get(String(row.id)) ?? [], links.get(String(row.id)) ?? [], counts));
+export async function getProductById(id: string): Promise<Product | null> {
+  const context = await loadProductContext();
+  const row = await dbFirst<Row>(`${PRODUCT_SELECT} WHERE p.id = ?`, [id]);
+  return row
+    ? mapProductRow(
+        row,
+        context.variants.get(String(row.id)) ?? [],
+        context.links.get(String(row.id)) ?? [],
+        context.counts,
+        context.collectionsBySlug
+      )
+    : null;
 }
 
-export function getProductById(id: string): Product | null {
-  const db = getDb();
-  const variants = loadVariantsByProduct();
-  const links = loadProductCollectionLinks();
-  const counts = loadCollectionCounts();
-  refreshCollectionMap();
-  const row = db.prepare(`${PRODUCT_SELECT} WHERE p.id = ?`).get(id) as Row | undefined;
-  return row ? mapProductRow(row, variants.get(String(row.id)) ?? [], links.get(String(row.id)) ?? [], counts) : null;
-}
-
-export function getProductBySlug(slug: string): Product | null {
-  const db = getDb();
-  const variants = loadVariantsByProduct();
-  const links = loadProductCollectionLinks();
-  const counts = loadCollectionCounts();
-  refreshCollectionMap();
-  const row = db.prepare(`${PRODUCT_SELECT} WHERE p.slug = ?`).get(slug) as Row | undefined;
-  return row ? mapProductRow(row, variants.get(String(row.id)) ?? [], links.get(String(row.id)) ?? [], counts) : null;
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const context = await loadProductContext();
+  const row = await dbFirst<Row>(`${PRODUCT_SELECT} WHERE p.slug = ?`, [slug]);
+  return row
+    ? mapProductRow(
+        row,
+        context.variants.get(String(row.id)) ?? [],
+        context.links.get(String(row.id)) ?? [],
+        context.counts,
+        context.collectionsBySlug
+      )
+    : null;
 }
 
 export type ProductVariantInput = {
@@ -311,9 +332,11 @@ type ProductRow = {
   seo?: ProductSeoByLanguage;
 };
 
-function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
+async function insertProductRow(product: ProductRow) {
   const seo = normalizeSeo(product.seo);
-  db.prepare(
+  const now = new Date().toISOString();
+
+  await dbRun(
     `INSERT INTO products (id, slug, reference, name_fr, name_ar, name_en, description_fr, description_ar, description_en, material_fr, material_ar, material_en, material_slug, width, price, in_stock, featured, is_new, characteristics_fr, characteristics_ar, characteristics_en, seo_fr, seo_ar, seo_en, images, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
@@ -341,73 +364,74 @@ function insertProductRow(db: ReturnType<typeof getDb>, product: ProductRow) {
        seo_ar = excluded.seo_ar,
        seo_en = excluded.seo_en,
        images = excluded.images,
-       updated_at = excluded.updated_at`
-  ).run(
-    product.id,
-    product.slug,
-    product.reference,
-    product.name.fr,
-    product.name.ar,
-    product.name.en,
-    product.description?.fr ?? '',
-    product.description?.ar ?? '',
-    product.description?.en ?? '',
-    product.material?.fr ?? '',
-    product.material?.ar ?? '',
-    product.material?.en ?? '',
-    product.materialSlug ?? '',
-    product.width ?? '',
-    product.price ?? null,
-    product.inStock ? 1 : 0,
-    product.featured ? 1 : 0,
-    product.isNew ? 1 : 0,
-    JSON.stringify(product.characteristics?.fr ?? []),
-    JSON.stringify(product.characteristics?.ar ?? []),
-    JSON.stringify(product.characteristics?.en ?? []),
-    JSON.stringify(seo.fr),
-    JSON.stringify(seo.ar),
-    JSON.stringify(seo.en),
-    JSON.stringify(product.images ?? []),
-    new Date().toISOString(),
-    new Date().toISOString()
+       updated_at = excluded.updated_at`,
+    [
+      product.id,
+      product.slug,
+      product.reference,
+      product.name.fr,
+      product.name.ar,
+      product.name.en,
+      product.description?.fr ?? '',
+      product.description?.ar ?? '',
+      product.description?.en ?? '',
+      product.material?.fr ?? '',
+      product.material?.ar ?? '',
+      product.material?.en ?? '',
+      product.materialSlug ?? '',
+      product.width ?? '',
+      product.price ?? null,
+      product.inStock ? 1 : 0,
+      product.featured ? 1 : 0,
+      product.isNew ? 1 : 0,
+      JSON.stringify(product.characteristics?.fr ?? []),
+      JSON.stringify(product.characteristics?.ar ?? []),
+      JSON.stringify(product.characteristics?.en ?? []),
+      JSON.stringify(seo.fr),
+      JSON.stringify(seo.ar),
+      JSON.stringify(seo.en),
+      JSON.stringify(product.images ?? []),
+      now,
+      now,
+    ]
   );
 
-  db.prepare('DELETE FROM product_collections WHERE product_id = ?').run(product.id);
-  const insertLink = db.prepare('INSERT INTO product_collections (product_id, collection_slug) VALUES (?, ?)');
+  await dbRun('DELETE FROM product_collections WHERE product_id = ?', [product.id]);
   for (const collectionSlug of product.collectionSlugs) {
-    insertLink.run(product.id, collectionSlug);
+    await dbRun('INSERT INTO product_collections (product_id, collection_slug) VALUES (?, ?)', [
+      product.id,
+      collectionSlug,
+    ]);
   }
 }
 
-function replaceVariants(productId: string, variants: ProductVariantInput[], reference: string) {
-  const db = getDb();
-  db.prepare('DELETE FROM product_variants WHERE product_id = ?').run(productId);
-  const stmt = db.prepare(
-    `INSERT INTO product_variants (id, product_id, color_fr, color_ar, color_en, color_hex, sku, price, in_stock, sort_order, images)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  );
-  variants.forEach((variant, index) => {
-    stmt.run(
-      variant.id || nowId('v'),
-      productId,
-      variant.color?.fr ?? '',
-      variant.color?.ar ?? '',
-      variant.color?.en ?? '',
-      variant.colorHex ?? '#000000',
-      variant.sku || `${reference}-${index + 1}`,
-      variant.price ?? null,
-      variant.inStock === false ? 0 : 1,
-      variant.sortOrder ?? index,
-      JSON.stringify(variant.images ?? [])
+async function replaceVariants(productId: string, variants: ProductVariantInput[], reference: string) {
+  await dbRun('DELETE FROM product_variants WHERE product_id = ?', [productId]);
+  for (const [index, variant] of variants.entries()) {
+    await dbRun(
+      `INSERT INTO product_variants (id, product_id, color_fr, color_ar, color_en, color_hex, sku, price, in_stock, sort_order, images)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        variant.id || nowId('v'),
+        productId,
+        variant.color?.fr ?? '',
+        variant.color?.ar ?? '',
+        variant.color?.en ?? '',
+        variant.colorHex ?? '#000000',
+        variant.sku || `${reference}-${index + 1}`,
+        variant.price ?? null,
+        variant.inStock === false ? 0 : 1,
+        variant.sortOrder ?? index,
+        JSON.stringify(variant.images ?? []),
+      ]
     );
-  });
+  }
 }
 
-export function createProduct(input: ProductInput): Product {
-  const db = getDb();
+export async function createProduct(input: ProductInput): Promise<Product> {
   const slug = input.slug?.trim() || slugify(input.name.fr || input.name.en || input.name.ar || input.reference);
   const id = nowId('p');
-  insertProductRow(db, {
+  await insertProductRow({
     id,
     slug,
     ...input,
@@ -416,15 +440,14 @@ export function createProduct(input: ProductInput): Product {
     featured: input.featured ?? false,
     isNew: input.isNew ?? false,
   });
-  if (input.variants) replaceVariants(id, input.variants, input.reference);
-  return getProductById(id)!;
+  if (input.variants) await replaceVariants(id, input.variants, input.reference);
+  return (await getProductById(id))!;
 }
 
-export function updateProduct(id: string, input: Partial<ProductInput>): Product | null {
-  const existing = getProductById(id);
+export async function updateProduct(id: string, input: Partial<ProductInput>): Promise<Product | null> {
+  const existing = await getProductById(id);
   if (!existing) return null;
 
-  const db = getDb();
   const merged: ProductInput = {
     name: input.name ?? existing.name,
     reference: input.reference ?? existing.reference,
@@ -442,37 +465,35 @@ export function updateProduct(id: string, input: Partial<ProductInput>): Product
     seo: input.seo ?? existing.seo,
   };
 
-  insertProductRow(db, {...merged, id: existing.id, slug: existing.slug});
+  await insertProductRow({...merged, id: existing.id, slug: existing.slug});
 
-  if (input.variants) replaceVariants(id, input.variants, merged.reference);
+  if (input.variants) await replaceVariants(id, input.variants, merged.reference);
 
   return getProductById(id);
 }
 
-export function deleteProduct(id: string): boolean {
-  const db = getDb();
-  const result = db.prepare('DELETE FROM products WHERE id = ?').run(id);
-  return result.changes > 0;
+export async function deleteProduct(id: string): Promise<boolean> {
+  const changes = await dbRun('DELETE FROM products WHERE id = ?', [id]);
+  return changes > 0;
 }
 
 // ── Site settings ──
 
 const SITE_SETTINGS_KEY = 'site';
 
-export function getSiteSettings(): SiteSettings {
-  const db = getDb();
-  const row = db.prepare('SELECT value FROM site_settings WHERE key = ?').get(SITE_SETTINGS_KEY) as Row | undefined;
+export async function getSiteSettings(): Promise<SiteSettings> {
+  const row = await dbFirst<Row>('SELECT value FROM site_settings WHERE key = ?', [SITE_SETTINGS_KEY]);
   if (!row) return getDefaultSiteSettings();
   const parsed = parseJSON<unknown>(row.value, null);
   return migrateSiteSettings(parsed);
 }
 
-export function saveSiteSettings(settings: SiteSettings): void {
-  const db = getDb();
-  db.prepare(
+export async function saveSiteSettings(settings: SiteSettings): Promise<void> {
+  await dbRun(
     `INSERT INTO site_settings (key, value) VALUES (?, ?)
-     ON CONFLICT(key) DO UPDATE SET value = excluded.value`
-  ).run(SITE_SETTINGS_KEY, JSON.stringify(settings));
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+    [SITE_SETTINGS_KEY, JSON.stringify(settings)]
+  );
 }
 
 // ── Dashboard stats ──
@@ -490,26 +511,37 @@ export type DashboardData = {
   collectionBreakdown: CollectionBreakdown[];
 };
 
-export function getDashboardData(): DashboardData {
-  const products = getAllProducts();
+export async function getDashboardData(): Promise<DashboardData> {
+  const [products, collections] = await Promise.all([getAllProducts(), getCollections()]);
 
   const totalColorVariants = products.reduce((sum, p) => sum + Math.max(p.variants?.length ?? 0, 1), 0);
 
-  const byCollection = products.reduce<Map<string, {slug: string; name: string; count: number}>>((acc, p) => {
-    for (const collection of p.collections) {
-      const current = acc.get(collection.slug) ?? {slug: collection.slug, name: collection.name.fr, count: 0};
-      current.count += 1;
-      acc.set(collection.slug, current);
-    }
-    return acc;
-  }, new Map());
+  // Seeded from the full collection list so a collection with no linked
+  // products still shows up with a count of 0.
+  const byCollection = new Map<string, {slug: string; name: string; count: number}>(
+    collections.map((collection) => [collection.slug, {slug: collection.slug, name: collection.name.fr, count: 0}])
+  );
 
-  const collectionBreakdown: CollectionBreakdown[] = Array.from(byCollection.values()).map(({slug, name, count}) => ({
-    slug,
-    name,
-    count,
-    percentage: products.length > 0 ? Math.round((count / products.length) * 100) : 0,
-  }));
+  for (const product of products) {
+    for (const collection of product.collections) {
+      const current = byCollection.get(collection.slug) ?? {
+        slug: collection.slug,
+        name: collection.name.fr,
+        count: 0,
+      };
+      current.count += 1;
+      byCollection.set(collection.slug, current);
+    }
+  }
+
+  const collectionBreakdown: CollectionBreakdown[] = Array.from(byCollection.values()).map(
+    ({slug, name, count}) => ({
+      slug,
+      name,
+      count,
+      percentage: products.length > 0 ? Math.round((count / products.length) * 100) : 0,
+    })
+  );
 
   return {totalProducts: products.length, totalColorVariants, collectionBreakdown};
 }

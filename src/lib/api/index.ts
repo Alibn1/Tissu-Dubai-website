@@ -7,15 +7,16 @@ import {
 } from '@/lib/data/store';
 import type {CollectionCard, HomepageContent} from '@/lib/siteSettings';
 
-function getHomepageContent(): HomepageContent {
-  return getSiteSettings().homepage;
+async function getHomepageContent(): Promise<HomepageContent> {
+  return (await getSiteSettings()).homepage;
 }
 
-function loadMergedCollections(): Collection[] {
-  const homepage = getHomepageContent();
+async function loadMergedCollections(): Promise<Collection[]> {
+  const homepage = await getHomepageContent();
   const cardsBySlug = new Map<string, CollectionCard>(homepage.collectionCards.map((card) => [card.id, card]));
 
-  return getCollectionsFromStore().map((cat) => {
+  const collections = await getCollectionsFromStore();
+  return collections.map((cat) => {
     const card = cardsBySlug.get(cat.slug);
     if (!card) return cat;
     return {
@@ -35,7 +36,7 @@ export async function getProducts(filters?: {
   search?: string;
   sort?: string;
 }): Promise<Product[]> {
-  let filtered = [...getAllProducts()];
+  let filtered = [...(await getAllProducts())];
 
   if (filters?.collection) {
     filtered = filtered.filter((p) => p.collections.some((c) => c.slug === filters.collection));
@@ -91,11 +92,11 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
-  return getAllProducts().filter((p) => p.featured).slice(0, limit);
+  return (await getAllProducts()).filter((p) => p.featured).slice(0, limit);
 }
 
 export async function getNewArrivals(limit = 8): Promise<Product[]> {
-  return getAllProducts().filter((p) => p.isNew).slice(0, limit);
+  return (await getAllProducts()).filter((p) => p.isNew).slice(0, limit);
 }
 
 export async function getCollections(): Promise<Collection[]> {
@@ -103,12 +104,12 @@ export async function getCollections(): Promise<Collection[]> {
 }
 
 export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
-  const merged = loadMergedCollections();
+  const merged = await loadMergedCollections();
   return merged.find((c) => c.slug === slug) || null;
 }
 
 export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
-  return getAllProducts()
+  return (await getAllProducts())
     .filter(
       (p) =>
         p.id !== product.id &&

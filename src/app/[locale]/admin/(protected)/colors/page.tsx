@@ -13,7 +13,7 @@ export default async function AdminColorsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const products = getAllProducts();
+  const products = await getAllProducts();
 
   const variantCount = (p: (typeof products)[number]) => Math.max(p.variants?.length ?? 0, 1);
 

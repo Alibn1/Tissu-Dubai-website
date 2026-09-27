@@ -3,7 +3,7 @@ import {getSiteSettings, saveSiteSettings} from '@/lib/data/store';
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 
 export async function GET() {
-  return NextResponse.json(getSiteSettings());
+  return NextResponse.json(await getSiteSettings());
 }
 
 export async function PUT(request: NextRequest) {
@@ -14,6 +14,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({error: 'Invalid settings payload'}, {status: 400});
   }
 
-  saveSiteSettings(body);
-  return NextResponse.json({success: true, settings: getSiteSettings()});
+  await saveSiteSettings(body);
+  return NextResponse.json({success: true, settings: await getSiteSettings()});
 }

@@ -13,11 +13,10 @@ export default async function AdminProductEditPage({params}: Props) {
   const {locale, id} = await params;
   setRequestLocale(locale);
 
-  const product = getProductById(id);
+  const product = await getProductById(id);
   if (!product) notFound();
 
-  const models = getModels();
-  const collections = getCollections();
+  const [models, collections] = await Promise.all([getModels(), getCollections()]);
 
   return (
     <div className="min-h-[70vh]">

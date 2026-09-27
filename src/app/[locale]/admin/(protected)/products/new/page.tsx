@@ -12,8 +12,7 @@ export default async function AdminNewProductPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const collections = getCollections();
-  const models = getModels();
+  const [collections, models] = await Promise.all([getCollections(), getModels()]);
 
   return (
     <div>

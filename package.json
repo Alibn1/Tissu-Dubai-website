@@ -11,7 +11,8 @@
     "test:watch": "cross-env NODE_OPTIONS=--experimental-sqlite vitest",
     "db:reset": "node scripts/db-reset.mjs",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "test:d1": "cross-env NODE_OPTIONS=--experimental-sqlite TISSU_FORCE_D1=1 vitest run src/db/d1.integration.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

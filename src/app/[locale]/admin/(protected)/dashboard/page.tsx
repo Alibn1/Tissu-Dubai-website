@@ -11,7 +11,7 @@ export default async function AdminDashboardPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const {totalProducts, totalColorVariants, collectionBreakdown} = getDashboardData();
+  const {totalProducts, totalColorVariants, collectionBreakdown} = await getDashboardData();
 
   return (
     <div className="min-h-full">
