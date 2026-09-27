@@ -107,7 +107,7 @@ export default async function AdminColorsPage({params}: Props) {
                               fill
                               sizes="48px"
                               unoptimized
-                              className="object-cover"
+                              className="object-contain"
                             />
                           ) : (
                             <Package className="h-5 w-5 text-brand-muted" />
