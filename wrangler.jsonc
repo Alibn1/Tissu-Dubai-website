@@ -11,6 +11,13 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tissu-dubai",
+      "database_id": "31c09d79-607a-4746-988a-cabd60e28078"
+    }
+  ],
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
