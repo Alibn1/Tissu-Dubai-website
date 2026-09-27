@@ -1,4 +1,11 @@
 import {dbAll, dbBatch, dbFirst, dbRun, type BatchStatement} from '@/db';
+import {
+  checkImageBudget,
+  modelInputSchema,
+  parseOrThrow,
+  productInputSchema,
+  siteSettingsSchema
+} from '@/lib/validation/schemas';
 import type {
   Collection,
   Locale,
@@ -222,6 +229,8 @@ export async function getModelsByCollection(collectionSlug: string): Promise<Mod
 }
 
 export async function upsertModel(model: Model): Promise<Model> {
+  parseOrThrow(modelInputSchema, model, 'model');
+
   await dbRun(
     `INSERT INTO models (id, slug, name_fr, name_ar, name_en)
      VALUES (?, ?, ?, ?, ?)
@@ -438,6 +447,7 @@ async function replaceVariants(productId: string, variants: ProductVariantInput[
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
+  validateProductInput(input, {partial: false});
   const slug = input.slug?.trim() || slugify(input.name.fr || input.name.en || input.name.ar || input.reference);
   const id = nowId('p');
   await insertProductRow({
@@ -453,9 +463,37 @@ export async function createProduct(input: ProductInput): Promise<Product> {
   return (await getProductById(id))!;
 }
 
+/**
+ * Checks a product before it reaches SQL.
+ *
+ * The routes already reject an empty reference, no collection and a missing
+ * image. This covers what they cannot see: a blank French name, a price that
+ * arrived as NaN, and an image payload too large for a D1 row. All three would
+ * otherwise be stored wrong, or fail without a usable message.
+ */
+function validateProductInput(input: Partial<ProductInput>, options: {partial: boolean}): void {
+  // On an update the top-level keys become optional, but any key that is
+  // present is still checked by its own schema, so a partial edit cannot smuggle
+  // in a nameless product or a NaN price.
+  const schema = options.partial ? productInputSchema.partial() : productInputSchema;
+  parseOrThrow(schema, input, 'product');
+
+  checkImageBudget([
+    {label: 'Images du produit', images: input.images},
+    ...(input.variants ?? []).map((variant) => ({
+      label: `Image de la variante ${variant.color?.fr ?? ''}`.trim(),
+      images: variant.images
+    }))
+  ]);
+}
+
 export async function updateProduct(id: string, input: Partial<ProductInput>): Promise<Product | null> {
   const existing = await getProductById(id);
   if (!existing) return null;
+
+  // Checked against the fields the caller actually sent, before they are merged
+  // with the existing row, so a bad value is reported rather than persisted.
+  validateProductInput(input, {partial: true});
 
   const merged: ProductInput = {
     name: input.name ?? existing.name,
@@ -652,6 +690,27 @@ export async function getSiteSettings(): Promise<SiteSettings> {
  * "everything in one row" document from coming back.
  */
 export async function saveSiteSettings(settings: SiteSettings): Promise<void> {
+  // The settings route accepts any object at all, so this is the last place a
+  // malformed payload can be caught before it is spread across fourteen rows.
+  parseOrThrow(siteSettingsSchema, settings, 'settings');
+
+  // Each card and the hero is its own settings row, so the image ceiling is
+  // checked per image, exactly as for product rows.
+  const homepage = settings.homepage;
+  if (homepage) {
+    checkImageBudget([
+      {label: 'Banniere de la page d\'accueil', images: [homepage.hero?.image ?? '']},
+      ...(homepage.collectionCards ?? []).map((card) => ({
+        label: `Carte de collection ${card.id}`,
+        images: [card.image ?? '']
+      })),
+      ...(homepage.genderCards ?? []).map((card) => ({
+        label: `Carte ${card.id}`,
+        images: [card.image ?? '']
+      }))
+    ]);
+  }
+
   const {faq, ...rest} = settings;
   await saveFaqs(faq ?? []);
 

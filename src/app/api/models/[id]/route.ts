@@ -1,5 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {removeModel, upsertModel} from '@/lib/data/store';
+import {writeErrorResponse} from '@/lib/validation/routeError';
 import type {Locale} from '@/types';
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 
@@ -27,7 +28,11 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
     (collectionSlug: unknown) => typeof collectionSlug === 'string'
   );
 
-  await upsertModel({id, slug: body.slug, collectionSlugs, name});
+  try {
+    await upsertModel({id, slug: body.slug, collectionSlugs, name});
+  } catch (error) {
+    return writeErrorResponse(error, 'Failed to update model');
+  }
   return NextResponse.json({success: true});
 }
 

@@ -1,5 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {getSiteSettings, saveSiteSettings} from '@/lib/data/store';
+import {writeErrorResponse} from '@/lib/validation/routeError';
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 
 export async function GET() {
@@ -14,6 +15,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({error: 'Invalid settings payload'}, {status: 400});
   }
 
-  await saveSiteSettings(body);
+  try {
+    await saveSiteSettings(body);
+  } catch (error) {
+    return writeErrorResponse(error, 'Failed to save settings');
+  }
   return NextResponse.json({success: true, settings: await getSiteSettings()});
 }

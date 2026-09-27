@@ -59,6 +59,73 @@ describe('DB-backed store', () => {
     expect(await store.getProductById(created.id)).toBeNull();
   });
 
+  it('refuses to write a product that would be stored wrong', async () => {
+    // The store is the enforcement point, so these are refused whether they
+    // arrive from an API route, a test, or a future importer.
+    const store = await import('@/lib/data/store');
+    const {ValidationError} = await import('@/lib/validation/schemas');
+
+    const base = {
+      reference: 'TD-BAD-001',
+      collectionSlugs: ['caftan'],
+      price: 100
+    };
+
+    await expect(
+      store.createProduct({...base, name: {fr: '', ar: '', en: ''}})
+    ).rejects.toBeInstanceOf(ValidationError);
+
+    await expect(
+      store.createProduct({...base, name: {fr: 'NaN price', ar: '', en: ''}, price: Number.NaN})
+    ).rejects.toBeInstanceOf(ValidationError);
+
+    await expect(
+      store.createProduct({...base, name: {fr: 'No collection', ar: '', en: ''}, collectionSlugs: []})
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('refuses an image payload D1 could not store instead of failing silently', async () => {
+    // Over the D1 2,000,000 byte row limit the insert used to fail with no
+    // usable error, so the save appeared to work and the data was just gone.
+    const store = await import('@/lib/data/store');
+    const {ValidationError} = await import('@/lib/validation/schemas');
+
+    const oversized = `data:image/jpeg;base64,${'A'.repeat(1_500_000)}`;
+
+    await expect(
+      store.createProduct({
+        name: {fr: 'Trop lourde', ar: 'ثقيل', en: 'Too heavy'},
+        reference: 'TD-BIG-001',
+        collectionSlugs: ['caftan'],
+        images: [oversized]
+      })
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('refuses a model with an unusable slug or no name', async () => {
+    const store = await import('@/lib/data/store');
+    const {ValidationError} = await import('@/lib/validation/schemas');
+
+    await expect(
+      store.upsertModel({id: 'm-bad', slug: 'Pas Valide!', name: {fr: 'Modele', ar: '', en: ''}, collectionSlugs: ['caftan']})
+    ).rejects.toBeInstanceOf(ValidationError);
+
+    await expect(
+      store.upsertModel({id: 'm-bad-2', slug: 'modele-valide', name: {fr: '', ar: '', en: ''}, collectionSlugs: ['caftan']})
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('refuses a settings payload that is not settings', async () => {
+    // The settings route accepts any object, so this used to be the one write
+    // path with no structure check at all.
+    const store = await import('@/lib/data/store');
+    const {ValidationError} = await import('@/lib/validation/schemas');
+
+    await expect(
+      store.saveSiteSettings({businessHours: [{day: 'funday', isClosed: false}]} as never)
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
   it('persists product and variant images through create and update', async () => {
     const store = await import('@/lib/data/store');
 

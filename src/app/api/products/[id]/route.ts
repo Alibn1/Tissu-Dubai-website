@@ -3,6 +3,7 @@ import {getProductById, updateProduct, deleteProduct, type ProductInput} from '@
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 import {missingVariantImageMessage, variantsMissingImage} from '@/lib/variantValidation';
 import {normalizeSeo} from '@/lib/productSeo';
+import {writeErrorResponse} from '@/lib/validation/routeError';
 
 type Params = Promise<{id: string}>;
 
@@ -68,8 +69,7 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
     const updated = await updateProduct(id, input);
     return NextResponse.json({success: true, product: updated});
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to update product';
-    return NextResponse.json({error: message}, {status: 400});
+    return writeErrorResponse(error, 'Failed to update product');
   }
 }
 

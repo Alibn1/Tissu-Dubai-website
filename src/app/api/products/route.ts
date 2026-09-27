@@ -3,6 +3,7 @@ import {getAllProducts, createProduct, type ProductInput} from '@/lib/data/store
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 import {hasImage, missingVariantImageMessage, variantsMissingImage} from '@/lib/variantValidation';
 import {normalizeSeo} from '@/lib/productSeo';
+import {writeErrorResponse} from '@/lib/validation/routeError';
 
 export async function GET() {
   const summary = (await getAllProducts()).map((p) => ({
@@ -86,8 +87,7 @@ export async function POST(request: NextRequest) {
     const product = await createProduct(input);
     return NextResponse.json({success: true, product}, {status: 201});
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to create product';
-    return NextResponse.json({error: message}, {status: 400});
+    return writeErrorResponse(error, 'Failed to create product');
   }
 }
 

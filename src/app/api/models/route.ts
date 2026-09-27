@@ -1,5 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {getModels, upsertModel} from '@/lib/data/store';
+import {writeErrorResponse} from '@/lib/validation/routeError';
 import type {Locale, Model} from '@/types';
 import {isAdminRequest, unauthorizedResponse} from '@/lib/adminAuth';
 
@@ -35,6 +36,10 @@ export async function POST(request: NextRequest) {
     name,
   };
 
-  await upsertModel(model);
+  try {
+    await upsertModel(model);
+  } catch (error) {
+    return writeErrorResponse(error, 'Failed to save model');
+  }
   return NextResponse.json({success: true, model}, {status: 201});
 }
