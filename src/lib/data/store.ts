@@ -8,7 +8,12 @@ import type {
   ProductVariant,
 } from '@/types';
 import {normalizeSeo, parseSeoFields} from '@/lib/productSeo';
-import {getDefaultSiteSettings, migrateSiteSettings, type SiteSettings} from '@/lib/siteSettings';
+import {
+  getDefaultSiteSettings,
+  migrateSiteSettings,
+  type FaqEntry,
+  type SiteSettings
+} from '@/lib/siteSettings';
 
 type Row = Record<string, unknown>;
 
@@ -478,22 +483,110 @@ export async function deleteProduct(id: string): Promise<boolean> {
   return changes > 0;
 }
 
+// ── FAQs ──
+
+/**
+ * FAQ entries in display order, one row per question.
+ *
+ * These live outside the site_settings blob because a question is an
+ * individually editable, ordered record rather than a scalar. See
+ * migrations/0002_faqs.sql for the reasoning.
+ */
+export async function getFaqs(): Promise<FaqEntry[]> {
+  const rows = await dbAll<Row>(
+    'SELECT * FROM faqs WHERE is_active = 1 ORDER BY sort_order, created_at, id'
+  );
+  return rows.map((row) => ({
+    id: String(row.id),
+    question: {
+      fr: String(row.question_fr ?? ''),
+      ar: String(row.question_ar ?? ''),
+      en: String(row.question_en ?? '')
+    },
+    answer: {
+      fr: String(row.answer_fr ?? ''),
+      ar: String(row.answer_ar ?? ''),
+      en: String(row.answer_en ?? '')
+    }
+  }));
+}
+
+/**
+ * Replaces the FAQ list. The admin form always submits the whole list, so this
+ * upserts every entry and then drops the ones no longer present. Going row by
+ * row rather than DELETE-then-INSERT keeps created_at intact for entries whose
+ * wording was merely edited.
+ */
+export async function saveFaqs(faqs: FaqEntry[]): Promise<void> {
+  for (const [index, entry] of faqs.entries()) {
+    await dbRun(
+      `INSERT INTO faqs (id, question_fr, question_ar, question_en, answer_fr, answer_ar, answer_en, sort_order, is_active, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))
+       ON CONFLICT(id) DO UPDATE SET
+         question_fr = excluded.question_fr,
+         question_ar = excluded.question_ar,
+         question_en = excluded.question_en,
+         answer_fr = excluded.answer_fr,
+         answer_ar = excluded.answer_ar,
+         answer_en = excluded.answer_en,
+         sort_order = excluded.sort_order,
+         is_active = 1,
+         updated_at = excluded.updated_at`,
+      [
+        entry.id,
+        entry.question?.fr ?? '',
+        entry.question?.ar ?? '',
+        entry.question?.en ?? '',
+        entry.answer?.fr ?? '',
+        entry.answer?.ar ?? '',
+        entry.answer?.en ?? '',
+        index
+      ]
+    );
+  }
+
+  if (faqs.length === 0) {
+    await dbRun('DELETE FROM faqs');
+    return;
+  }
+  const placeholders = faqs.map(() => '?').join(', ');
+  await dbRun(`DELETE FROM faqs WHERE id NOT IN (${placeholders})`, faqs.map((entry) => entry.id));
+}
+
 // ── Site settings ──
 
 const SITE_SETTINGS_KEY = 'site';
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const row = await dbFirst<Row>('SELECT value FROM site_settings WHERE key = ?', [SITE_SETTINGS_KEY]);
-  if (!row) return getDefaultSiteSettings();
-  const parsed = parseJSON<unknown>(row.value, null);
-  return migrateSiteSettings(parsed);
+  const [row, faqs] = await Promise.all([
+    dbFirst<Row>('SELECT value FROM site_settings WHERE key = ?', [SITE_SETTINGS_KEY]),
+    getFaqs()
+  ]);
+
+  const defaults = getDefaultSiteSettings();
+  if (!row) return {...defaults, faq: faqs.length > 0 ? faqs : defaults.faq};
+
+  const parsed = migrateSiteSettings(parseJSON<unknown>(row.value, null));
+  // The faqs table wins once it holds rows. Falling back to the blob keeps a
+  // fresh deploy working in the window between the migration and the backfill;
+  // the first saveSiteSettings() call writes the entries to the table and drops
+  // them from the blob, so this path is not permanent.
+  return faqs.length > 0 ? {...parsed, faq: faqs} : parsed;
 }
 
+/**
+ * Persists the settings blob and the FAQ table together. `faq` is destructured
+ * out of the object before stringify so the blob cannot hold a second, stale
+ * copy that would drift from the table. The FAQ write goes first: if the blob
+ * write then fails, the table still wins on read and nothing is lost.
+ */
 export async function saveSiteSettings(settings: SiteSettings): Promise<void> {
+  const {faq, ...rest} = settings;
+  await saveFaqs(faq ?? []);
   await dbRun(
     `INSERT INTO site_settings (key, value) VALUES (?, ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
-    [SITE_SETTINGS_KEY, JSON.stringify(settings)]
+    [SITE_SETTINGS_KEY, JSON.stringify(rest)]
   );
 }
 

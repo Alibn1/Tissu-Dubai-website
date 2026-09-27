@@ -93,4 +93,22 @@ CREATE TABLE IF NOT EXISTS site_settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+-- FAQ entries live in their own table rather than inside the site_settings JSON
+-- blob: a question is an individually editable, ordered record, not a scalar.
+-- The SiteSettings type still exposes faq: FaqEntry[]; getSiteSettings() merges
+-- this table back in, so no consumer of the settings object changes.
+CREATE TABLE IF NOT EXISTS faqs (
+  id TEXT PRIMARY KEY,
+  question_fr TEXT NOT NULL DEFAULT '',
+  question_ar TEXT NOT NULL DEFAULT '',
+  question_en TEXT NOT NULL DEFAULT '',
+  answer_fr TEXT NOT NULL DEFAULT '',
+  answer_ar TEXT NOT NULL DEFAULT '',
+  answer_en TEXT NOT NULL DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;

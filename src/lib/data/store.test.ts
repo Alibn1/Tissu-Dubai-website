@@ -202,3 +202,57 @@ describe('DB-backed store', () => {
     await store.deleteProduct(created.id);
   });
 });
+
+describe('FAQ storage', () => {
+  it('stores questions in their own table and leaves them out of the blob', async () => {
+    const store = await import('@/lib/data/store');
+    const {getFaqs} = store;
+    const {getDb, dbFirst} = await import('@/db');
+
+    const settings = await store.getSiteSettings();
+    const faq = [
+      {
+        id: 'faq-test-1',
+        question: {fr: 'Question un', ar: 'سؤال', en: 'Question one'},
+        answer: {fr: 'Réponse un', ar: 'جواب', en: 'Answer one'},
+      },
+      {
+        id: 'faq-test-2',
+        question: {fr: 'Question deux', ar: 'سؤال٢', en: 'Question two'},
+        answer: {fr: 'Réponse deux', ar: 'جواب٢', en: 'Answer two'},
+      },
+    ];
+
+    await store.saveSiteSettings({...settings, faq});
+
+    // Read back through the table, in list order.
+    const fromTable = await getFaqs();
+    expect(fromTable.map((entry) => entry.id)).toEqual(['faq-test-1', 'faq-test-2']);
+    expect(fromTable[0].question.fr).toBe('Question un');
+    expect(fromTable[1].answer.en).toBe('Answer two');
+
+    // The blob must not keep a second copy that could drift from the table.
+    const row = await dbFirst<{value: string}>(
+      "SELECT value FROM site_settings WHERE key = 'site'"
+    );
+    expect(JSON.parse(row!.value)).not.toHaveProperty('faq');
+
+    // ...and getSiteSettings still exposes faq, unchanged for every consumer.
+    expect((await store.getSiteSettings()).faq.map((entry) => entry.id)).toEqual([
+      'faq-test-1',
+      'faq-test-2',
+    ]);
+
+    // The table is the source of truth: a row can be edited without touching the blob.
+    getDb().prepare('UPDATE faqs SET question_fr = ? WHERE id = ?').run('Modifié', 'faq-test-1');
+    expect((await getFaqs())[0].question.fr).toBe('Modifié');
+
+    // Reordering follows the submitted list, not the previous sort_order.
+    await store.saveSiteSettings({...(await store.getSiteSettings()), faq: [faq[1], faq[0]]});
+    expect((await getFaqs()).map((entry) => entry.id)).toEqual(['faq-test-2', 'faq-test-1']);
+
+    // Removing an entry from the list deletes its row.
+    await store.saveSiteSettings({...(await store.getSiteSettings()), faq: [faq[0]]});
+    expect((await getFaqs()).map((entry) => entry.id)).toEqual(['faq-test-1']);
+  });
+});
