@@ -21,6 +21,12 @@ import {describe, expect, it, beforeAll} from 'vitest';
 const enabled = process.env.TISSU_FORCE_D1 === '1';
 const describeD1 = enabled ? describe : describe.skip;
 
+/**
+ * This suite talks to a real D1 database over the network, so a round trip can
+ * outlast the default 5s timeout and read as a failure when nothing is wrong.
+ */
+const D1_TIMEOUT = 30_000;
+
 // Set before the store is imported so the adapter picks D1 over the local file.
 if (enabled) {
   process.env.NEXT_RUNTIME = 'nodejs';
@@ -47,7 +53,7 @@ describeD1('D1 integration (production data path)', () => {
     expect(products).toHaveLength(21);
     expect(products.reduce((n, p) => n + p.variants.length, 0)).toBe(54);
     expect(products.some((p) => p.collections.length > 1)).toBe(true);
-  });
+  }, D1_TIMEOUT);
 
   it('looks products up by id and by slug', async () => {
     const store = await import('@/lib/data/store');
@@ -56,21 +62,21 @@ describeD1('D1 integration (production data path)', () => {
     expect((await store.getProductBySlug(first.slug))?.id).toBe(first.id);
     expect((await store.getProductById(first.id))?.slug).toBe(first.slug);
     expect(await store.getProductBySlug('does-not-exist')).toBeNull();
-  });
+  }, D1_TIMEOUT);
 
   it('reads models with their junction-table collection links', async () => {
     const store = await import('@/lib/data/store');
     const models = await store.getModels();
     expect(models).toHaveLength(9);
     expect(models.some((m) => m.collectionSlugs.length > 1)).toBe(true);
-  });
+  }, D1_TIMEOUT);
 
   it('reads site settings from D1', async () => {
     const store = await import('@/lib/data/store');
     const settings = await store.getSiteSettings();
     expect(settings.contact.phones[0]?.length).toBeGreaterThan(0);
     expect(settings.homepage.collectionCards.length).toBeGreaterThan(0);
-  });
+  }, D1_TIMEOUT);
 
   it('lists every collection in the dashboard, including ones with few products', async () => {
     const store = await import('@/lib/data/store');
@@ -84,7 +90,7 @@ describeD1('D1 integration (production data path)', () => {
       'tekchita',
     ]);
     expect(dashboard.collectionBreakdown.find((c) => c.slug === 'homme')?.count).toBe(1);
-  });
+  }, D1_TIMEOUT);
 
   it('persists a product write in D1 and reads it back', async () => {
     const store = await import('@/lib/data/store');
@@ -128,9 +134,17 @@ describeD1('D1 integration (production data path)', () => {
 
     const settings = await store.getSiteSettings();
     const address = `D1 verify street ${Date.now()}`;
-    await store.saveSiteSettings({...settings, contact: {...settings.contact, address}});
-    expect((await store.getSiteSettings()).contact.address).toBe(address);
-    await store.saveSiteSettings(settings);
+
+    // Restored in a finally: an assertion that fails between the write and the
+    // restore would otherwise leave the live contact page showing this string,
+    // which is exactly the kind of damage this suite is meant to catch.
+    try {
+      await store.saveSiteSettings({...settings, contact: {...settings.contact, address}});
+      expect((await store.getSiteSettings()).contact.address).toBe(address);
+    } finally {
+      await store.saveSiteSettings(settings);
+      expect((await store.getSiteSettings()).contact.address).toBe(settings.contact.address);
+    }
 
     await store.upsertModel({
       id: 'm-verify',
@@ -144,5 +158,5 @@ describeD1('D1 integration (production data path)', () => {
 
     expect(await store.removeModel('m-verify')).toBe(true);
     expect((await store.getModels()).find((m) => m.id === 'm-verify')).toBeUndefined();
-  });
+  }, D1_TIMEOUT);
 });

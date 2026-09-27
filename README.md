@@ -1,24 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app/turbopack).
 
-## Getting Started
+## How this project works
 
-First, run the development server:
+**Two databases, on purpose.** The deployed Worker reads and writes Cloudflare D1
+only. `npm run dev` reads the local SQLite file at `data/tissu.db`, which is also
+the source used to seed D1. Nothing in the Worker falls back to in-memory state,
+so if a page looks right locally and wrong in production, suspect the data rather
+than the query.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**`data/tissu.db` is read-only input.** Do not edit it. Image extraction for R2
+reads from it; the catalogue itself lives in D1.
+
+**Secrets.** `ADMIN_PASSWORD` signs the admin session cookie and is required.
+`ADMIN_API_KEY` is optional: setting it enables an `Authorization: Bearer` path
+for scripts, and it doubles as the signing key if no password is set. Never commit
+either value; they belong in `.dev.vars` locally and in Cloudflare as Worker
+secrets.
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Local dev server against `data/tissu.db` |
+| `npm test` | Unit and component tests against a throwaway SQLite file |
+| `npm run test:d1` | Integration test against the **real D1 database** |
+| `npm run build` | Production build (OpenNext output) |
+| `npm run preview` | Build and serve locally as a Worker |
+| `npm run deploy` | Build and deploy to Cloudflare |
+| `npm run db:reset` | Recreate the local SQLite file |
+
+All of these need `NODE_OPTIONS=--experimental-sqlite`, which the scripts set for
+you. Running `npx vitest` or `npx next` directly will fail with
+`No such built-in module: node:sqlite`.
+
+### `npm run test:d1` writes to production
+
+This is not a read-only smoke test. It creates a product, updates it, deletes it,
+and temporarily overwrites the contact address before restoring it. Two things to
+know before running it:
+
+- A run that fails part-way can leave a `TD-D1-VERIFY` product behind, and the
+  next run then fails on the unique `reference` constraint. Delete it by hand
+  before retrying.
+- It asserts exact catalogue counts, so adding or removing a product in the admin
+  will fail the first test. Those numbers are a deliberate check that the import
+  landed correctly, which is why they are not relative.
+
+## Windows: `.open-next` is locked
+
+`workerd.exe` from a previous `npm run deploy` or `npm run preview` can survive the
+build and hold the output directory, making the next build fail on a rename. Stop
+it first:
+
+```powershell
+Get-Process workerd -ErrorAction SilentlyContinue | Stop-Process -Force
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
 

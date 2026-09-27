@@ -56,6 +56,7 @@ export function ProductEditForm({product, models, collections}: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [collectionSlugs, setCollectionSlugs] = useState<string[]>(product.collections.map((c) => c.slug));
   const [modelId, setModelId] = useState<string>(() => {
@@ -226,6 +227,7 @@ export function ProductEditForm({product, models, collections}: Props) {
       : product.images;
 
     try {
+      setSubmitError(null);
       const res = await fetch(`/api/products/${product.id}`, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
@@ -248,15 +250,29 @@ export function ProductEditForm({product, models, collections}: Props) {
           isNew: formData.isNew,
           variants: buildVariants(),
           seo,
+          // Refuses the save if someone else changed the product since this
+          // form was loaded, instead of overwriting their work.
+          expectedUpdatedAt: product.updatedAt,
         }),
       });
 
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+      } else {
+        // Previously a failed save was silent, so a rejected write looked like
+        // the button had simply done nothing.
+        let message = `Enregistrement impossible (HTTP ${res.status}).`;
+        try {
+          const data = await res.json();
+          if (typeof data?.error === 'string' && data.error.trim()) message = data.error;
+        } catch {
+          // Non-JSON body: keep the generic message.
+        }
+        setSubmitError(message);
       }
     } catch {
-      // handle error
+      setSubmitError('Enregistrement impossible : la connexion au serveur a echoue.');
     } finally {
       setSaving(false);
     }
@@ -414,6 +430,14 @@ export function ProductEditForm({product, models, collections}: Props) {
       {/* Save */}
       {variantError && (
         <p className="text-sm font-medium text-brand-error">{variantError.message}</p>
+      )}
+      {submitError && (
+        <p
+          role="alert"
+          className="rounded-md border border-brand-error bg-brand-error/10 px-3 py-2 text-sm font-medium text-brand-error"
+        >
+          {submitError}
+        </p>
       )}
       <div className="flex items-center gap-4">
         <button

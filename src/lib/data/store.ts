@@ -1,6 +1,7 @@
 import {dbAll, dbBatch, dbFirst, dbRun, type BatchStatement} from '@/db';
 import {
   checkImageBudget,
+  EditConflictError,
   modelInputSchema,
   parseOrThrow,
   productInputSchema,
@@ -140,6 +141,9 @@ function mapProductRow(
       ar: parseSeoFields(parseJSON<unknown>(row.seo_ar, {})),
       en: parseSeoFields(parseJSON<unknown>(row.seo_en, {})),
     },
+    // Sent back to the client on save so a second editor's write can be detected
+    // instead of quietly overwriting this one.
+    updatedAt: row.updated_at == null ? undefined : String(row.updated_at),
   };
 }
 
@@ -329,6 +333,11 @@ export type ProductInput = {
   images?: string[];
   variants?: ProductVariantInput[];
   seo?: ProductSeoByLanguage;
+  /**
+   * The `updatedAt` the editor loaded. When present, the write is refused if the
+   * stored row has moved on, so two admins cannot silently overwrite each other.
+   */
+  expectedUpdatedAt?: string;
 };
 
 type ProductRow = {
@@ -487,6 +496,67 @@ function validateProductInput(input: Partial<ProductInput>, options: {partial: b
   ]);
 }
 
+/** Stable JSON so key order cannot make two equal objects look different. */
+function stable(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value ?? null);
+  if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`;
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter(([, v]) => v !== undefined)
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stable(v)}`).join(',')}}`;
+}
+
+/** The variant fields updateProduct actually persists, ignoring anything else. */
+function comparableVariants(variants: ProductVariantInput[] | ProductVariant[]): unknown {
+  return variants.map((variant) => ({
+    id: variant.id,
+    color: variant.color,
+    colorHex: variant.colorHex ?? '',
+    sku: variant.sku ?? '',
+    price: variant.price ?? null,
+    inStock: variant.inStock ?? true,
+    images: variant.images ?? [],
+    sortOrder: (variant as ProductVariantInput).sortOrder ?? 0
+  }));
+}
+
+/**
+ * Whether the caller's partial input actually differs from what is stored.
+ *
+ * Deliberately limited to the fields updateProduct merges, so a field that is
+ * sent but not persisted cannot make this report a change that never happens.
+ */
+function hasFieldChanges(input: Partial<ProductInput>, existing: Product): boolean {
+  const current: Record<string, unknown> = {
+    name: existing.name,
+    reference: existing.reference,
+    collectionSlugs: existing.collections.map((c) => c.slug).sort(),
+    description: existing.description ?? {},
+    material: existing.material ?? {},
+    materialSlug: existing.materialSlug,
+    width: existing.width,
+    price: existing.price ?? null,
+    inStock: existing.inStock,
+    featured: existing.featured,
+    isNew: existing.isNew,
+    characteristics: existing.characteristics ?? {},
+    images: existing.images ?? [],
+    variants: comparableVariants(existing.variants ?? []),
+    seo: existing.seo ?? {}
+  };
+
+  for (const [key, value] of Object.entries(input)) {
+    if (key === 'expectedUpdatedAt' || value === undefined) continue;
+    if (key === 'variants') {
+      if (stable(comparableVariants(value as ProductVariantInput[])) !== stable(current.variants)) return true;
+      continue;
+    }
+    if (!(key in current)) continue;
+    if (stable(value) !== stable(current[key])) return true;
+  }
+  return false;
+}
+
 export async function updateProduct(id: string, input: Partial<ProductInput>): Promise<Product | null> {
   const existing = await getProductById(id);
   if (!existing) return null;
@@ -494,6 +564,13 @@ export async function updateProduct(id: string, input: Partial<ProductInput>): P
   // Checked against the fields the caller actually sent, before they are merged
   // with the existing row, so a bad value is reported rather than persisted.
   validateProductInput(input, {partial: true});
+
+  // If the editor told us which version it loaded, refuse the write when the row
+  // has moved on. An update that leaves the whole row alone is not a real edit,
+  // so a stale timestamp alone is not worth rejecting.
+  const stillSameVersion =
+    !input.expectedUpdatedAt || !hasFieldChanges(input, existing) || input.expectedUpdatedAt === existing.updatedAt;
+  if (!stillSameVersion) throw new EditConflictError();
 
   const merged: ProductInput = {
     name: input.name ?? existing.name,

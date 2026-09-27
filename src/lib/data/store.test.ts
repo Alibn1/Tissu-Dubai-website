@@ -126,6 +126,64 @@ describe('DB-backed store', () => {
     ).rejects.toBeInstanceOf(ValidationError);
   });
 
+  it('refuses a save that is based on a version someone else has replaced', async () => {
+    const store = await import('@/lib/data/store');
+    const {EditConflictError} = await import('@/lib/validation/schemas');
+
+    const created = await store.createProduct({
+      name: {fr: 'Version', ar: 'نسخة', en: 'Version'},
+      reference: 'TD-VERSION-001',
+      collectionSlugs: ['caftan'],
+      price: 100,
+      images: ['/images/products/product-1.svg']
+    });
+    const loaded = created.updatedAt;
+    expect(loaded).toBeTruthy();
+
+    // The optimistic save from the version this form loaded.
+    await store.updateProduct(created.id, {price: 150, expectedUpdatedAt: loaded});
+
+    // A second admin, still holding the original copy, tries to save.
+    await expect(
+      store.updateProduct(created.id, {price: 999, expectedUpdatedAt: loaded})
+    ).rejects.toBeInstanceOf(EditConflictError);
+
+    // Their write must not have landed.
+    expect((await store.getProductById(created.id))?.price).toBe(150);
+
+    // Reloading and saving again is fine.
+    const reloaded = (await store.getProductById(created.id))!.updatedAt;
+    expect((await store.updateProduct(created.id, {price: 175, expectedUpdatedAt: reloaded}))?.price).toBe(175);
+
+    // No timestamp means no check, so existing callers are unaffected.
+    expect((await store.updateProduct(created.id, {price: 200}))?.price).toBe(200);
+
+    await store.deleteProduct(created.id);
+  });
+
+  it('does not report a conflict when the save changes nothing', async () => {
+    const store = await import('@/lib/data/store');
+
+    const created = await store.createProduct({
+      name: {fr: 'Idempotent', ar: 'غير متغير', en: 'Idempotent'},
+      reference: 'TD-VERSION-002',
+      collectionSlugs: ['caftan'],
+      price: 100,
+      images: ['/images/products/product-1.svg']
+    });
+
+    await store.updateProduct(created.id, {price: 150, expectedUpdatedAt: created.updatedAt});
+    const afterFirst = (await store.getProductById(created.id))!;
+
+    // Same value again, from a genuinely stale copy. Nothing would be lost, so
+    // rejecting it would only be an annoyance.
+    const unchanged = await store.updateProduct(created.id, {price: 150, expectedUpdatedAt: created.updatedAt});
+    expect(unchanged?.price).toBe(150);
+
+    await store.deleteProduct(created.id);
+    expect(afterFirst.updatedAt).toBeTruthy();
+  });
+
   it('persists product and variant images through create and update', async () => {
     const store = await import('@/lib/data/store');
 

@@ -40,6 +40,20 @@ export class ValidationError extends Error {
   }
 }
 
+/**
+ * Raised when the row changed after the editor loaded it. Kept separate from
+ * ValidationError so the route can answer 409 rather than 400: nothing is wrong
+ * with the payload, the caller is simply working from an out-of-date copy.
+ */
+export class EditConflictError extends Error {
+  constructor() {
+    super(
+      "Ce produit a ete modifie par quelqu'un d'autre pendant que vous le modifiiez. Rechargez la page pour voir les changements actuels avant de relancer l'enregistrement."
+    );
+    this.name = 'EditConflictError';
+  }
+}
+
 /** French is the source language, so it is the one that must not be empty. */
 const localizedText = (max: number) =>
   z

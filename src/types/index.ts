@@ -39,6 +39,11 @@ export type Product = {
   images: string[];
   characteristics: Record<Locale, string[]>;
   seo?: ProductSeoByLanguage;
+  /**
+   * ISO timestamp of the last write, used to detect a stale edit. Optional
+   * because a product that has never been updated may not carry one.
+   */
+  updatedAt?: string;
 };
 
 export type Collection = {

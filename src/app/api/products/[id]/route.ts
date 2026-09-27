@@ -44,6 +44,8 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
     isNew: body.isNew ?? product.isNew,
     images: Array.isArray(body.images) ? body.images : undefined,
     seo: body.seo !== undefined ? normalizeSeo(body.seo) : undefined,
+    // Sent back by the edit form so a save over a newer version is refused.
+    expectedUpdatedAt: typeof body.expectedUpdatedAt === 'string' ? body.expectedUpdatedAt : undefined,
     variants: Array.isArray(body.variants)
       ? body.variants.map((v: Record<string, unknown>) => ({
           id: typeof v.id === 'string' ? v.id : undefined,
