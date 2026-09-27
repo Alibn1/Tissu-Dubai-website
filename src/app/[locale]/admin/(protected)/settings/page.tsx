@@ -21,7 +21,7 @@ export default async function AdminSettingsPage({params}: Props) {
         </p>
       </div>
 
-      <SiteSettingsForm initialData={getSiteSettings()} />
+      <SiteSettingsForm initialData={await getSiteSettings()} />
     </div>
   );
 }

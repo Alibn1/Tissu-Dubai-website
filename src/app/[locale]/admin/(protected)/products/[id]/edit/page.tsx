@@ -3,7 +3,7 @@ import {setRequestLocale} from 'next-intl/server';
 import {getCollections, getModels, getProductById} from '@/lib/data/store';
 import {ProductEditForm} from '@/components/admin/ProductEditForm';
 import {ArrowLeft} from 'lucide-react';
-import {Link} from '@/i18n/navigation';
+import Link from 'next/link';
 
 type Props = {
   params: Promise<{locale: string; id: string}>;
@@ -13,11 +13,10 @@ export default async function AdminProductEditPage({params}: Props) {
   const {locale, id} = await params;
   setRequestLocale(locale);
 
-  const product = getProductById(id);
+  const product = await getProductById(id);
   if (!product) notFound();
 
-  const models = getModels();
-  const collections = getCollections();
+  const [models, collections] = await Promise.all([getModels(), getCollections()]);
 
   return (
     <div className="min-h-[70vh]">

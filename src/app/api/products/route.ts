@@ -5,7 +5,7 @@ import {hasImage, missingVariantImageMessage, variantsMissingImage} from '@/lib/
 import {normalizeSeo} from '@/lib/productSeo';
 
 export async function GET() {
-  const summary = getAllProducts().map((p) => ({
+  const summary = (await getAllProducts()).map((p) => ({
     id: p.id,
     name: p.name,
     slug: p.slug,
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const product = createProduct(input);
+    const product = await createProduct(input);
     return NextResponse.json({success: true, product}, {status: 201});
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to create product';

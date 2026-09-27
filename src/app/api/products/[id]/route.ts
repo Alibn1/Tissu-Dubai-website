@@ -8,7 +8,7 @@ type Params = Promise<{id: string}>;
 
 export async function GET(_request: NextRequest, {params}: {params: Params}) {
   const {id} = await params;
-  const product = getProductById(id);
+  const product = await getProductById(id);
   if (!product) {
     return NextResponse.json({error: 'Product not found'}, {status: 404});
   }
@@ -20,7 +20,7 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
 
   const {id} = await params;
   const body = await request.json();
-  const product = getProductById(id);
+  const product = await getProductById(id);
   if (!product) {
     return NextResponse.json({error: 'Product not found'}, {status: 404});
   }
@@ -65,7 +65,7 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
   }
 
   try {
-    const updated = updateProduct(id, input);
+    const updated = await updateProduct(id, input);
     return NextResponse.json({success: true, product: updated});
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to update product';
@@ -77,7 +77,7 @@ export async function DELETE(_request: NextRequest, {params}: {params: Params}) 
   if (!isAdminRequest(_request)) return unauthorizedResponse();
 
   const {id} = await params;
-  const deleted = deleteProduct(id);
+  const deleted = await deleteProduct(id);
   if (!deleted) {
     return NextResponse.json({error: 'Product not found'}, {status: 404});
   }

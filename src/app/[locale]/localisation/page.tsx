@@ -32,7 +32,7 @@ export default async function LocationPage({params}: Props) {
   const tHours = await getTranslations('location.hours');
   const tContact = await getTranslations('location.contact');
 
-  const settings = getSiteSettings();
+  const settings = await getSiteSettings();
   const {address, phones, whatsappNumber} = resolveContact(settings);
   const hours = formatBusinessHours(settings.businessHours, locale as Locale);
 

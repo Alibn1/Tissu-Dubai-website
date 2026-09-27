@@ -8,6 +8,11 @@ import {SiteChrome} from '@/components/layout/SiteChrome';
 import {getSiteSettings} from '@/lib/data/store';
 import '../globals.css';
 
+// Site settings, products and collections are read from D1 on every request so
+// an admin change is visible immediately. Without this, Next.js would render
+// these routes once at build time and the Worker would serve that frozen copy.
+export const dynamic = 'force-dynamic';
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({locale}));
 }
@@ -75,7 +80,7 @@ export default async function LocaleLayout({children, params}: LocaleLayoutProps
     notFound();
   }
 
-  const siteSettings = getSiteSettings();
+  const siteSettings = await getSiteSettings();
 
   return (
     <html lang={lang} dir={dir} className="h-full antialiased">

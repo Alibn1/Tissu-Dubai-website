@@ -1,7 +1,7 @@
 'use client';
 
 import {useMemo, useState} from 'react';
-import {useRouter} from '@/i18n/navigation';
+import {useRouter} from 'next/navigation';
 import {cn} from '@/lib/utils';
 import {Save, Loader2, Check} from 'lucide-react';
 import {MultilingualFields} from '@/components/admin/MultilingualFields';

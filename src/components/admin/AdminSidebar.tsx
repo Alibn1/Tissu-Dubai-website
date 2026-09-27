@@ -1,6 +1,7 @@
 'use client';
 
-import {Link, usePathname} from '@/i18n/navigation';
+import Link from 'next/link';
+import {usePathname} from 'next/navigation';
 import {cn} from '@/lib/utils';
 import {LayoutDashboard, Package, Tags, Settings, LogOut, ExternalLink} from 'lucide-react';
 
@@ -12,13 +13,16 @@ const navItems = [
 ];
 
 export function AdminSidebar() {
-  const pathname = usePathname();
+  // Defensive: the pages are served through a locale-prefixed rewrite, so
+  // usePathname can report either /admin/... or /fr/admin/... depending on
+  // where the navigation came from. Normalise before matching.
+  const pathname = (usePathname() ?? '').replace(/^\/(fr|ar|en)(?=\/|$)/, '');
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', {method: 'POST'});
     // Hard navigation so the admin layout re-renders server-side
     // without the session cookie and hides the sidebar.
-    window.location.href = '/fr/admin/login';
+    window.location.href = '/admin/login';
   };
 
   return (

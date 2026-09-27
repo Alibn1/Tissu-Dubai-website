@@ -22,7 +22,7 @@ export function AdminLoginForm() {
       if (res.ok) {
         // Hard navigation so the admin layout re-renders server-side
         // with the session cookie and the sidebar becomes visible.
-        window.location.href = '/fr/admin/dashboard';
+        window.location.href = '/admin/dashboard';
       } else {
         setError(true);
       }

@@ -1,13 +1,19 @@
-import {describe, expect, it} from 'vitest';
+import {beforeAll, describe, expect, it} from 'vitest';
 import sitemap from '@/app/sitemap';
+import type {MetadataRoute} from 'next';
 
 /**
  * The sitemap used to be a hardcoded list, which had drifted from the app: it
  * advertised /tissus (no such route) and listed no products at all.
  */
 describe('sitemap', () => {
-  const entries = sitemap();
-  const urls = entries.map((e) => e.url.replace(/^https?:\/\/[^/]+/, ''));
+  let entries: MetadataRoute.Sitemap;
+  let urls: string[];
+
+  beforeAll(async () => {
+    entries = await sitemap();
+    urls = entries.map((e) => e.url.replace(/^https?:\/\/[^/]+/, ''));
+  });
 
   it('is not empty', () => {
     expect(entries.length).toBeGreaterThan(0);

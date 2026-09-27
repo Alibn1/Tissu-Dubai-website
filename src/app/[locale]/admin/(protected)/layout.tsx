@@ -2,21 +2,26 @@ import {cookies} from 'next/headers';
 import {redirect} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
 import {AdminSidebar} from '@/components/admin/AdminSidebar';
+import {verifySessionToken} from '@/lib/adminAuth';
 
 type Props = {
   children: React.ReactNode;
   params: Promise<{locale: string}>;
 };
 
+// Already reads a cookie, so Next.js treats these routes as dynamic; stated
+// explicitly because the admin also reads and writes D1.
+export const dynamic = 'force-dynamic';
+
 export default async function AdminProtectedLayout({children, params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
   const cookieStore = await cookies();
-  const session = cookieStore.get('admin-session');
+  const session = cookieStore.get('admin-session')?.value;
 
-  if (!session) {
-    redirect(`/${locale}/admin/login`);
+  if (!verifySessionToken(session)) {
+    redirect('/admin/login');
   }
 
   return (

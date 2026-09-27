@@ -39,11 +39,11 @@ export default async function CollectionPage({params}: Props) {
   const cat = await getCollectionBySlug(collection);
   if (!cat) notFound();
 
-  const [products, collections] = await Promise.all([
+  const [products, collections, models] = await Promise.all([
     getProducts(),
-    getCollections()
+    getCollections(),
+    getModels()
   ]);
-  const models = getModels();
 
   const tCommon = await getTranslations('common');
 

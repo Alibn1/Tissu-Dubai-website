@@ -12,7 +12,7 @@ export async function StoreLocationSection() {
   const tLocation = await getTranslations('location');
   const tHours = await getTranslations('location.hours');
 
-  const settings = getSiteSettings();
+  const settings = await getSiteSettings();
   const {address, phones} = resolveContact(settings);
   const hours = formatBusinessHours(settings.businessHours, (await getLocale()) as Locale);
   const phone = phones[0] || '';

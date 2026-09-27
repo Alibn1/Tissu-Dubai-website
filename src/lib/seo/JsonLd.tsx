@@ -9,9 +9,9 @@ type JsonLdProps = {
   data?: Record<string, unknown>;
 };
 
-export function JsonLd({locale, type, data = {}}: JsonLdProps) {
+export async function JsonLd({locale, type, data = {}}: JsonLdProps) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  const settings = getSiteSettings();
+  const settings = await getSiteSettings();
   const contact = resolveContact(settings);
 
   const openingHours = settings.businessHours

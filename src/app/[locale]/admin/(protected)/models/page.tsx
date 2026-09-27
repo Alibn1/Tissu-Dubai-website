@@ -10,8 +10,7 @@ export default async function AdminModelsPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const collections = getCollections();
-  const models = getModels();
+  const [collections, models] = await Promise.all([getCollections(), getModels()]);
 
   return (
     <div className="min-h-[70vh]">

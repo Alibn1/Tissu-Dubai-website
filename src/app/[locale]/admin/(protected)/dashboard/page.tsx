@@ -1,7 +1,7 @@
 import {setRequestLocale} from 'next-intl/server';
 import {getDashboardData} from '@/lib/data/store';
 import {Package, ChevronRight} from 'lucide-react';
-import {Link} from '@/i18n/navigation';
+import Link from 'next/link';
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -11,7 +11,7 @@ export default async function AdminDashboardPage({params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const {totalProducts, totalColorVariants, collectionBreakdown} = getDashboardData();
+  const {totalProducts, totalColorVariants, collectionBreakdown} = await getDashboardData();
 
   return (
     <div className="min-h-full">

@@ -27,7 +27,7 @@ export async function PUT(request: NextRequest, {params}: {params: Params}) {
     (collectionSlug: unknown) => typeof collectionSlug === 'string'
   );
 
-  upsertModel({id, slug: body.slug, collectionSlugs, name});
+  await upsertModel({id, slug: body.slug, collectionSlugs, name});
   return NextResponse.json({success: true});
 }
 
@@ -35,7 +35,7 @@ export async function DELETE(_request: NextRequest, {params}: {params: Params}) 
   if (!isAdminRequest(_request)) return unauthorizedResponse();
 
   const {id} = await params;
-  const removed = removeModel(id);
+  const removed = await removeModel(id);
   if (!removed) {
     return NextResponse.json({error: 'Model not found'}, {status: 404});
   }

@@ -2,18 +2,53 @@ import {DatabaseSync} from 'node:sqlite';
 import {dirname} from 'node:path';
 import {existsSync, mkdirSync, unlinkSync} from 'node:fs';
 import {SCHEMA_SQL} from '@/db/schema';
-import {createWorkersDatabase, WorkersDatabase} from '@/db/workers';
 import {collections as mockCollections} from '@/mock/collections';
 import {products as mockProducts} from '@/mock/products';
 import {mockModels} from '@/mock/models';
 import {getDefaultSiteSettings} from '@/lib/siteSettings';
 
-let db: DatabaseSync | WorkersDatabase | null = null;
+// The data layer exposes one async interface with two backends:
+//
+//   D1  - the Workers runtime, and production
+//   node:sqlite - local development, the build step and the test suite
+//
+// node:sqlite is preferred when it works because it is a local file with no
+// network involved, so development and tests stay fast and keep working on a
+// database that can be inspected. On Workers neither `fs` nor `node:sqlite`
+// exist, so opening the file throws and every call goes to the D1 binding
+// instead. That is the whole selection mechanism: there is no mock database and
+// no silent fallback, so a write can no longer disappear into throwaway memory.
+//
+// Set TISSU_FORCE_D1=1 to exercise the D1 path locally.
 
-type DbHandle = DatabaseSync | WorkersDatabase;
+type D1Statement = {
+  bind(...params: unknown[]): {
+    all<T = Record<string, unknown>>(): Promise<{results?: T[]}>;
+    first<T = Record<string, unknown>>(): Promise<T | null>;
+    run(): Promise<{meta?: {changes?: number}}>;
+  };
+};
 
-export function getDb(): DbHandle {
-  if (db) return db;
+type D1Like = {
+  prepare(sql: string): D1Statement;
+};
+
+let sqlite: DatabaseSync | null = null;
+let sqliteUnavailable = false;
+let warnedAboutSqlite = false;
+
+function shouldForceD1(): boolean {
+  return process.env.TISSU_FORCE_D1 === '1';
+}
+
+/**
+ * Opens the local SQLite file, migrating and seeding it on first use. Returns
+ * null when the runtime has no filesystem or no node:sqlite, which is the
+ * signal to use D1 instead.
+ */
+function getSqlite(): DatabaseSync | null {
+  if (sqlite) return sqlite;
+  if (sqliteUnavailable || shouldForceD1()) return null;
 
   try {
     const dbPath = process.env.TISSU_DB_PATH || `${process.cwd()}/data/tissu.db`;
@@ -43,60 +78,132 @@ export function getDb(): DbHandle {
       throw error;
     }
 
-    db = database;
-    return db;
+    sqlite = database;
+    return sqlite;
   } catch (error) {
-    // Workers runtime: neither `fs` nor `node:sqlite` are real. Fall back to
-    // the in-memory database seeded from mock data so every request no longer
-    // 500s. Keep the error visible for local debugging but do not rethrow.
-    if (!(error instanceof Error && (error.message.includes('not implemented') || error.message.includes('no such module')))) {
-      console.error('[db] file-based sqlite unavailable, using in-memory fallback:', error instanceof Error ? error.message : error);
+    sqliteUnavailable = true;
+    if (!warnedAboutSqlite) {
+      warnedAboutSqlite = true;
+      const message = error instanceof Error ? error.message : String(error);
+      // The Workers runtime reports these as unsupported modules; anything else
+      // is worth seeing while developing.
+      if (!message.includes('not implemented') && !message.includes('no such module')) {
+        console.error('[db] local sqlite unavailable, using D1:', message);
+      }
     }
-    const database = createWorkersDatabase();
-    try {
-      migrateSchema(database);
-      database.exec(SCHEMA_SQL);
-      seedIfEmpty(database);
-      ensureDefaultCollections(database);
-    } catch (seedError) {
-      console.error('[db] failed to initialise in-memory database:', seedError instanceof Error ? seedError.message : seedError);
-    }
-    db = database;
-    return db;
+    return null;
   }
 }
 
-/** Closes the singleton connection (used by tests during teardown). */
+async function getD1(): Promise<D1Like> {
+  const {getCloudflareContext} = await import('@opennextjs/cloudflare');
+  const {env} = await getCloudflareContext({async: true});
+  const binding = (env as {DB?: D1Like}).DB;
+  if (!binding) {
+    throw new Error('[db] the D1 binding "DB" is not available. Check d1_databases in wrangler.jsonc.');
+  }
+  return binding;
+}
+
+/**
+ * Neither backend can bind a boolean or an undefined: D1 rejects them and
+ * node:sqlite throws "Provided value cannot be bound". Converting to the
+ * smallest common representation here means callers can pass ordinary
+ * JavaScript values and both backends stay interchangeable.
+ */
+function normalizeParams(params: unknown[]): unknown[] {
+  return params.map((value) => {
+    if (value === undefined) return null;
+    if (typeof value === 'boolean') return value ? 1 : 0;
+    return value;
+  });
+}
+
+async function backend(): Promise<DatabaseSync | 'd1'> {
+  return getSqlite() ?? 'd1';
+}
+
+/** Runs a SELECT and returns every row. */
+export async function dbAll<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
+  const bound = normalizeParams(params);
+  const local = getSqlite();
+  if (local) return local.prepare(sql).all(...bound) as T[];
+
+  const d1 = await getD1();
+  const {results} = await d1.prepare(sql).bind(...bound).all<T>();
+  return results ?? [];
+}
+
+/** Runs a SELECT and returns the first row, or null when there is none. */
+export async function dbFirst<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T | null> {
+  const bound = normalizeParams(params);
+  const local = getSqlite();
+  if (local) return (local.prepare(sql).get(...bound) as T | undefined) ?? null;
+
+  const d1 = await getD1();
+  return await d1.prepare(sql).bind(...bound).first<T>();
+}
+
+/** Runs an INSERT/UPDATE/DELETE and returns the number of affected rows. */
+export async function dbRun(sql: string, params: unknown[] = []): Promise<number> {
+  const bound = normalizeParams(params);
+  const local = getSqlite();
+  if (local) return Number(local.prepare(sql).run(...bound).changes);
+
+  const d1 = await getD1();
+  const result = await d1.prepare(sql).bind(...bound).run();
+  return Number(result?.meta?.changes ?? 0);
+}
+
+/** True when reads and writes are going to the D1 binding. */
+export async function isUsingD1(): Promise<boolean> {
+  return (await backend()) === 'd1';
+}
+
+/**
+ * Direct access to the local SQLite handle. Only valid on a runtime that has
+ * one, so the migration tests can inspect PRAGMA output; the application code
+ * goes through dbAll/dbFirst/dbRun instead.
+ */
+export function getDb(): DatabaseSync {
+  const local = getSqlite();
+  if (!local) {
+    throw new Error('[db] no local sqlite handle on this runtime. Use dbAll/dbFirst/dbRun.');
+  }
+  return local;
+}
+
+/** Closes the local connection (used by tests during teardown). */
 export function closeDb(): void {
-  if (db) {
-    db.close();
-    db = null;
+  if (sqlite) {
+    sqlite.close();
+    sqlite = null;
   }
 }
 
 /** Recreates the local database from scratch and re-seeds it from mock data. */
 export function resetDatabase(): void {
-  if (db) {
-    db.close();
-    db = null;
-  }
+  closeDb();
   try {
     const dbPath = process.env.TISSU_DB_PATH || `${process.cwd()}/data/tissu.db`;
     if (existsSync(/* turbopackIgnore: true */ dbPath)) {
       unlinkSync(/* turbopackIgnore: true */ dbPath);
     }
   } catch {
-    // filesystem unavailable (Workers runtime)
+    // filesystem unavailable
   }
-  getDb();
+  getSqlite();
 }
 
 /**
  * Brings databases created before the `category` -> `collection` rename up to
  * date. Must run before SCHEMA_SQL, because the schema's index on
  * `collection_slug` would otherwise reference a column that does not exist yet.
+ *
+ * D1 does not need any of this: its schema is created by
+ * migrations/0001_init.sql rather than at runtime.
  */
-function migrateSchema(database: DbHandle) {
+function migrateSchema(database: DatabaseSync) {
   const columns = database.prepare('PRAGMA table_info(products)').all() as {name: string}[];
   const names = new Set(columns.map((column) => column.name));
 
@@ -105,11 +212,6 @@ function migrateSchema(database: DbHandle) {
   }
 
   database.exec('DROP INDEX IF EXISTS idx_products_category;');
-
-  // The in-memory Workers fallback starts fresh from mock data every boot and
-  // only mirrors the closed set of statements issued by the store, so schema
-  // reshaping is a no-op there.
-  if (database instanceof WorkersDatabase) return;
 
   // A fresh database has no `products` table yet (SCHEMA_SQL creates it right
   // after this), so only widen tables that already exist.
@@ -128,10 +230,7 @@ const ADDED_PRODUCT_COLUMNS: Record<string, string> = {
   seo_en: "ALTER TABLE products ADD COLUMN seo_en TEXT NOT NULL DEFAULT '{}'",
 };
 
-function addMissingProductColumns(
-  database: Exclude<DbHandle, WorkersDatabase>,
-  existing: Set<string>
-) {
+function addMissingProductColumns(database: DatabaseSync, existing: Set<string>) {
   for (const [column, statement] of Object.entries(ADDED_PRODUCT_COLUMNS)) {
     if (existing.has(column)) continue;
     database.exec(statement);
@@ -149,7 +248,7 @@ type ProductRowForMigration = {
  * product's single collection link into product_collections, then drops the
  * now-unused column so new rows insert without it.
  */
-function migrateProductsToJunction(database: Exclude<DbHandle, WorkersDatabase>) {
+function migrateProductsToJunction(database: DatabaseSync) {
   const columns = database.prepare('PRAGMA table_info(products)').all() as {name: string}[];
   if (!columns.some((column) => column.name === 'collection_slug')) return;
 
@@ -193,7 +292,7 @@ type ModelRow = {
  * deduplicate by slug keeping the first row, then recreate the table and link
  * every (model, collection) pair through model_collections.
  */
-function migrateModelsToJunction(database: Exclude<DbHandle, WorkersDatabase>) {
+function migrateModelsToJunction(database: DatabaseSync) {
   const columns = database.prepare('PRAGMA table_info(models)').all() as {name: string}[];
   if (!columns.some((column) => column.name === 'collection_slug')) return;
 
@@ -201,7 +300,7 @@ function migrateModelsToJunction(database: Exclude<DbHandle, WorkersDatabase>) {
   if (oldRows.length === 0) {
     // No rows to preserve: drop the old-shaped table and let SCHEMA_SQL
     // recreate both models and model_collections in the new shape.
-    database.exec('DROP TABLE IF EXISTS models;');
+    database.exec('DROP TABLE models;');
     return;
   }
 
@@ -244,7 +343,7 @@ function migrateModelsToJunction(database: Exclude<DbHandle, WorkersDatabase>) {
   database.exec('DROP TABLE models_old_v2;');
 }
 
-function seedIfEmpty(database: DbHandle) {
+function seedIfEmpty(database: DatabaseSync) {
   const {count} = database.prepare('SELECT COUNT(*) AS count FROM collections').get() as {count: number};
   if (count > 0) return;
   seedDatabase(database);
@@ -256,16 +355,9 @@ type CollectionSeedRow = {
 
 /**
  * Idempotently adds any default collection missing from an existing database
- * (e.g. `homme` created after the initial seed). Uses an upsert on the file
- * database so names/descriptions stay aligned with the mocks, and the plain
- * INSERT upsert-by-id on the in-memory Workers fallback, which only supports
- * the closed statement set.
+ * (e.g. `homme` created after the initial seed).
  */
-function ensureDefaultCollections(database: DbHandle) {
-  // The in-memory Workers fallback boots from mock data every time, so it is
-  // always fully seeded; only the file database can predate newer collections.
-  if (database instanceof WorkersDatabase) return;
-
+function ensureDefaultCollections(database: DatabaseSync) {
   const rows = database.prepare('SELECT slug FROM collections').all() as CollectionSeedRow[];
   const existing = new Set(rows.map((row) => row.slug));
 
@@ -300,7 +392,7 @@ function ensureDefaultCollections(database: DbHandle) {
   });
 }
 
-function seedDatabase(database: DbHandle) {
+function seedDatabase(database: DatabaseSync) {
   const now = Date.now();
 
   const insertCollection = database.prepare(
@@ -388,7 +480,8 @@ function seedDatabase(database: DbHandle) {
      VALUES (?, ?, ?, ?, ?)`
   );
   const insertModelCollection = database.prepare(
-    `INSERT INTO model_collections (model_id, collection_slug) VALUES (?, ?)`
+    `INSERT INTO model_collections (model_id, collection_slug)
+     VALUES (?, ?)`
   );
   mockModels.forEach((model) => {
     insertModel.run(

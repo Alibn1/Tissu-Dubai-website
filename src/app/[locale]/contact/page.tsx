@@ -29,7 +29,7 @@ export default async function ContactPage({params}: Props) {
   const tHero = await getTranslations('contact.hero');
   const tInfo = await getTranslations('contact.info');
 
-  const {address, phones, whatsappNumber} = resolveContact(getSiteSettings());
+  const {address, phones, whatsappNumber} = resolveContact(await getSiteSettings());
   const phone = phones[0] || '';
 
   return (
