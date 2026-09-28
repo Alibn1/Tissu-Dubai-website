@@ -35,14 +35,11 @@ export function CollectionCarousel({collections, locale}: Props) {
     return () => observer.disconnect();
   }, []);
 
-  // Row = leading margin + the visible cards + their gaps + a trailing gap, so
-  // exactly PER_VIEW cards fill the page width and the copy boundary is even.
-  const cardWidth = `calc((100cqw - ${SIDE_PADDING + GAP * 3}px) / ${PER_VIEW})`;
-  const rowStyle = {
-    gap: `${GAP}px`,
-    paddingInlineStart: `${SIDE_PADDING}px`,
-    paddingInlineEnd: `${GAP}px`
-  };
+  // Both copies are identical so the -50% shift wraps without a visible jump,
+  // and each copy ends with a single trailing gap: every card-to-card gap,
+  // including the one where the loop closes, is the same GAP.
+  const cardWidth = `calc((100cqw - ${GAP * (PER_VIEW - 1)}px) / ${PER_VIEW})`;
+  const rowStyle = {gap: `${GAP}px`, paddingInlineEnd: `${GAP}px`};
 
   return (
     <div className="mt-10 lg:mt-12">
@@ -54,7 +51,10 @@ export function CollectionCarousel({collections, locale}: Props) {
       </div>
 
       {/* Desktop: seamless infinite marquee */}
-      <div className="hidden overflow-hidden lg:block [container-type:inline-size]">
+      <div
+        className="hidden overflow-hidden lg:block [container-type:inline-size]"
+        style={{paddingInline: `${SIDE_PADDING}px`}}
+      >
         <div
           className="marquee-track flex w-max"
           style={{'--marquee-duration': `${duration}s`} as React.CSSProperties}
