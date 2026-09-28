@@ -40,17 +40,17 @@ export function LanguageSwitcher({className}: {className?: string}) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-1.5 px-2.5 py-1.5 font-medium',
+          'flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold',
           'rounded-md border border-brand-border',
-          'text-brand-secondary hover:bg-brand-light',
+          'text-brand-secondary hover:bg-brand-light hover:text-brand-primary',
           'transition-colors duration-200',
-          'text-sm lg:text-[15px] lg:px-4 lg:py-2'
+          'lg:px-3.5 lg:py-1.5'
         )}
         aria-label={t('common.menu')}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <span className="text-sm capitalize tracking-wider lg:text-[15px]">
+        <span className="text-sm capitalize tracking-wide">
           {localeConfig[locale].label}
         </span>
         <svg

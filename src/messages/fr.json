@@ -33,9 +33,7 @@
     "currency": "DH",
     "surDevis": "Sur devis",
     "meters": "mètres",
-    "meter": "mètre",
-    "previous": "Précédent",
-    "next": "Suivant"
+    "meter": "mètre"
   },
   "nav": {
     "fabrics": {

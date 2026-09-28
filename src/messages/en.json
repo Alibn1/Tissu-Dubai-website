@@ -33,9 +33,7 @@
     "currency": "MAD",
     "surDevis": "On request",
     "meters": "meters",
-    "meter": "meter",
-    "previous": "Previous",
-    "next": "Next"
+    "meter": "meter"
   },
   "nav": {
     "fabrics": {

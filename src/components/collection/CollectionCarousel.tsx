@@ -1,14 +1,12 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {useTranslations} from 'next-intl';
-import {cn} from '@/lib/utils';
 import {CollectionCardLink} from '@/components/collection/CollectionCard';
 import {type Collection, type Locale} from '@/types';
 
 const PER_VIEW = 3;
-const GAP = 24;
+const GAP = 32;
+const SIDE_PADDING = 56;
 const AUTOPLAY_MS = 3800;
 
 type Props = {
@@ -17,7 +15,6 @@ type Props = {
 };
 
 export function CollectionCarousel({collections, locale}: Props) {
-  const t = useTranslations('common');
   const slideRef = useRef<HTMLDivElement>(null);
   const directionRef = useRef<1 | -1>(1);
   const [index, setIndex] = useState(0);
@@ -80,8 +77,10 @@ export function CollectionCarousel({collections, locale}: Props) {
         onMouseLeave={() => setPaused(false)}
       >
         <div
-          className="flex gap-6 px-6 will-change-transform"
+          className="flex will-change-transform"
           style={{
+            gap: `${GAP}px`,
+            paddingInline: `${SIDE_PADDING}px`,
             transform: `translateX(${offset}px)`,
             transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)'
           }}
@@ -97,35 +96,6 @@ export function CollectionCarousel({collections, locale}: Props) {
             </div>
           ))}
         </div>
-
-        {maxIndex > 0 && (
-          <div className="pointer-events-none absolute inset-y-0 flex items-center justify-between px-2">
-            <button
-              onClick={() => go(-1)}
-              className={cn(
-                'pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full',
-                'border border-brand-border bg-brand-surface/90 text-brand-secondary',
-                'shadow-lg backdrop-blur transition-colors duration-200',
-                'hover:bg-brand-surface hover:text-brand-primary'
-              )}
-              aria-label={t('previous')}
-            >
-              <ChevronLeft className="h-5 w-5 rtl:rotate-180" />
-            </button>
-            <button
-              onClick={() => go(1)}
-              className={cn(
-                'pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full',
-                'border border-brand-border bg-brand-surface/90 text-brand-secondary',
-                'shadow-lg backdrop-blur transition-colors duration-200',
-                'hover:bg-brand-surface hover:text-brand-primary'
-              )}
-              aria-label={t('next')}
-            >
-              <ChevronRight className="h-5 w-5 rtl:rotate-180" />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

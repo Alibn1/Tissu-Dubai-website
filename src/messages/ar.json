@@ -33,9 +33,7 @@
     "currency": "درهم",
     "surDevis": "حسب الطلب",
     "meters": "أمتار",
-    "meter": "متر",
-    "previous": "السابق",
-    "next": "التالي"
+    "meter": "متر"
   },
   "nav": {
     "fabrics": {
