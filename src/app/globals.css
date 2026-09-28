@@ -138,3 +138,28 @@ h1, h2, h3, h4, h5, h6 {
   width: 70%;
   left: 15%;
 }
+
+/* Infinite marquee for the home collections row (desktop only).
+   The track holds two identical copies of the card row, so shifting it by
+   -50% (LTR) or +50% (RTL) lands exactly on the start of the second copy: the
+   loop is seamless and the cards never stop or wait. The duration is set
+   inline from the measured row width, which keeps the speed constant at any
+   viewport size instead of stretching with it. */
+@keyframes marquee-ltr {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes marquee-rtl {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(50%, 0, 0); }
+}
+
+.marquee-track {
+  animation: marquee-ltr var(--marquee-duration, 30s) linear infinite;
+  will-change: transform;
+}
+
+[dir='rtl'] .marquee-track {
+  animation-name: marquee-rtl;
+}

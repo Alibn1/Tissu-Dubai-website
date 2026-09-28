@@ -1,13 +1,13 @@
 'use client';
 
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {CollectionCardLink} from '@/components/collection/CollectionCard';
 import {type Collection, type Locale} from '@/types';
 
 const PER_VIEW = 3;
 const GAP = 32;
 const SIDE_PADDING = 56;
-const AUTOPLAY_MS = 3800;
+const SPEED_PX_PER_SEC = 60;
 
 type Props = {
   collections: Collection[];
@@ -15,51 +15,34 @@ type Props = {
 };
 
 export function CollectionCarousel({collections, locale}: Props) {
-  const slideRef = useRef<HTMLDivElement>(null);
-  const directionRef = useRef<1 | -1>(1);
-  const [index, setIndex] = useState(0);
-  const [step, setStep] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [duration, setDuration] = useState(30);
 
-  const isRtl = locale === 'ar';
-  const maxIndex = Math.max(0, collections.length - PER_VIEW);
-
+  // Keep the scroll speed constant: one full row takes width / speed seconds,
+  // re-measured whenever the row resizes.
   useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+
     const measure = () => {
-      const slide = slideRef.current;
-      if (slide) setStep(slide.getBoundingClientRect().width + GAP);
+      const width = row.getBoundingClientRect().width;
+      if (width > 0) setDuration(width / SPEED_PX_PER_SEC);
     };
+
     measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    const observer = new ResizeObserver(measure);
+    observer.observe(row);
+    return () => observer.disconnect();
   }, []);
 
-  const go = useCallback(
-    (dir: 1 | -1) => {
-      setIndex((prev) => {
-        const next = prev + dir;
-        if (next >= maxIndex) {
-          directionRef.current = -1;
-          return maxIndex;
-        }
-        if (next <= 0) {
-          directionRef.current = 1;
-          return 0;
-        }
-        directionRef.current = dir;
-        return next;
-      });
-    },
-    [maxIndex]
-  );
-
-  useEffect(() => {
-    if (paused || maxIndex === 0) return;
-    const id = setInterval(() => go(directionRef.current), AUTOPLAY_MS);
-    return () => clearInterval(id);
-  }, [go, paused, maxIndex]);
-
-  const offset = isRtl ? index * step : -index * step;
+  // Row = leading margin + the visible cards + their gaps + a trailing gap, so
+  // exactly PER_VIEW cards fill the page width and the copy boundary is even.
+  const cardWidth = `calc((100cqw - ${SIDE_PADDING + GAP * 3}px) / ${PER_VIEW})`;
+  const rowStyle = {
+    gap: `${GAP}px`,
+    paddingInlineStart: `${SIDE_PADDING}px`,
+    paddingInlineEnd: `${GAP}px`
+  };
 
   return (
     <div className="mt-10 lg:mt-12">
@@ -70,29 +53,24 @@ export function CollectionCarousel({collections, locale}: Props) {
         ))}
       </div>
 
-      {/* Desktop: full-bleed auto-scrolling carousel */}
-      <div
-        className="relative hidden lg:block"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-      >
+      {/* Desktop: seamless infinite marquee */}
+      <div className="hidden overflow-hidden lg:block [container-type:inline-size]">
         <div
-          className="flex will-change-transform"
-          style={{
-            gap: `${GAP}px`,
-            paddingInline: `${SIDE_PADDING}px`,
-            transform: `translateX(${offset}px)`,
-            transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)'
-          }}
+          className="marquee-track flex w-max"
+          style={{'--marquee-duration': `${duration}s`} as React.CSSProperties}
         >
-          {collections.map((collection, i) => (
+          {[0, 1].map((copy) => (
             <div
-              key={collection.id}
-              ref={i === 0 ? slideRef : undefined}
-              className="shrink-0"
-              style={{width: `calc((100% - ${GAP * (PER_VIEW - 1)}px) / ${PER_VIEW})`}}
+              key={copy}
+              ref={copy === 0 ? rowRef : undefined}
+              className="flex shrink-0"
+              style={rowStyle}
             >
-              <CollectionCardLink collection={collection} locale={locale} />
+              {collections.map((collection) => (
+                <div key={collection.id} className="shrink-0" style={{width: cardWidth}}>
+                  <CollectionCardLink collection={collection} locale={locale} />
+                </div>
+              ))}
             </div>
           ))}
         </div>
