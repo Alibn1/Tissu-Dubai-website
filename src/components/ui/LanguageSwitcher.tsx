@@ -50,12 +50,12 @@ export function LanguageSwitcher({className}: {className?: string}) {
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <Languages className="h-4 w-4" />
-        <span className="hidden sm:inline text-xs capitalize tracking-wider">
+        <Languages className="h-4 w-4 shrink-0" />
+        <span className="text-xs capitalize tracking-wider">
           {localeConfig[locale].label}
         </span>
         <svg
-          className={cn('hidden sm:block h-3 w-3 transition-transform', isOpen && 'rotate-180')}
+          className={cn('h-3 w-3 shrink-0 transition-transform', isOpen && 'rotate-180')}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

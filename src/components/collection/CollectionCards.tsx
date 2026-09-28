@@ -44,11 +44,11 @@ async function CollectionCardLink({collection, locale}: {collection: Collection;
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        <div className="absolute bottom-0 start-0 end-0 p-5 sm:p-6 lg:p-8">
-          <h3 className="font-heading text-xl font-bold text-white sm:text-2xl lg:text-3xl">
+        <div className="absolute bottom-0 start-0 end-0 p-5 sm:p-6 xl:p-8">
+          <h3 className="font-heading text-xl font-bold text-white sm:text-2xl xl:text-3xl">
             {collection.name[locale] || collection.name.fr}
           </h3>
-          <p className="mt-1.5 line-clamp-2 text-xs text-white/80 sm:text-sm lg:text-base">
+          <p className="mt-1.5 line-clamp-2 text-xs text-white/80 sm:text-sm xl:text-base">
             {collection.description[locale] || collection.description.fr}
           </p>
         </div>

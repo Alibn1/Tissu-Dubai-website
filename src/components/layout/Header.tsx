@@ -83,15 +83,15 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
           </span>
         </div>
 
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
-          {/* Left cluster: sidebar toggle + Logo (flex dir auto-mirrors for RTL) */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
+        <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+          {/* Left cluster: sidebar toggle (mobile) / brand (desktop) */}
+          <div className="flex flex-1 items-center lg:flex-none lg:gap-8">
             {/* Mobile hamburger */}
             <button
               onClick={() => setSidebarOpen(true)}
               className={cn(
                 'lg:hidden flex items-center justify-center',
-                'h-10 w-10 rounded-lg -ms-1 sm:ms-0',
+                'h-10 w-10 rounded-lg',
                 'text-brand-secondary hover:bg-brand-light',
                 'transition-colors duration-200'
               )}
@@ -100,18 +100,29 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
               <Menu className="h-5 w-5" />
             </button>
 
+            {/* Brand (desktop) */}
             <Link
               href="/"
               onClick={handleHomeClick}
-              className="flex items-center gap-2.5 flex-shrink-0 group"
+              className="hidden lg:flex items-center gap-2.5 flex-shrink-0 group"
               aria-label={t('common.brand')}
             >
               <Logo size="lg" />
-              <span className="hidden sm:block font-heading text-xl font-bold text-brand-secondary group-hover:text-brand-primary transition-colors duration-200">
+              <span className="font-heading text-xl font-bold text-brand-secondary group-hover:text-brand-primary transition-colors duration-200">
                 Tissu Dubai
               </span>
             </Link>
           </div>
+
+          {/* Brand (mobile) — centered between the two flexible clusters */}
+          <Link
+            href="/"
+            onClick={handleHomeClick}
+            className="flex shrink-0 items-center lg:hidden"
+            aria-label={t('common.brand')}
+          >
+            <Logo size="lg" />
+          </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex flex-1 items-center justify-center gap-0.5" aria-label="Main navigation">
@@ -132,14 +143,13 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
           </nav>
 
           {/* Right cluster: Call icon then Language menu */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex flex-1 items-center justify-end gap-1.5 sm:gap-2 lg:flex-none">
             <a
               href={`tel:${phone}`}
               className={cn(
-                'flex items-center justify-center',
-                'h-10 w-10 rounded-lg',
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
                 'text-brand-secondary hover:text-brand-primary',
-                'transition-colors duration-200 rounded-lg hover:bg-brand-light'
+                'transition-colors duration-200 hover:bg-brand-light'
               )}
               aria-label={t('common.phone')}
             >
@@ -160,15 +170,14 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar — anchored to the inline-start edge: left in FR/EN, right in AR */}
       <div
         className={cn(
-          'fixed top-0 right-0 z-[70] h-full w-[280px] bg-brand-surface shadow-2xl',
+          'fixed inset-y-0 start-0 z-[70] w-[300px] max-w-[85vw] bg-brand-surface shadow-2xl',
           'transition-transform duration-300 ease-out lg:hidden',
           'flex flex-col',
-          sidebarOpen ? 'translate-x-0' : 'translate-x-full'
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'
         )}
-        dir="ltr"
       >
         {/* Sidebar header */}
         <div className="flex items-center justify-between px-5 h-16 border-b border-brand-border/50">
