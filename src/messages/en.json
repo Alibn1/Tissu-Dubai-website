@@ -33,7 +33,9 @@
     "currency": "MAD",
     "surDevis": "On request",
     "meters": "meters",
-    "meter": "meter"
+    "meter": "meter",
+    "previous": "Previous",
+    "next": "Next"
   },
   "nav": {
     "fabrics": {
@@ -188,7 +190,6 @@
     "askWhatsApp": "Inquire via WhatsApp",
     "selectColor": "Select color",
     "selectQuantity": "Quantity",
-    "color": "Color",
     "availableColors": "Available colors",
     "chooseColor": "Choose another color",
     "share": "Share this fabric"

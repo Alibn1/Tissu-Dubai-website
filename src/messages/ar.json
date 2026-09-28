@@ -33,7 +33,9 @@
     "currency": "درهم",
     "surDevis": "حسب الطلب",
     "meters": "أمتار",
-    "meter": "متر"
+    "meter": "متر",
+    "previous": "السابق",
+    "next": "التالي"
   },
   "nav": {
     "fabrics": {
@@ -188,7 +190,6 @@
     "askWhatsApp": "استفسر عبر واتساب",
     "selectColor": "اختر اللون",
     "selectQuantity": "الكمية",
-    "color": "اللون",
     "availableColors": "الألوان المتاحة",
     "chooseColor": "اختر لونًا آخر",
     "share": "مشاركة هذا القماش"

@@ -1,16 +1,21 @@
+import {getTranslations, getLocale} from 'next-intl/server';
 import {SectionHeading} from '@/components/ui/SectionHeading';
-import {CollectionCards} from '@/components/collection/CollectionCards';
+import {CollectionCarousel} from '@/components/collection/CollectionCarousel';
+import {getCollections} from '@/lib/api';
+import {type Locale} from '@/types';
 
 export async function CollectionsSection() {
-  const t = await (await import('next-intl/server')).getTranslations('home.collections');
+  const t = await getTranslations('home.collections');
+  const locale = (await getLocale()) as Locale;
+  const collections = await getCollections();
 
   return (
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading title={t('title')} subtitle={t('subtitle')} />
-
-        <CollectionCards gridClassName="lg:grid-cols-4" />
       </div>
+
+      <CollectionCarousel collections={collections} locale={locale} />
     </section>
   );
 }

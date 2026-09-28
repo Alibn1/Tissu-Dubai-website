@@ -3,7 +3,6 @@
 import {useLocale, useTranslations} from 'next-intl';
 import {useRouter, usePathname} from '@/i18n/navigation';
 import {cn} from '@/lib/utils';
-import {Languages} from 'lucide-react';
 import {type Locale} from '@/types';
 import {useState, useRef, useEffect} from 'react';
 
@@ -41,21 +40,21 @@ export function LanguageSwitcher({className}: {className?: string}) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-sm font-medium',
+          'flex items-center gap-1.5 px-2.5 py-1.5 font-medium',
           'rounded-md border border-brand-border',
           'text-brand-secondary hover:bg-brand-light',
-          'transition-colors duration-200'
+          'transition-colors duration-200',
+          'text-sm lg:text-[15px] lg:px-4 lg:py-2'
         )}
         aria-label={t('common.menu')}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <Languages className="h-4 w-4 shrink-0" />
-        <span className="text-xs capitalize tracking-wider">
+        <span className="text-sm capitalize tracking-wider lg:text-[15px]">
           {localeConfig[locale].label}
         </span>
         <svg
-          className={cn('h-3 w-3 shrink-0 transition-transform', isOpen && 'rotate-180')}
+          className={cn('h-3.5 w-3.5 shrink-0 transition-transform', isOpen && 'rotate-180')}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

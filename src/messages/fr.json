@@ -33,7 +33,9 @@
     "currency": "DH",
     "surDevis": "Sur devis",
     "meters": "mètres",
-    "meter": "mètre"
+    "meter": "mètre",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "nav": {
     "fabrics": {
@@ -188,7 +190,6 @@
     "askWhatsApp": "Demander via WhatsApp",
     "selectColor": "Sélectionnez la couleur",
     "selectQuantity": "Quantité",
-    "color": "Couleur",
     "availableColors": "Couleurs disponibles",
     "chooseColor": "Choisir une autre couleur",
     "share": "Partager ce tissu"

@@ -83,9 +83,9 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
           </span>
         </div>
 
-        <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-          {/* Left cluster: sidebar toggle (mobile) / brand (desktop) */}
-          <div className="flex flex-1 items-center lg:flex-none lg:gap-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:gap-8 lg:px-8">
+          {/* Sidebar toggle (mobile) + Brand */}
+          <div className="flex items-center gap-3 lg:gap-8">
             {/* Mobile hamburger */}
             <button
               onClick={() => setSidebarOpen(true)}
@@ -100,29 +100,18 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
               <Menu className="h-5 w-5" />
             </button>
 
-            {/* Brand (desktop) */}
             <Link
               href="/"
               onClick={handleHomeClick}
-              className="hidden lg:flex items-center gap-2.5 flex-shrink-0 group"
+              className="flex items-center gap-2.5 flex-shrink-0 group"
               aria-label={t('common.brand')}
             >
               <Logo size="lg" />
-              <span className="font-heading text-xl font-bold text-brand-secondary group-hover:text-brand-primary transition-colors duration-200">
+              <span className="hidden sm:block font-heading text-xl font-bold text-brand-secondary group-hover:text-brand-primary transition-colors duration-200">
                 Tissu Dubai
               </span>
             </Link>
           </div>
-
-          {/* Brand (mobile) — centered between the two flexible clusters */}
-          <Link
-            href="/"
-            onClick={handleHomeClick}
-            className="flex shrink-0 items-center lg:hidden"
-            aria-label={t('common.brand')}
-          >
-            <Logo size="lg" />
-          </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex flex-1 items-center justify-center gap-0.5" aria-label="Main navigation">
@@ -142,8 +131,8 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
             ))}
           </nav>
 
-          {/* Right cluster: Call icon then Language menu */}
-          <div className="flex flex-1 items-center justify-end gap-1.5 sm:gap-2 lg:flex-none">
+          {/* Call icon then Language menu */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <a
               href={`tel:${phone}`}
               className={cn(
@@ -217,18 +206,6 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
             </Link>
           ))}
         </nav>
-
-        {/* Sidebar footer */}
-        <div className="border-t border-brand-border/50 px-5 py-4 space-y-3">
-          <LanguageSwitcher />
-          <a
-            href={`tel:${phone}`}
-            className="flex items-center gap-2 text-sm text-brand-muted hover:text-brand-primary transition-colors"
-          >
-            <Phone className="h-4 w-4" />
-            {phone}
-          </a>
-        </div>
       </div>
     </>
   );
