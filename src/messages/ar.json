@@ -33,7 +33,21 @@
     "currency": "درهم",
     "surDevis": "حسب الطلب",
     "meters": "أمتار",
-    "meter": "متر"
+    "meter": "متر",
+    "backToTop": "العودة إلى الأعلى",
+    "callUs": "اتصل بنا",
+    "recentlyViewed": "شوهد مؤخرًا",
+    "compare": "قارن",
+    "addToCompare": "أضف إلى المقارنة",
+    "compareTitle": "مقارنة المنتجات",
+    "compareFull": "يمكنك مقارنة ٤ منتجات كحد أقصى",
+    "clear": "مسح",
+    "noRecent": "لا توجد منتجات شوهدت بعد",
+    "compareEmpty": "اختر منتجات للمقارنة",
+    "removeFromCompare": "إزالة من المقارنة",
+    "inStock": "متوفر",
+    "viewProduct": "عرض المنتج",
+    "zoomImage": "تكبير الصورة"
   },
   "nav": {
     "fabrics": {

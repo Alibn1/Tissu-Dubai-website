@@ -263,9 +263,13 @@ export function CatalogContent({
         {/* Product Grid */}
         <div className="flex-1">
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 sm:gap-6 xl:gap-7">
+            <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-3 xl:gap-7">
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  className="w-[70vw] shrink-0 snap-start sm:w-auto sm:shrink"
+                />
               ))}
             </div>
           ) : (

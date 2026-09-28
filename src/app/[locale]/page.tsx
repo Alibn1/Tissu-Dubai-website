@@ -5,6 +5,7 @@ import {HeroSection} from '@/components/home/HeroSection';
 import {CollectionsSection} from '@/components/home/CollectionsSection';
 import {FeaturedSection} from '@/components/home/FeaturedSection';
 import {NewArrivalsSection} from '@/components/home/NewArrivalsSection';
+import {RecentlyViewedSection} from '@/components/home/RecentlyViewedSection';
 import {BrandStorySection} from '@/components/home/BrandStorySection';
 import {WhyUsSection} from '@/components/home/WhyUsSection';
 import {WhatsAppCtaSection} from '@/components/home/WhatsAppCtaSection';
@@ -35,6 +36,7 @@ export default async function HomePage({params}: Props) {
       <CollectionsSection />
       <FeaturedSection />
       <NewArrivalsSection />
+      <RecentlyViewedSection />
       <BrandStorySection />
       <WhyUsSection />
       <WhatsAppCtaSection />

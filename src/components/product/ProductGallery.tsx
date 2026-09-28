@@ -1,10 +1,11 @@
 'use client';
 
+import {useState} from 'react';
 import Image from 'next/image';
 import {useTranslations} from 'next-intl';
 import {cn} from '@/lib/utils';
 import {type Product, type Locale, type ProductVariant} from '@/types';
-import {Expand} from 'lucide-react';
+import {Expand, X, ZoomIn} from 'lucide-react';
 import {resolveSeoValue} from '@/lib/productSeo';
 
 type ProductGalleryProps = {
@@ -21,6 +22,7 @@ export function ProductGallery({
   onVariantChange
 }: ProductGalleryProps) {
   const t = useTranslations();
+  const [zoomOpen, setZoomOpen] = useState(false);
   const variants = product.variants;
   const selected = variants[selectedVariant];
   const mainImage = selected?.images?.[0] || product.images?.[0] || '/images/products/product-1.svg';
@@ -47,8 +49,10 @@ export function ProductGallery({
           className="object-cover"
         />
         <button
+          type="button"
+          onClick={() => setZoomOpen(true)}
           className="absolute top-3 end-3 flex h-8 w-8 items-center justify-center rounded-full bg-brand-surface/80 text-brand-secondary hover:bg-brand-surface transition-colors"
-          aria-label="Expand image"
+          aria-label={t('common.zoomImage')}
         >
           <Expand className="h-4 w-4" />
         </button>
@@ -93,6 +97,47 @@ export function ProductGallery({
               </button>
             );
           })}
+          </div>
+        </div>
+      )}
+
+      {/* Tap to zoom: full-bleed view of the fabric, pinch/scroll to inspect */}
+      {zoomOpen && (
+        <div
+          className="fixed inset-0 z-[90] flex flex-col bg-[#120C07]/97 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('common.zoomImage')}
+          onClick={() => setZoomOpen(false)}
+        >
+          <div className="flex items-center justify-between px-4 py-3 text-brand-secondary">
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <ZoomIn className="h-4 w-4" />
+              {productAlt}
+            </span>
+            <button
+              type="button"
+              onClick={() => setZoomOpen(false)}
+              aria-label={t('common.close')}
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-brand-secondary transition-colors hover:bg-brand-light"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div
+            className="min-h-0 flex-1 overflow-auto p-4"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="relative mx-auto aspect-[3/4] w-full max-w-2xl overflow-hidden rounded-md border border-brand-border">
+              <Image
+                src={mainImage}
+                alt={productAlt}
+                fill
+                sizes="100vw"
+                className="object-contain"
+              />
+            </div>
           </div>
         </div>
       )}

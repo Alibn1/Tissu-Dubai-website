@@ -13,9 +13,13 @@ export async function RelatedProducts({products}: RelatedProductsProps) {
   return (
     <div className="mt-12 border-t border-brand-border pt-8">
       <SectionHeading title={t('relatedProducts')} align="left" />
-      <div className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-4">
+      <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0 md:grid-cols-4">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            className="w-[46vw] shrink-0 snap-start sm:w-auto sm:shrink"
+          />
         ))}
       </div>
     </div>

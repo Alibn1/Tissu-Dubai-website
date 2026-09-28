@@ -10,6 +10,8 @@ import {Breadcrumbs} from '@/components/ui/Breadcrumbs';
 import {ProductView} from '@/components/product/ProductView';
 import {ProductDetails} from '@/components/product/ProductDetails';
 import {RelatedProducts} from '@/components/product/RelatedProducts';
+import {RecentlyViewedTracker} from '@/components/product/RecentlyViewedTracker';
+import {RecentlyViewedSection} from '@/components/home/RecentlyViewedSection';
 import {type Locale} from '@/types';
 
 type Props = {
@@ -142,7 +144,21 @@ export default async function ProductDetailPage({params}: Props) {
           {relatedProducts.length > 0 && (
             <RelatedProducts products={relatedProducts} />
           )}
+
+          <RecentlyViewedTracker
+            item={{
+              id: product.id,
+              slug: product.slug,
+              href: `/collections/${product.collections[0]?.slug ?? 'all'}/${product.slug}`,
+              image: product.images[0] || '/images/products/product-1.svg',
+              price: product.price,
+              name: product.name,
+              material: product.material
+            }}
+          />
         </div>
+
+        <RecentlyViewedSection excludeId={product.id} />
       </section>
     </>
   );

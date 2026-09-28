@@ -33,7 +33,21 @@
     "currency": "MAD",
     "surDevis": "On request",
     "meters": "meters",
-    "meter": "meter"
+    "meter": "meter",
+    "backToTop": "Back to top",
+    "callUs": "Call us",
+    "recentlyViewed": "Recently viewed",
+    "compare": "Compare",
+    "addToCompare": "Add to compare",
+    "compareTitle": "Compare products",
+    "compareFull": "You can compare up to 4 products",
+    "clear": "Clear",
+    "noRecent": "No products viewed yet",
+    "compareEmpty": "Select products to compare",
+    "removeFromCompare": "Remove from compare",
+    "inStock": "In stock",
+    "viewProduct": "View product",
+    "zoomImage": "Zoom image"
   },
   "nav": {
     "fabrics": {
