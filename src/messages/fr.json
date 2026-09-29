@@ -37,16 +37,8 @@
     "backToTop": "Retour en haut",
     "callUs": "Appelez-nous",
     "recentlyViewed": "Vus récemment",
-    "compare": "Comparer",
-    "addToCompare": "Ajouter au comparateur",
-    "compareTitle": "Comparaison de produits",
-    "compareFull": "Vous pouvez comparer 4 produits maximum",
     "clear": "Effacer",
     "noRecent": "Aucun produit vu pour le moment",
-    "compareEmpty": "Sélectionnez des produits à comparer",
-    "removeFromCompare": "Retirer de la comparaison",
-    "inStock": "En stock",
-    "viewProduct": "Voir le produit",
     "zoomImage": "Agrandir l’image"
   },
   "nav": {

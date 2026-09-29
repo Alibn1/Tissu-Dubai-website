@@ -16,10 +16,10 @@ const greetings: Record<Locale, string> = {
 
 /**
  * Fixed bottom navigation for phones: the actions a shopper needs most are
- * always one thumb-tap away, which removes the scroll back to the header.
- * The floating WhatsApp button is hidden below `lg` because this replaces it.
+ * always one thumb-tap away, which removes the scroll back to the header. The floating
+ * WhatsApp button is hidden below `lg` because this replaces it.
  */
-export function MobileBottomBar({compareActive}: {compareActive?: boolean}) {
+export function MobileBottomBar() {
   const t = useTranslations();
   const locale = useLocale() as Locale;
   const pathname = usePathname();
@@ -30,7 +30,6 @@ export function MobileBottomBar({compareActive}: {compareActive?: boolean}) {
   const phone = settings?.contact.phones?.[0]?.trim() || process.env.NEXT_PUBLIC_STORE_PHONE || '';
   const whatsapp = getWhatsAppNumber(settings);
 
-  if (compareActive) return null;
 
   const itemClass =
     'flex min-w-0 flex-1 flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium transition-colors duration-200';

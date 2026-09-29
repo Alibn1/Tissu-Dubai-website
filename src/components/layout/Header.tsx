@@ -132,7 +132,7 @@ export function Header({siteSettings}: {siteSettings: SiteSettings}) {
             <Link
               href="/"
               onClick={handleHomeClick}
-              className="ms-1 flex items-center gap-2.5 flex-shrink-0 group lg:ms-0"
+              className="ms-3 flex items-center gap-2.5 flex-shrink-0 group lg:ms-0"
               aria-label={t('common.brand')}
             >
               <Logo size="lg" />

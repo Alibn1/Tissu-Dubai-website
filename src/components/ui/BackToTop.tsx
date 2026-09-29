@@ -4,7 +4,6 @@ import {useEffect, useState} from 'react';
 import {useTranslations} from 'next-intl';
 import {ArrowUp} from 'lucide-react';
 import {cn} from '@/lib/utils';
-import {useCompare} from '@/lib/compareContext';
 
 /**
  * Desktop-only: on phones the bottom bar already carries Home for scroll-to-top,
@@ -12,7 +11,6 @@ import {useCompare} from '@/lib/compareContext';
  */
 export function BackToTop() {
   const t = useTranslations();
-  const {items} = useCompare();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -21,8 +19,6 @@ export function BackToTop() {
     window.addEventListener('scroll', onScroll, {passive: true});
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  if (items.length > 0) return null;
 
   return (
     <button
