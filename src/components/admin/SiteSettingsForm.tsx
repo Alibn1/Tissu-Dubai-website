@@ -567,10 +567,11 @@ export function SiteSettingsForm({initialData}: Props) {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <ImagePreview src={settings.homepage.hero.image || undefined} alt="Image du hero" />
                 <div className="flex flex-col gap-1">
-                  <FileUploadButton
-                    onUpload={updateHeroImage}
-                    label={settings.homepage.hero.image ? 'Changer l’image' : 'Ajouter une image'}
-                  />
+                    <FileUploadButton
+                      onUpload={updateHeroImage}
+                      folder="site"
+                      label={settings.homepage.hero.image ? 'Changer l’image' : 'Ajouter une image'}
+                    />
                   <p className="text-xs text-brand-muted">
                     Bannière pleine largeur — format 16:9 recommandé (ex. 1920×1080)
                   </p>
@@ -600,10 +601,11 @@ export function SiteSettingsForm({initialData}: Props) {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                       <ImagePreview src={card.image || undefined} alt={`Image de la carte ${cardLabel}`} />
                       <div className="flex flex-col gap-1">
-                        <FileUploadButton
-                          onUpload={(url) => setCardImage(card.id, url)}
-                          label={card.image ? 'Changer l’image' : 'Ajouter une image'}
-                        />
+                          <FileUploadButton
+                            onUpload={(url) => setCardImage(card.id, url)}
+                            folder="collections"
+                            label={card.image ? 'Changer l’image' : 'Ajouter une image'}
+                          />
                         <p className="text-xs text-brand-muted">
                           Format portrait — ratio 4:5 recommandé (ex. 800×1000)
                         </p>
@@ -640,10 +642,11 @@ export function SiteSettingsForm({initialData}: Props) {
                         alt={`Image de la carte ${label}`}
                       />
                       <div className="flex flex-col gap-1">
-                        <FileUploadButton
-                          onUpload={(url) => setGenderCardImage(card.id, url)}
-                          label={card.image ? 'Changer l’image' : 'Ajouter une image'}
-                        />
+                          <FileUploadButton
+                            onUpload={(url) => setGenderCardImage(card.id, url)}
+                            folder="gender-cards"
+                            label={card.image ? 'Changer l’image' : 'Ajouter une image'}
+                          />
                         <p className="text-xs text-brand-muted">
                           Format portrait — ratio 3:4 recommandé (ex. 900×1200)
                         </p>

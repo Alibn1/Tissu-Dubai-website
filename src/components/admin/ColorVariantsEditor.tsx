@@ -165,7 +165,7 @@ export function ColorVariantsEditor({
               <VariantImageControl
                 src={variant.image}
                 alt={variant.colorLabel.fr || 'Variante'}
-                onUpload={(dataUrl) => updateVariant(variant.id, {image: dataUrl})}
+                  onUpload={(url) => updateVariant(variant.id, {image: url})}
                 onRemove={() => updateVariant(variant.id, {image: ''})}
               />
               <div className="min-w-0 flex-1">

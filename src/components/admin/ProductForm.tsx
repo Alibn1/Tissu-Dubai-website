@@ -630,7 +630,8 @@ export function ProductForm({mode, productId, initialData, collections, models}:
               </div>
             ))}
             <FileUploadButton
-              onUpload={(dataUrl) => setBaseImages([...formData.baseImages, dataUrl])}
+              onUpload={(url) => setBaseImages([...formData.baseImages, url])}
+              folder="products"
               label="Ajouter une image"
             />
           </div>

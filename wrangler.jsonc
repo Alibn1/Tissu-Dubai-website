@@ -26,5 +26,11 @@
   ],
   "images": {
     "binding": "IMAGES"
-  }
+  },
+  "r2_buckets": [
+    {
+      "binding": "R2_IMAGES",
+      "bucket_name": "tissu-images"
+    }
+  ]
 }
