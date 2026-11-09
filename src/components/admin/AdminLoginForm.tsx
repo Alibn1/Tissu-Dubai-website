@@ -6,11 +6,11 @@ import {Lock} from 'lucide-react';
 
 export function AdminLoginForm() {
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(false);
+    setError('');
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -19,18 +19,21 @@ export function AdminLoginForm() {
         body: JSON.stringify({password})
       });
 
-        if (res.ok) {
-          // Hard navigation so the admin layout re-renders server-side
-          // with the session cookie and the sidebar becomes visible.
-          // A client-side router.push() would leave the server layout reading
-          // the old, cookieless render, so the sidebar would stay hidden.
-          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-          window.location.href = '/admin/dashboard';
-        } else {
-        setError(true);
+      if (res.ok) {
+        // Hard navigation so the admin layout re-renders server-side
+        // with the session cookie and the sidebar becomes visible.
+        // A client-side router.push() would leave the server layout reading
+        // the old, cookieless render, so the sidebar would stay hidden.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+        window.location.href = '/admin/dashboard';
+      } else {
+        // Show the server's message: a 403 from Cloudflare Access is a
+        // deployment problem, and "invalid password" would be misleading.
+        const detail = await res.json().catch(() => null);
+        setError(detail?.error ?? 'Mot de passe invalide');
       }
     } catch {
-      setError(true);
+      setError('Impossible de contacter le serveur');
     }
   };
 
@@ -47,7 +50,7 @@ export function AdminLoginForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <p className="rounded-md bg-brand-error/10 p-3 text-sm text-brand-error">
-              Mot de passe invalide
+              {error}
             </p>
           )}
 

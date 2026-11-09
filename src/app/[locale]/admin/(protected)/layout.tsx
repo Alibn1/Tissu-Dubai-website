@@ -1,8 +1,8 @@
-import {cookies} from 'next/headers';
+import {cookies, headers} from 'next/headers';
 import {redirect} from 'next/navigation';
 import {setRequestLocale} from 'next-intl/server';
 import {AdminSidebar} from '@/components/admin/AdminSidebar';
-import {verifySessionToken} from '@/lib/adminAuth';
+import {readSession, sessionMatchesAccessIdentity, SESSION_COOKIE} from '@/lib/adminAuth';
 
 type Props = {
   children: React.ReactNode;
@@ -17,10 +17,12 @@ export default async function AdminProtectedLayout({children, params}: Props) {
   const {locale} = await params;
   setRequestLocale(locale);
 
-  const cookieStore = await cookies();
-  const session = cookieStore.get('admin-session')?.value;
+  const [cookieStore, headerList] = await Promise.all([cookies(), headers()]);
+  const session = readSession(cookieStore.get(SESSION_COOKIE)?.value);
 
-  if (!verifySessionToken(session)) {
+  // A valid signature is not enough: the session also has to be presented by
+  // the same Cloudflare Access identity it was issued to.
+  if (!session || !sessionMatchesAccessIdentity(session, headerList)) {
     redirect('/admin/login');
   }
 

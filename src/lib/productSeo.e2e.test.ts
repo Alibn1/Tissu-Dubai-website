@@ -3,16 +3,18 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {afterAll, beforeAll, describe, expect, it} from 'vitest';
 import {NextRequest} from 'next/server';
-import {createSessionToken} from '@/lib/adminAuth';
+import {createSessionToken, SESSION_COOKIE} from '@/lib/adminAuth';
 
 let dir: string;
 
 beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), 'tissu-seo-e2e-'));
   process.env.TISSU_DB_PATH = join(dir, 'e2e.db');
-  // adminAuth signs session cookies with ADMIN_PASSWORD; without it no valid
-  // token can be minted and every admin route would 401.
+  // adminAuth signs session cookies with SESSION_SECRET (falling back to
+  // ADMIN_PASSWORD outside production); without it no valid token can be
+  // minted and every admin route would 401.
   process.env.ADMIN_PASSWORD = 'test-only-admin-password';
+  process.env.SESSION_SECRET = 'test-only-session-secret-0123456789';
 });
 
 afterAll(async () => {
@@ -20,6 +22,7 @@ afterAll(async () => {
   closeDb();
   delete process.env.TISSU_DB_PATH;
   delete process.env.ADMIN_PASSWORD;
+  delete process.env.SESSION_SECRET;
   rmSync(dir, {recursive: true, force: true});
 });
 
@@ -27,7 +30,10 @@ afterAll(async () => {
 function adminRequest(url: string, body?: unknown, method = 'POST'): NextRequest {
   return new NextRequest(new Request(`http://localhost${url}`, {
     method,
-    headers: {'content-type': 'application/json', cookie: `admin-session=${createSessionToken()}`},
+    headers: {
+      'content-type': 'application/json',
+      cookie: `${SESSION_COOKIE}=${createSessionToken('e2e@example.com')}`
+    },
     body: body === undefined ? undefined : JSON.stringify(body),
   }));
 }
